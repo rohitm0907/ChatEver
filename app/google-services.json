@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "812366800335",
+    "project_id": "chitforchat-d1ee5",
+    "storage_bucket": "chitforchat-d1ee5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:812366800335:android:b8bfccd34f56b69339deba",
+        "android_client_info": {
+          "package_name": "com.rohit.chitForChat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "812366800335-75jv9e2k1b8bspcl5nnjm86iujv920am.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlpu6dTKDbAOhWmWL3InfYKedyG9bQ25w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "812366800335-75jv9e2k1b8bspcl5nnjm86iujv920am.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

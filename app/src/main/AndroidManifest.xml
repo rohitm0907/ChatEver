@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.rohit.chitForChat">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/logo"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/logo"
+        android:supportsRtl="true"
+        android:hardwareAccelerated="true"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/Theme.ChatToChat">
+        <activity android:name="com.rohit.chitForChat.HomeActivity"/>
+        <activity
+            android:name="com.rohit.chitForChat.ProfileActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.rohit.chitForChat.CodeVerificationActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.rohit.chitForChat.LoginActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.rohit.chitForChat.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

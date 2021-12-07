@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/app_color"
+    tools:context=".CodeVerificationActivity">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/logo"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/verification_code"
+        android:textColor="@color/white"
+        android:layout_marginTop="50dp"
+        android:gravity="center_horizontal"
+        android:layout_marginHorizontal="10dp"
+        android:textStyle="bold"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_code"
+        android:textColor="@color/white"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:layout_marginHorizontal="10dp"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+919815187258"
+        android:textColor="@color/white"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:layout_marginHorizontal="10dp"
+        android:textStyle="bold"
+        android:textSize="20sp"/>
+
+    <com.mukesh.OtpView
+        android:id="@+id/otp_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:inputType="number"
+        app:itemCount="6"
+        android:itemBackground="@color/white"
+        android:textColor="@android:color/black"
+        android:layout_gravity="center_horizontal"
+        />
+</LinearLayout>
