@@ -12,6 +12,7 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:padding="10dp">
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imgUser"
         android:layout_width="70dp"
@@ -35,7 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:text="30 pm"
+        android:text="Start Chat"
+        android:textColor="@color/app_color"
         android:layout_alignParentRight="true"
       />
 
@@ -45,8 +47,8 @@
         android:layout_below="@+id/txtName"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/imgUser"
-        android:text="this is my message."
-        android:id="@+id/txtLastMessage"
+        android:text="Status"
+        android:id="@+id/txtStatus"
         android:textColor="@color/black" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

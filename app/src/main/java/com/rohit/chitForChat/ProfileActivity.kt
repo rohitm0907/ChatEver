@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -21,7 +22,6 @@ import com.google.firebase.storage.UploadTask
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants.NODE_USERS
 import com.rohit.chitForChat.databinding.ActivityProfileBinding
-import com.rohit.chitForChat.fragments.MyUtils
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -29,7 +29,7 @@ import java.util.*
 class ProfileActivity : AppCompatActivity() {
     var userImage: Bitmap? = null
     var firebaseUsers =
-        FirebaseDatabase.getInstance("https://chitforchat-d1ee5-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(NODE_USERS)
     lateinit var binding: ActivityProfileBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +37,15 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        MyUtils.showToast(this, intent.getStringExtra(MyConstants.PHONE_NUMBER).toString())
+
+
+        binding.edtName.setText(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_NAME))
+        if(!MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE).equals("")) {
+            Glide.with(this@ProfileActivity)
+                .load(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE))
+                .into(binding.imgUser)
+        }
+
         binding.imgUser.setOnClickListener {
             ImagePicker.with(this)
                 .crop()                    //Crop image(Optional), Check Customization for more option
@@ -50,7 +58,16 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.btnSave.setOnClickListener {
-            uploadFile(userImage!!)
+            MyUtils.showProgress(this@ProfileActivity)
+            if (userImage != null) {
+                uploadFile(userImage!!)
+            } else {
+                uploadData(
+                    intent.getStringExtra(MyConstants.PHONE_NUMBER).toString(),
+                    binding.edtName.text.toString(),
+                    MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE)
+                )
+            }
         }
 
 
@@ -77,8 +94,6 @@ class ProfileActivity : AppCompatActivity() {
 
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -94,6 +109,7 @@ class ProfileActivity : AppCompatActivity() {
         val uploadTask: UploadTask = mountainImagesRef.putBytes(data)
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
+            MyUtils.stopProgress(this@ProfileActivity)
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
@@ -115,7 +131,37 @@ class ProfileActivity : AppCompatActivity() {
         users.phone = phone
         users.image = imageUri!!
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
-            startActivity(Intent(this, HomeActivity::class.java))
+            MyUtils.stopProgress(this@ProfileActivity)
+
+            MyUtils.saveStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_NAME,
+                name
+            )
+            MyUtils.saveStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_IMAGE,
+                imageUri!!
+            )
+            MyUtils.saveStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_PHONE,
+                phone
+            )
+
+            if(MyUtils.getBooleanValue(this@ProfileActivity,MyConstants.IS_LOGIN,)) {
+                userImage=null
+                MyUtils.showToast(this@ProfileActivity,"Successfully Update")
+            }else{
+                userImage=null
+                startActivity(Intent(this, HomeActivity::class.java))
+            }
+
+            MyUtils.saveBooleanValue(
+                this@ProfileActivity,
+                MyConstants.IS_LOGIN,
+                true
+            )
         }
 
 

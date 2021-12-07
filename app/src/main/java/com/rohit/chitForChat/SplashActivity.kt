@@ -10,6 +10,16 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        Handler().postDelayed({ startActivity(Intent(this@SplashActivity,LoginActivity::class.java)) },3000)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Handler().postDelayed({
+            if (MyUtils.getBooleanValue(this@SplashActivity, MyConstants.IS_LOGIN)) {
+                startActivity(Intent(this@SplashActivity, HomeActivity::class.java))
+            } else {
+                startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
+            }
+        }, 3000)
     }
 }

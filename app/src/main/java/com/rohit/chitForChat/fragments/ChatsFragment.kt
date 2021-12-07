@@ -5,12 +5,26 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.rohit.chitForChat.Models.ChatFriendsModel
+import com.rohit.chitForChat.Models.LiveChatModel
+import com.rohit.chitForChat.MyConstants
+import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.adapters.ChatListAdapter
+import com.rohit.chitForChat.adapters.ChatLiveAdapter
 import com.rohit.chitForChat.databinding.FragmentChatsBinding
 
 
 class ChatsFragment : Fragment() {
-    lateinit var binding:FragmentChatsBinding;
+    var firebaseChatFriends =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_CHAT_FIRENDS)
+
+    lateinit var binding: FragmentChatsBinding;
+    var chatFriendList: ArrayList<ChatFriendsModel> = ArrayList()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -22,10 +36,35 @@ class ChatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        getChatsFromFirebase()
 
-        binding.recyclerChatList.adapter=ChatListAdapter(requireActivity())
 
     }
 
+    private fun getChatsFromFirebase() {
+        firebaseChatFriends.child(MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE))
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        chatFriendList.clear()
+                        for (postSnapshot in snapshot.children) {
+                            val user: ChatFriendsModel? =
+                                postSnapshot.getValue(ChatFriendsModel::class.java)
+                            chatFriendList.add(user!!)
+                            // here you can access to name property like university.name
+                        }
+                        binding!!.recyclerChatList.adapter =
+                            ChatListAdapter(requireActivity(), chatFriendList!!)
+                    }
+
+
+                }
+
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+            })
+    }
 
 }

@@ -17,4 +17,16 @@ class Users() {
             field = value
         }
 
+    var lat:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    var long:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
 }

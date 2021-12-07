@@ -9,28 +9,96 @@ import android.util.Log
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.rohit.chitForChat.databinding.ActivityCodeVerificationBinding
 import com.mukesh.OnOtpCompletionListener
-import com.rohit.chitForChat.fragments.MyUtils
+import com.rohit.chitForChat.Models.Users
 import java.util.concurrent.TimeUnit
 
 class CodeVerificationActivity : AppCompatActivity() {
-    var VerificationId=""
-    var auth:FirebaseAuth?=null
+    var VerificationId = ""
+    var auth: FirebaseAuth? = null
+    var firebaseUsers =
+        FirebaseDatabase.getInstance("https://chitforchat-d1ee5-default-rtdb.asia-southeast1.firebasedatabase.app/")
+            .getReference(MyConstants.NODE_USERS)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_code_verification)
-        var binding=ActivityCodeVerificationBinding.inflate(layoutInflater)
+        var binding = ActivityCodeVerificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        auth = FirebaseAuth.getInstance()
+//        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
+        binding.txtMobile.setText("+91"+intent.getStringExtra(MyConstants.PHONE_NUMBER))
 
-        auth= FirebaseAuth.getInstance()
-        binding.otpView.setOtpCompletionListener(object: OnOtpCompletionListener {
-            override fun onOtpCompleted(otp:String) {
+        binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
+            override fun onOtpCompleted(otp: String) {
                 // do Stuff
 //                verifyOtp(otp)
-                startActivity(Intent(this@CodeVerificationActivity,ProfileActivity::class.java).putExtra(MyConstants.PHONE_NUMBER,intent.getStringExtra(MyConstants.PHONE_NUMBER)))
+
+
+                firebaseUsers.child(intent.getStringExtra(MyConstants.PHONE_NUMBER).toString())
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+
+                            if (snapshot.exists()) {
+                                startActivity(
+                                    Intent(
+                                        this@CodeVerificationActivity,
+                                        HomeActivity::class.java
+                                    ).putExtra(
+                                        MyConstants.PHONE_NUMBER,
+                                        intent.getStringExtra(MyConstants.PHONE_NUMBER)
+                                    )
+                                )
+
+                                var data: Users? = snapshot.getValue(Users::class.java)
+
+                                MyUtils.saveStringValue(
+                                    this@CodeVerificationActivity,
+                                    MyConstants.USER_NAME,
+                                    data!!.name.toString()
+                                )
+                                MyUtils.saveStringValue(
+                                    this@CodeVerificationActivity,
+                                    MyConstants.USER_IMAGE,
+                                    data!!.image.toString()
+                                )
+                                MyUtils.saveStringValue(
+                                    this@CodeVerificationActivity,
+                                    MyConstants.USER_PHONE,
+                                    data!!.phone.toString()
+                                )
+                                MyUtils.saveBooleanValue(
+                                    this@CodeVerificationActivity,
+                                    MyConstants.IS_LOGIN,
+                                    true
+                                )
+
+
+                            } else {
+                                startActivity(
+                                    Intent(
+                                        this@CodeVerificationActivity,
+                                        ProfileActivity::class.java
+                                    ).putExtra(
+                                        MyConstants.PHONE_NUMBER,
+                                        intent.getStringExtra(MyConstants.PHONE_NUMBER)
+                                    )
+                                )
+
+                            }
+
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            TODO("Not yet implemented")
+                        }
+
+                    })
 
             }
         })
@@ -39,11 +107,11 @@ class CodeVerificationActivity : AppCompatActivity() {
 
     }
 
-    private fun verifyOtp(otp:String) {
+    private fun verifyOtp(otp: String) {
+        MyUtils.showProgress(this@CodeVerificationActivity)
         val credential = PhoneAuthProvider.getCredential(VerificationId!!, otp)
         signInWithPhoneAuthCredential(credential)
     }
-
 
 
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
@@ -52,29 +120,23 @@ class CodeVerificationActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
-
+                    checkAlreadyRegister()
 
                 } else {
                     // Sign in failed, display a message and update the UI
+                        MyUtils.stopProgress(this@CodeVerificationActivity)
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                   MyUtils.showToast(this,"Invalid OTP")
+                    MyUtils.showToast(this, "Invalid OTP")
                     // Update UI
                 }
             }
     }
 
 
+    private fun sentOtp(phoneNumber: String) {
 
-
-
-
-
-
-
-    private fun sentOtp(phoneNumber:String) {
-
-
-        var  callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        MyUtils.showProgress(this@CodeVerificationActivity)
+        var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                 // This callback will be invoked in two situations:
@@ -83,17 +145,16 @@ class CodeVerificationActivity : AppCompatActivity() {
                 // 2 - Auto-retrieval. On some devices Google Play services can automatically
                 //     detect the incoming verification SMS and perform verification without
                 //     user action.
-
-
+                checkAlreadyRegister()
             }
-
 
 
             override fun onVerificationFailed(e: FirebaseException) {
                 // This callback is invoked in an invalid request for verification is made,
                 // for instance if the the phone number format is not valid.
                 Log.w(ContentValues.TAG, "onVerificationFailed", e)
-                MyUtils.showToast(this@CodeVerificationActivity,e.toString())
+                MyUtils.stopProgress(this@CodeVerificationActivity)
+                MyUtils.showToast(this@CodeVerificationActivity, e.toString())
                 if (e is FirebaseAuthInvalidCredentialsException) {
                     // Invalid request
                 } else if (e is FirebaseTooManyRequestsException) {
@@ -107,11 +168,12 @@ class CodeVerificationActivity : AppCompatActivity() {
                 verificationId: String,
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
+                MyUtils.stopProgress(this@CodeVerificationActivity)
                 // The SMS verification code has been sent to the provided phone number, we
                 // now need to ask the user to enter the code and then construct a credential
                 // by combining the code with a verification ID.
                 Log.d(ContentValues.TAG, "onCodeSent:$verificationId")
-MyUtils.showToast(this@CodeVerificationActivity,"Code Successfully Sent")
+                MyUtils.showToast(this@CodeVerificationActivity, "Code Successfully Sent")
                 // Save verification ID and resending token so we can use them later
                 VerificationId = verificationId
 
@@ -119,7 +181,7 @@ MyUtils.showToast(this@CodeVerificationActivity,"Code Successfully Sent")
         }
 
         val options = PhoneAuthOptions.newBuilder(auth!!)
-            .setPhoneNumber("+91"+phoneNumber)       // Phone number to verify
+            .setPhoneNumber("+91" + phoneNumber)       // Phone number to verify
             .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
             .setActivity(this)                 // Activity (for callback binding)
             .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks
@@ -127,4 +189,67 @@ MyUtils.showToast(this@CodeVerificationActivity,"Code Successfully Sent")
         PhoneAuthProvider.verifyPhoneNumber(options)
 
     }
+
+    private fun checkAlreadyRegister() {
+        MyUtils.showProgress(this@CodeVerificationActivity)
+        firebaseUsers.child(intent.getStringExtra(MyConstants.PHONE_NUMBER).toString())
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    MyUtils.stopProgress(this@CodeVerificationActivity)
+                    if (snapshot.exists()) {
+                        startActivity(
+                            Intent(
+                                this@CodeVerificationActivity,
+                                HomeActivity::class.java
+                            ).putExtra(
+                                MyConstants.PHONE_NUMBER,
+                                intent.getStringExtra(MyConstants.PHONE_NUMBER)
+                            )
+                        )
+
+                        var data: Users? = snapshot.getValue(Users::class.java)
+
+                        MyUtils.saveStringValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.USER_NAME,
+                            data!!.name.toString()
+                        )
+                        MyUtils.saveStringValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.USER_IMAGE,
+                            data!!.image.toString()
+                        )
+                        MyUtils.saveStringValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.USER_PHONE,
+                            data!!.phone.toString()
+                        )
+                        MyUtils.saveBooleanValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.IS_LOGIN,
+                            true
+                        )
+
+
+                    } else {
+                        startActivity(
+                            Intent(
+                                this@CodeVerificationActivity,
+                                ProfileActivity::class.java
+                            ).putExtra(
+                                MyConstants.PHONE_NUMBER,
+                                intent.getStringExtra(MyConstants.PHONE_NUMBER)
+                            )
+                        )
+
+
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    MyUtils.stopProgress(this@CodeVerificationActivity)
+                }
+            })
     }
+}
+
