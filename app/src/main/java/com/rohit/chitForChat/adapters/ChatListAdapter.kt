@@ -27,7 +27,9 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         holder.txtName.setText(chatFriendList.get(position).name)
         holder.txtLastMessage.setText(chatFriendList.get(position).lastMessage)
         holder.txtTime.setText("2:00 pm")
-        Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
+        if(!chatFriendList.get(position).image.equals("")) {
+            Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
+        }
         holder.itemView.setOnClickListener {
             context.startActivity(
                 Intent(

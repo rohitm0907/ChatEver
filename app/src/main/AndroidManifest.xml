@@ -13,7 +13,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ChatToChat">
+        android:theme="@style/Theme.Chit4Chat">
         <activity android:name=".ChatLiveActivity"></activity>
         <activity android:name=".HomeActivity" />
         <activity
