@@ -24,6 +24,9 @@ class ChatLiveActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
     var chatsList: ArrayList<LiveChatModel> = ArrayList()
+    var firebaseOnlineStatus =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_ONLINE_STATUS)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,10 +35,17 @@ class ChatLiveActivity : AppCompatActivity() {
         setContentView(binding!!.root)
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
-        Glide.with(this@ChatLiveActivity).load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
-            .into(binding!!.imgUser)
+        if(!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
+            Glide.with(this@ChatLiveActivity)
+                .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
+                .into(binding!!.imgUser)
+        }
+
+        clicks()
         var senderId = MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
         var receiverId = intent.getStringExtra(MyConstants.OTHER_USER_PHONE).toString()
+
+        getOnlineStatus(receiverId)
         if (senderId < receiverId) {
             roomId = senderId + receiverId
         } else {
@@ -83,6 +93,30 @@ class ChatLiveActivity : AppCompatActivity() {
         }
 
         getChatsFromFirebase();
+    }
+
+    private fun clicks() {
+        binding!!.imgBack.setOnClickListener { finish() }
+    }
+
+    private fun getOnlineStatus(receiverId: String) {
+
+
+        firebaseOnlineStatus.child(receiverId).child(MyConstants.NODE_ONLINE_STATUS).addValueEventListener(object:ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists()){
+
+                    var onlineStatus= snapshot.getValue(String::class.java)
+                    binding!!.txtOnlineStatus.setText(onlineStatus)
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+
     }
 
     private fun getChatsFromFirebase() {

@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">ChatToChat</string>
+    <string name="app_name">Chit4Chat</string>
     <string name="enter_mobile">Enter Mobile Number</string>
     <string name="mobile">Mobile Number</string>
     <string name="next">Next</string>
-    <string name="verification_code">Verification Code</string>
+    <string name="verification_code">Verification Code</string>h
     <string name="enter_code">Please enter the verification code sent to your mobile number</string>
     <string name="name">Name</string>
     <string name="save">Save</string>

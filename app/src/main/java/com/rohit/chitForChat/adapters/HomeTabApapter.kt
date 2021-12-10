@@ -10,6 +10,7 @@ import com.rohit.chitForChat.fragments.Settings
 class HomeTabApapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getCount(): Int {
         return 3;
+
     }
 
     override fun getItem(position: Int): Fragment {

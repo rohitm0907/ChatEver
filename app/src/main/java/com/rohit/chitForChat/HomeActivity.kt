@@ -14,13 +14,16 @@ import com.rohit.chitForChat.databinding.ActivityHomeBinding
 
 class HomeActivity : AppCompatActivity() {
     private val LOCATION_PERMISSION_REQUEST_CODE: Int = 1
-    var fusedLocationProviderClient:FusedLocationProviderClient?=null
-    var locationRequest:LocationRequest?=null
+    var fusedLocationProviderClient: FusedLocationProviderClient? = null
+    var locationRequest: LocationRequest? = null
     lateinit var binding: ActivityHomeBinding
-    private  var locationCallback: LocationCallback?=null
+    private var locationCallback: LocationCallback? = null
     var firebaseUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
+    var firebaseOnlineStatus =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_ONLINE_STATUS)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,8 +32,8 @@ class HomeActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.myViewPager.adapter = HomeTabApapter(supportFragmentManager)
         binding.myTablayout.setupWithViewPager(binding.myViewPager)
-         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this@HomeActivity)
-
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(this@HomeActivity)
 
         when {
             MyUtils.isAccessFineLocationGranted(this) -> {
@@ -54,9 +57,8 @@ class HomeActivity : AppCompatActivity() {
 
 
     private fun setUpLocationListener() {
-
         // for getting the current location update after every 2 seconds with high accuracy
-         locationRequest = LocationRequest().setInterval(5000).setFastestInterval(5000)
+        locationRequest = LocationRequest().setInterval(10000).setFastestInterval(10000)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
 
         if (ActivityCompat.checkSelfPermission(
@@ -94,8 +96,9 @@ class HomeActivity : AppCompatActivity() {
                 users.image = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_IMAGE)
                 users.lat = lat!!
                 users.long = longi!!
-
-                firebaseUsers.child(users.phone.toString()).setValue(users)
+                if (users.phone!=null && !users.phone.equals("")) {
+                    firebaseUsers.child(users.phone.toString()).setValue(users)
+                }
                 MyUtils.saveStringValue(
                     this@HomeActivity,
                     MyConstants.USER_LATITUDE,
@@ -111,15 +114,40 @@ class HomeActivity : AppCompatActivity() {
                 // For example: Update the location of user on server
             }
         }
-        fusedLocationProviderClient!!.requestLocationUpdates(locationRequest,
+        fusedLocationProviderClient!!.requestLocationUpdates(
+            locationRequest,
             locationCallback,
-            Looper.getMainLooper())
+            Looper.getMainLooper()
+        )
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
+            firebaseOnlineStatus.child(
+                MyUtils.getStringValue(
+                    this@HomeActivity,
+                    MyConstants.USER_PHONE
+                )
+            ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Online")
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
+            firebaseOnlineStatus.child(
+                MyUtils.getStringValue(
+                    this@HomeActivity,
+                    MyConstants.USER_PHONE
+                )
+            ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
+
+    }
 }

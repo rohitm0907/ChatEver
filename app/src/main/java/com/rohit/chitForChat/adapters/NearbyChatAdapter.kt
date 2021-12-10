@@ -27,7 +27,9 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
 
     override fun onBindViewHolder(holder: NearbyChatAdapter.viewHolder, position: Int) {
         holder.txtName.text=chatNearbyList.get(position).name
-        Glide.with(context).load(chatNearbyList.get(position).image).into(holder.imgUser)
+        if(!chatNearbyList.get(position).image.equals("")) {
+            Glide.with(context).load(chatNearbyList.get(position).image).into(holder.imgUser)
+        }
 
         holder.itemView.setOnClickListener {
             context.startActivity(

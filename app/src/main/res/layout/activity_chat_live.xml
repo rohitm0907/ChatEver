@@ -14,10 +14,20 @@
         android:id="@+id/rlTopBar"
         android:padding="10dp">
 
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back"
+            android:layout_centerVertical="true"
+            android:id="@+id/imgBack"/>
+
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imgUser"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/imgBack"
             android:layout_centerVertical="true"
             android:src="@drawable/user" />
 
@@ -47,7 +57,8 @@
             android:layout_below="@+id/txtName"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@id/imgUser"
-            android:text="Online Status"
+            android:text="Offline"
+            android:id="@+id/txtOnlineStatus"
             android:textColor="@color/white" />
     </RelativeLayout>
 

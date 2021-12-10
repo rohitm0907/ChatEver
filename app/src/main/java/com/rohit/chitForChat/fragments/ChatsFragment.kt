@@ -45,6 +45,7 @@ class ChatsFragment : Fragment() {
         firebaseChatFriends.child(MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE))
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+
                     if (snapshot.exists()) {
                         chatFriendList.clear()
                         for (postSnapshot in snapshot.children) {

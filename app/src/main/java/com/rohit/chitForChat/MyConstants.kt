@@ -5,6 +5,7 @@ package com.rohit.chitForChat
      var NODE_USERS="Users"
      var NODE_CHATS="Chats"
      var NODE_CHAT_FIRENDS="ChatFriends"
+     var NODE_ONLINE_STATUS="onlineStatus"
      var NODE_NAME="Name"
      var NODE_IMAGE="image"
      var NODE_MOBILE="Mobile"

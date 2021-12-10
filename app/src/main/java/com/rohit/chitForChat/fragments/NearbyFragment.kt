@@ -40,7 +40,46 @@ class NearbyFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        searchNearby()
+        binding!!.imgSearch.setOnClickListener {
+            searchNearby()
+        }
 
+    }
+
+    private fun searchNearby() {
+        MyUtils.showProgress(requireActivity())
+        myLat=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LATITUDE)
+        myLong=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LONGITUDE)
+        firebaseUsers.addListenerForSingleValueEvent(object:ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                MyUtils.stopProgress(requireActivity())
+                if (snapshot.exists()) {
+                    chatNearbyList.clear()
+                    for (postSnapshot in snapshot.children) {
+                        val user: Users? =
+                            postSnapshot.getValue(Users::class.java)
+
+                        if (!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)) && !myLat.equals("") && getKmFromLatLong(myLat.toFloat(), myLong.toFloat(), user!!.lat!!.toFloat(), user!!.long!!.toFloat()) < 1) {
+                            chatNearbyList.add(user!!)
+                        }
+
+
+                            binding!!.recyclerChatList.adapter =
+                                NearbyChatAdapter(requireActivity(), chatNearbyList!!)
+
+                        // here you can access to name property like university.name
+                    }
+
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                MyUtils.stopProgress(requireActivity())
+            }
+
+        })
     }
 
     fun getKmFromLatLong(lat1: Float, lng1: Float, lat2: Float, lng2: Float): Float {
@@ -56,32 +95,6 @@ class NearbyFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        myLat=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LATITUDE)
-        myLong=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LONGITUDE)
-        firebaseUsers.addListenerForSingleValueEvent(object:ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    chatNearbyList.clear()
-                    for (postSnapshot in snapshot.children) {
-                        val user: Users? =
-                            postSnapshot.getValue(Users::class.java)
 
-                        if (!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)) && !myLat.equals("") && getKmFromLatLong(myLat.toFloat(), myLong.toFloat(), user!!.lat!!.toFloat(), user!!.long!!.toFloat()) < 1) {
-                            chatNearbyList.add(user!!)
-                        }
-
-                        binding!!.recyclerChatList.adapter =
-                            NearbyChatAdapter(requireActivity(), chatNearbyList!!)
-                        // here you can access to name property like university.name
-                    }
-
-
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-            }
-
-        })
     }
 }
