@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.rohit.chattochat", appContext.packageName)
+        assertEquals("com.rohit.Chit4Chat", appContext.packageName)
     }
 }
