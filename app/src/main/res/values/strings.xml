@@ -12,4 +12,5 @@
     <string name="enable_gps">Enable GPS</string>
     <string name="required_for_this_app">Location is require for this app</string>
     <string name="enable_now">Enable Now</string>
+    <string name="Captions">Captions</string>
 </resources>

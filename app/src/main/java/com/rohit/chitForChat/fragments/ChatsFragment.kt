@@ -16,7 +16,7 @@ import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.adapters.ChatListAdapter
 import com.rohit.chitForChat.adapters.ChatLiveAdapter
 import com.rohit.chitForChat.databinding.FragmentChatsBinding
-
+import android.app.Activity
 
 class ChatsFragment : Fragment() {
     var firebaseChatFriends =
@@ -37,8 +37,6 @@ class ChatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getChatsFromFirebase()
-
-
     }
 
     private fun getChatsFromFirebase() {
@@ -54,13 +52,15 @@ class ChatsFragment : Fragment() {
                             chatFriendList.add(user!!)
                             // here you can access to name property like university.name
                         }
-                        binding!!.recyclerChatList.adapter =
-                            ChatListAdapter(requireActivity(), chatFriendList!!)
+
+                        val activity: Activity? = activity
+                        if (activity != null) {
+                            binding!!.recyclerChatList.adapter =
+                                ChatListAdapter(requireActivity(), chatFriendList!!)
+                            // etc ...
+                        }
                     }
-
-
                 }
-
 
                 override fun onCancelled(error: DatabaseError) {
 

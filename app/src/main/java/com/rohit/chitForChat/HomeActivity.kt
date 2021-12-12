@@ -11,6 +11,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.adapters.HomeTabApapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
+import java.util.*
 
 class HomeActivity : AppCompatActivity() {
     private val LOCATION_PERMISSION_REQUEST_CODE: Int = 1
@@ -94,6 +95,7 @@ class HomeActivity : AppCompatActivity() {
                 users.name = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_NAME)
                 users.phone = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)
                 users.image = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_IMAGE)
+                users.captions = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_CAPTIONS)
                 users.lat = lat!!
                 users.long = longi!!
                 if (users.phone!=null && !users.phone.equals("")) {
@@ -135,7 +137,6 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
@@ -147,7 +148,7 @@ class HomeActivity : AppCompatActivity() {
                     this@HomeActivity,
                     MyConstants.USER_PHONE
                 )
-            ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
+            ).child(MyConstants.NODE_ONLINE_STATUS).setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
 
     }
 }

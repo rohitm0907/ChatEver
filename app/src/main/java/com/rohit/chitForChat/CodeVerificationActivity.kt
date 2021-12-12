@@ -78,6 +78,12 @@ class CodeVerificationActivity : AppCompatActivity() {
                                     true
                                 )
 
+                                MyUtils.saveStringValue(
+                                    this@CodeVerificationActivity,
+                                    MyConstants.USER_CAPTIONS,
+                                    data!!.captions.toString()
+                                )
+
 
                             } else {
                                 startActivity(

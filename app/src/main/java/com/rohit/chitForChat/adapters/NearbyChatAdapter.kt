@@ -9,14 +9,23 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.rohit.chitForChat.ChatLiveActivity
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
+import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
 import de.hdodenhof.circleimageview.CircleImageView
 
 class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<Users>) :
     RecyclerView.Adapter<NearbyChatAdapter.viewHolder>() {
+
+    var firebaseUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_USERS)
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -31,13 +40,37 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
             Glide.with(context).load(chatNearbyList.get(position).image).into(holder.imgUser)
         }
 
+        holder.txtStatus.setText(chatNearbyList.get(position).captions)
         holder.itemView.setOnClickListener {
             context.startActivity(
                 Intent(context, ChatLiveActivity::class.java).putExtra(MyConstants.OTHER_USER_NAME,chatNearbyList.get(position).name)
                     .putExtra(MyConstants.OTHER_USER_PHONE,chatNearbyList.get(position).phone)
                     .putExtra(MyConstants.OTHER_USER_IMAGE,chatNearbyList.get(position).image)
             )
+        }
 
+
+        holder.imgUser.setOnClickListener {
+
+            firebaseUsers.child(chatNearbyList.get(position).phone.toString())
+                .child("captions").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            var caption: String? = snapshot.getValue(String::class.java)
+                            MyUtils.showProfileDialog(
+                                context,
+                                chatNearbyList.get(position).image.toString(),
+                                caption.toString()
+                            )
+
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+
+                    }
+
+                })
 
         }
     }

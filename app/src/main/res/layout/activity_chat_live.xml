@@ -68,8 +68,8 @@
     android:layout_below="@id/rlTopBar"
     android:layout_above="@id/rlBottomBar"
     tools:listitem="@layout/list_chat_left"
-    tools:itemCount="20"
     android:id="@+id/rcChat"
+    app:reverseLayout="false"
     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
     />
     <RelativeLayout
@@ -81,15 +81,25 @@
         android:layout_alignParentBottom="true"
         >
 
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_camera"
+            android:layout_centerVertical="true"
+            android:id="@+id/imgCamera"></ImageView>
+
         <EditText
+            android:id="@+id/edtMessage"
             android:layout_width="match_parent"
+            android:layout_toRightOf="@+id/imgCamera"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/imgSend"
-            android:id="@+id/edtMessage"
             android:background="@drawable/bg_edt_message"
             android:hint="message..."
-            android:padding="10dp"/>
+            android:padding="10dp" />
 
         <ImageView
             android:layout_width="40dp"

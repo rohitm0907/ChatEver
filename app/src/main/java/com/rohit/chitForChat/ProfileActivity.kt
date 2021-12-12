@@ -32,14 +32,17 @@ class ProfileActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(NODE_USERS)
     lateinit var binding: ActivityProfileBinding
+
+    var date:String=""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         binding.edtName.setText(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_NAME))
+        binding.edtCaptions.setText(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_CAPTIONS))
         if(!MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE).equals("")) {
             Glide.with(this@ProfileActivity)
                 .load(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE))
@@ -65,6 +68,7 @@ class ProfileActivity : AppCompatActivity() {
                 uploadData(
                     intent.getStringExtra(MyConstants.PHONE_NUMBER).toString(),
                     binding.edtName.text.toString(),
+                    binding.edtCaptions.text.toString(),
                     MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE)
                 )
             }
@@ -119,17 +123,23 @@ class ProfileActivity : AppCompatActivity() {
                     uploadData(
                         intent.getStringExtra(MyConstants.PHONE_NUMBER).toString(),
                         name,
+                        binding.edtCaptions.text.toString(),
                         imageUri.toString()
                     )
                 }
             })
     }
 
-    private fun uploadData(phone: String, name: String, imageUri: String) {
+    private fun uploadData(phone: String, name: String, captions:String,imageUri: String) {
         var users: Users = Users();
         users!!.name = name
         users.phone = phone
         users.image = imageUri!!
+        if(!captions.equals("")) {
+            users.captions = captions
+        }else{
+            users.captions="No Captions"
+        }
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
             MyUtils.stopProgress(this@ProfileActivity)
 
@@ -147,6 +157,13 @@ class ProfileActivity : AppCompatActivity() {
                 this@ProfileActivity,
                 MyConstants.USER_PHONE,
                 phone
+            )
+
+
+            MyUtils.saveStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_CAPTIONS,
+                users.captions.toString()
             )
 
             if(MyUtils.getBooleanValue(this@ProfileActivity,MyConstants.IS_LOGIN,)) {
