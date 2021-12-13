@@ -1,19 +1,25 @@
 package com.rohit.chitForChat
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.media.AudioAttributes
+import android.media.AudioRecord
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
 import com.bumptech.glide.Glide
+import com.devlomi.record_view.OnRecordListener
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -30,12 +36,16 @@ import com.rohit.chitForChat.Models.LiveChatModel
 import com.rohit.chitForChat.MyConstants.FIREBASE_BASE_URL
 import com.rohit.chitForChat.adapters.ChatLiveAdapter
 import com.rohit.chitForChat.databinding.ActivityChatLiveBinding
+import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class ChatLiveActivity : AppCompatActivity() {
+    private var audioRecorder: AudioRecorder?=null
+    private var recordFile: File?=null
     private var senderId: String = ""
     private var receiverId: String = ""
     var sentImage: Bitmap? = null
@@ -62,8 +72,8 @@ class ChatLiveActivity : AppCompatActivity() {
         setContentView(binding!!.root)
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
-
-        if(!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
+audioRecording()
+        if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
             Glide.with(this@ChatLiveActivity)
                 .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
                 .into(binding!!.imgUser)
@@ -147,14 +157,9 @@ class ChatLiveActivity : AppCompatActivity() {
 
         binding!!.imgCamera.setOnClickListener {
 
-            ImagePicker.with(this)
-                .crop()                    //Crop image(Optional), Check Customization for more option
-                .compress(1024)            //Final image size will be less than 1 MB(Optional)
-                .maxResultSize(
-                    1080,
-                    1080
-                )    //Final image resolution will be less than 1080 x 1080(Optional)
-                .start()
+
+            showOptionsDialog()
+
 
         }
 
@@ -171,6 +176,61 @@ class ChatLiveActivity : AppCompatActivity() {
             }
 
         }
+
+    }
+
+    private fun showOptionsDialog() {
+        // setup the alert builder
+        // setup the alert builder
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this@ChatLiveActivity)
+        builder.setTitle("Select to Share")
+// add a list
+// add a list
+        val animals = arrayOf("Image", "Video", "Music", "Cancel")
+        builder.setItems(animals,
+            DialogInterface.OnClickListener { dialog, which ->
+                when (which) {
+                    0 -> {
+                        ImagePicker.with(this)
+                            .crop()                    //Crop image(Optional), Check Customization for more option
+                            .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                            .maxResultSize(
+                                1080,
+                                1080
+                            )    //Final image resolution will be less than 1080 x 1080(Optional)
+                            .start()
+
+                    }
+                    1 -> {
+//                        VideoPicker.Builder(this@ChatLiveActivity)
+//                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
+//                            .directory(VideoPicker.Directory.DEFAULT)
+//                            .extension(VideoPicker.Extension.MP4)
+//                            .enableDebuggingMode(true)
+//                            .build()
+                        val intent = Intent()
+                        intent.type = "video/*"
+                        intent.action = Intent.ACTION_GET_CONTENT
+                        startActivityForResult(
+                            Intent.createChooser(intent, "Select Video"),
+                            1
+                        )
+
+
+                    }
+                    2 -> {
+                    }
+                    3 -> {
+                        builder.setCancelable(true)
+                    }
+                }
+            })
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+// create and show the alert dialog
+
+// create and show the alert dialog
 
     }
 
@@ -192,31 +252,101 @@ class ChatLiveActivity : AppCompatActivity() {
         })
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             //Image Uri will not be null for RESULT_OK
-            val uri: Uri = data?.data!!
-            // Use Uri object instead of File to avoid storage permissions
 
-            MyUtils.showProgress(this@ChatLiveActivity)
-            sentImage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.decodeBitmap(
-                    ImageDecoder.createSource(
-                        this@ChatLiveActivity.contentResolver,
-                        uri
+            if (requestCode == ImagePicker.REQUEST_CODE) {
+                val uri: Uri = data?.data!!
+                // Use Uri object instead of File to avoid storage permissions
+
+                MyUtils.showProgress(this@ChatLiveActivity)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    sentImage = ImageDecoder.decodeBitmap(
+                        ImageDecoder.createSource(
+                            this@ChatLiveActivity.contentResolver,
+                            uri
+                        )
                     )
-                )
-            } else {
-                MediaStore.Images.Media.getBitmap(this@ChatLiveActivity.contentResolver, uri)
+                } else {
+                    MediaStore.Images.Media.getBitmap(this@ChatLiveActivity.contentResolver, uri)
+                }
+
+                uploadImageOnFirebase(sentImage!!)
+            } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE ) {
+                var mPaths: List<String> =
+                    data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
+//
+//                mPaths.forEachIndexed { index, s ->
+//
+//                    uploadVideoOnFirebase(mPaths.get(index))
+//                    //Your Code
+//
+//
+//                }
+            }else if (requestCode == 1 ) {
+                var uri=data!!.data
+
+                    uploadVideoOnFirebase(uri!!)
+                    //Your Code
+
+
+            }else if (resultCode == ImagePicker.RESULT_ERROR) {
+                Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
             }
+        }else{
+            Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()
 
-
-            uploadImageOnFirebase(sentImage!!)
-
-        } else if (resultCode == ImagePicker.RESULT_ERROR) {
-            Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun uploadVideoOnFirebase(videoUrl: Uri) {
+        val storage: FirebaseStorage = FirebaseStorage.getInstance()
+        val storageRef: StorageReference = storage.getReference()
+//        var file=File(videoUrl)
+        val mountainvideosRef: StorageReference =
+            storageRef.child("videos/" + "rohit" + Calendar.getInstance().time )
+
+        val uploadTask: UploadTask = mountainvideosRef.putFile(videoUrl)
+        MyUtils.showProgress(this@ChatLiveActivity)
+        uploadTask.addOnFailureListener(OnFailureListener {
+            // Handle unsuccessful uploads
+            MyUtils.stopProgress(this@ChatLiveActivity)
+            MyUtils.showToast(this@ChatLiveActivity,it.message.toString())
+        })
+            .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                val result: Task<Uri> = it.getStorage().getDownloadUrl()
+                result.addOnSuccessListener { uri ->
+                    val videoUri: String = uri.toString()
+                    sendMessageOnFirebase(videoUri, "video")
+                }
+            })
+    }
+
+
+    private fun uploadAudioOnFirebase(audioUrl: Uri) {
+        val storage: FirebaseStorage = FirebaseStorage.getInstance()
+        val storageRef: StorageReference = storage.getReference()
+//        var file=File(videoUrl)
+        val mountainvideosRef: StorageReference =
+            storageRef.child("audios/" + "rohit" + Calendar.getInstance().time )
+
+        val uploadTask: UploadTask = mountainvideosRef.putFile(audioUrl)
+        MyUtils.showProgress(this@ChatLiveActivity)
+        uploadTask.addOnFailureListener(OnFailureListener {
+            // Handle unsuccessful uploads
+            MyUtils.stopProgress(this@ChatLiveActivity)
+            MyUtils.showToast(this@ChatLiveActivity,it.message.toString())
+        })
+            .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                val result: Task<Uri> = it.getStorage().getDownloadUrl()
+                result.addOnSuccessListener { uri ->
+                    val uri: String = uri.toString()
+                    sendMessageOnFirebase(uri, "audio")
+                }
+            })
     }
 
     private fun sendMessageOnFirebase(message: String?, messageType: String) {
@@ -237,6 +367,12 @@ class ChatLiveActivity : AppCompatActivity() {
                 MyUtils.stopProgress(this@ChatLiveActivity)
                 if (messageType.equals("image")) {
                     message = "Image"
+                }
+                if (messageType.equals("audio")) {
+                    message = "Audio"
+                }
+                if (messageType.equals("video")) {
+                    message = "Video"
                 }
                 firebaseChatFriends.child(senderId).child(receiverId).setValue(
                     ChatFriendsModel(
@@ -271,7 +407,7 @@ class ChatLiveActivity : AppCompatActivity() {
         val storage: FirebaseStorage = FirebaseStorage.getInstance()
         val storageRef: StorageReference = storage.getReference()
         val mountainImagesRef: StorageReference =
-            storageRef.child("images/" + "rohit" + Calendar.getInstance().time + ".jpg")
+            storageRef.child("images/" + "images" + Calendar.getInstance().time + ".jpg")
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
         val data = baos.toByteArray()
@@ -343,4 +479,55 @@ class ChatLiveActivity : AppCompatActivity() {
             }
         })
     }
+    
+    fun audioRecording(){
+        binding!!.recordButton.setRecordView(binding!!.recordView)
+        binding!!.recordButton.setListenForRecord(true)
+        binding!!.recordView.setOnRecordListener(object : OnRecordListener {
+            override fun onStart() {
+                //Start Recording..
+
+                audioRecorder = AudioRecorder()
+                recordFile = File(filesDir, UUID.randomUUID().toString() + ".3gp")
+
+                if (!recordFile?.exists()!!) {
+                    recordFile?.createNewFile();
+                }
+
+                try {
+                    audioRecorder!!.start(recordFile?.path)
+                } catch (e: Exception) {
+
+                }
+            }
+
+            override fun onCancel() {
+
+                stopRecording(true)
+            }
+
+            override fun onFinish(recordTime: Long) {
+                stopRecording(false);
+                var uri = Uri.fromFile(File(recordFile?.path))
+                uploadAudioOnFirebase(uri)
+            }
+
+       
+            override fun onLessThanSecond() {
+                stopRecording(true);
+            }
+        })
+        
+    }
+
+
+
+    private fun stopRecording(deleteFile: Boolean) {
+        audioRecorder!!.stop()
+        if (recordFile != null && deleteFile) {
+            recordFile?.delete()
+        }
+    }
+
 }
+    

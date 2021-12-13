@@ -13,4 +13,10 @@
         android:scaleType="centerCrop"
         />
 
+    <VideoView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/videoUser"
+        android:layout_centerVertical="true"/>
+
 </RelativeLayout>

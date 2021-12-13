@@ -26,7 +26,7 @@ class HomeTabApapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         if (position == 1) return "Nearby"
         if (position == 2) return "Settings"
         else return "Chats"
-        return super.getPageTitle(position)
+
 
     }
 }

@@ -33,17 +33,54 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+
                 android:text="Message"
+                android:visibility="gone"
                 android:textColor="@color/white" />
 
 
+
+                <ImageView
+                    android:id="@+id/imgMessage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+
+                    android:background="@color/black"
+                    android:src="@drawable/user"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/imgPlay"
+                    android:visibility="gone"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_play" />
+
+
             <ImageView
-                android:id="@+id/imgMessage"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:background="@color/black"
-                android:src="@drawable/user"
-                android:visibility="gone" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/audioPlay"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_play"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/audioPause"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_pause"
+                />
+
+
+            <SeekBar
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:id="@+id/audioSeekbar"
+                android:layout_toRightOf="@id/audioPlay"
+                />
 
 
         </RelativeLayout>
@@ -65,7 +102,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginBottom="3dp"
             android:layout_toRightOf="@id/txtTime"
-        android:background="@drawable/bg_message_unseen"/>
+            android:background="@drawable/bg_message_unseen" />
 
     </RelativeLayout>
 

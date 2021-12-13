@@ -60,5 +60,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.github.zcweng:switch-button:0.0.3@aar'
     implementation 'com.github.douglasjunior:android-simple-tooltip:1.0.0-rc.0'
+    implementation 'net.alhazmy13.MediaPicker:libary:2.4.4'
+    implementation 'com.devlomi.record-view:record-view:2.0.1'
+
 
 }
