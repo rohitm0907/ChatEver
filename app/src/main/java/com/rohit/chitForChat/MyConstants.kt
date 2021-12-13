@@ -1,6 +1,9 @@
 package com.rohit.chitForChat
 
  object MyConstants {
+     val GHOST_MODE: String="ghostMode"
+     val ON: String?="on"
+     val OFF: String?="off"
      val USER_CAPTIONS: String="userCaptions"
      var DATE: String=""
      var PHONE_NUMBER="phoneNumber"

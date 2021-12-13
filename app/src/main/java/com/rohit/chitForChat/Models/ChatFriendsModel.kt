@@ -11,8 +11,6 @@ class ChatFriendsModel {
         image:String,
         origonalMessage:String,
         seenStatus:String,
-
-
     ) {
         this.name = name
         this.userId = userId

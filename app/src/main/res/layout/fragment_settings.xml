@@ -1,46 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="5dp"
     android:orientation="vertical"
+    android:padding="5dp"
+    android:id="@+id/rlScreen"
     tools:context=".fragments.Settings">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="5dp"
         android:id="@+id/btnProfile"
-        android:layout_margin="5dp"
-        >
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Profile"
-                android:textColor="@color/black"
-                android:padding="15dp"
-                android:textSize="16sp"
-
-                />
-
-    </androidx.cardview.widget.CardView>
-    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="5dp"
-        android:id="@+id/btnLogout"
         android:layout_margin="5dp"
-        >
+        android:elevation="5dp">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
-            android:textColor="@color/black"
             android:padding="15dp"
+            android:text="Profile"
+            android:textColor="@color/black"
             android:textSize="16sp"
 
             />
 
     </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:elevation="5dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+
+            <TextView
+                android:id="@+id/txtGhostMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:text="Gost Mode"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_toRightOf="@+id/txtGhostMode"
+            android:layout_centerVertical="true"
+                android:id="@+id/imgInfo"
+                android:src="@drawable/ic_info"
+            />
+
+
+            <com.suke.widget.SwitchButton
+                android:id="@+id/sbGhost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                app:sb_border_width="2dp"
+                app:sb_uncheckcircle_color="@color/green" />
+
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:elevation="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:text="Logout"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+
+            />
+
+    </androidx.cardview.widget.CardView>
+
+
 </LinearLayout>

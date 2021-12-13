@@ -1,23 +1,30 @@
 package com.rohit.chitForChat.fragments
 
+import android.R
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.google.firebase.database.FirebaseDatabase
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.ProfileActivity
-import com.rohit.chitForChat.R
 import com.rohit.chitForChat.databinding.FragmentSettingsBinding
+import com.suke.widget.SwitchButton
+import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 
 
 class Settings : Fragment() {
     var firebaseOnlineStatus =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
+
+    var firebaseUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_USERS)
     var binding: FragmentSettingsBinding? = null;
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +49,14 @@ class Settings : Fragment() {
             )
         }
 
+        if( MyUtils.getStringValue(
+                requireContext(),
+                MyConstants.GHOST_MODE
+
+            ).equals(MyConstants.ON)){
+            binding!!.sbGhost.isChecked=true
+        }
+
         binding!!.btnLogout.setOnClickListener {
             if(!MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE).equals("")) {
                 firebaseOnlineStatus.child(
@@ -55,7 +70,68 @@ class Settings : Fragment() {
             requireActivity()!!.finish()
         }
 
+        binding!!.sbGhost.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
+
+            if(isChecked) {
+                firebaseUsers.child(
+                    MyUtils.getStringValue(
+                        requireContext(),
+                        MyConstants.USER_PHONE
+                    )
+                ).child(MyConstants.GHOST_MODE).setValue(MyConstants.ON).addOnCompleteListener {
+
+                    MyUtils.saveStringValue(
+                        requireContext(),
+                        MyConstants.GHOST_MODE,
+                        MyConstants.ON.toString()
+                    )
+
+                }
+            }else{
+                firebaseUsers.child(
+                    MyUtils.getStringValue(
+                        requireContext(),
+                        MyConstants.USER_PHONE
+                    )
+                ).child(MyConstants.GHOST_MODE).setValue(MyConstants.OFF).addOnCompleteListener {
+
+                    MyUtils.saveStringValue(
+                        requireContext(),
+                        MyConstants.GHOST_MODE,
+                        MyConstants.OFF.toString()
+                    )
+
+                }
+                }
+
+
+
+        })
+
+
+        binding!!.imgInfo.setOnClickListener {
+
+
+
+
+            SimpleTooltip.Builder(requireContext())
+                .anchorView(binding!!.imgInfo)
+                .textColor(resources.getColor(R.color.white))
+                .arrowColor(resources.getColor(R.color.black))
+                .backgroundColor(resources.getColor(R.color.black))
+                .text("By ON Ghost mode, You will not appeared in nearby list when Other users searching")
+                .gravity(Gravity.BOTTOM)
+                .animated(true)
+                .transparentOverlay(false)
+                .build()
+                .show()
+
+        }
+
+
     }
+
+
 
 
 }

@@ -37,11 +37,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         holder.txtName.setText(chatFriendList.get(position).name)
         if (chatFriendList.get(position).seenStatus.equals("1")) {
             holder.txtLastMessage.setText(chatFriendList.get(position).origonalMessage)
-        } else {
-            holder.txtLastMessage.setText(chatFriendList.get(position).lastMessage)
-            holder.txtLastMessage.setTypeface(holder.txtLastMessage.getTypeface(), Typeface.BOLD);
-        }
-        holder.txtTime.setText("2:00 pm")
+        } else
+//        holder.txtTime.setText("2:00 pm")
         if (!chatFriendList.get(position).image.equals("")) {
             Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
         }
@@ -60,7 +57,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
 
         holder.imgUser.setOnClickListener {
-
             firebaseUsers.child(chatFriendList.get(position).userId.toString())
                 .child("captions").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -91,7 +87,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
     class viewHolder(itemView: View) : ViewHolder(itemView) {
         var txtName = itemView.findViewById<TextView>(R.id.txtName)
         var txtLastMessage = itemView.findViewById<TextView>(R.id.txtLastMessage)
-        var txtTime = itemView.findViewById<TextView>(R.id.txtTime)
+//        var txtTime = itemView.findViewById<TextView>(R.id.txtTime)
         var imgUser = itemView.findViewById<CircleImageView>(R.id.imgUser)
 
 

@@ -91,29 +91,20 @@ class HomeActivity : AppCompatActivity() {
                 }
 
 
-                var users: Users = Users();
-                users.name = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_NAME)
-                users.phone = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)
-                users.image = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_IMAGE)
-                users.captions = MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_CAPTIONS)
-                users.lat = lat!!
-                users.long = longi!!
-                if (users.phone!=null && !users.phone.equals("")) {
-                    firebaseUsers.child(users.phone.toString()).setValue(users)
+                firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("lat").setValue(lat)
+                firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("long").setValue(longi).addOnCompleteListener {
+                    MyUtils.saveStringValue(
+                        this@HomeActivity,
+                        MyConstants.USER_LATITUDE,
+                        lat
+                    )
+                    MyUtils.saveStringValue(
+                        this@HomeActivity,
+                        MyConstants.USER_LONGITUDE,
+                       longi
+                    )
                 }
-                MyUtils.saveStringValue(
-                    this@HomeActivity,
-                    MyConstants.USER_LATITUDE,
-                    users.lat.toString()
-                )
-                MyUtils.saveStringValue(
-                    this@HomeActivity,
-                    MyConstants.USER_LONGITUDE,
-                    users.long.toString()
-                )
 
-                // Few more things we can do here:
-                // For example: Update the location of user on server
             }
         }
         fusedLocationProviderClient!!.requestLocationUpdates(

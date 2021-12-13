@@ -41,6 +41,7 @@ class ChatLiveAdapter(
     }
 
     override fun onBindViewHolder(holder: ChatLiveAdapter.viewHolder, position: Int) {
+
         if (chatsList.get(position).sender.equals(
                 MyUtils.getStringValue(
                     context,
@@ -100,10 +101,10 @@ class ChatLiveAdapter(
 
         var imgUser = dialog.findViewById<ImageView>(R.id.imgUser)
 
-        dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.black);
         dialog.window!!.setLayout(
             GridLayoutManager.LayoutParams.MATCH_PARENT,
-            GridLayoutManager.LayoutParams.WRAP_CONTENT
+            GridLayoutManager.LayoutParams.MATCH_PARENT
         )
         if (!imageUrl.equals("")) {
             Glide.with(context).load(imageUrl).into(imgUser)

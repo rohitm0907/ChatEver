@@ -6,15 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.rohit.chitForChat.Models.ChatFriendsModel
+import com.google.firebase.database.*
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
-import com.rohit.chitForChat.adapters.ChatListAdapter
 import com.rohit.chitForChat.adapters.NearbyChatAdapter
 import com.rohit.chitForChat.databinding.FragmentNearbyBinding
 
@@ -51,7 +46,10 @@ class NearbyFragment : Fragment() {
         MyUtils.showProgress(requireActivity())
         myLat=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LATITUDE)
         myLong=MyUtils.getStringValue(requireActivity(),MyConstants.USER_LONGITUDE)
-        firebaseUsers.addListenerForSingleValueEvent(object:ValueEventListener{
+
+        val queryRef: Query = firebaseUsers.orderByChild("ghostMode").equalTo("off")
+
+        queryRef.addListenerForSingleValueEvent(object:ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 MyUtils.stopProgress(requireActivity())
                 if (snapshot.exists()) {
@@ -60,10 +58,9 @@ class NearbyFragment : Fragment() {
                         val user: Users? =
                             postSnapshot.getValue(Users::class.java)
 
-                        if (!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)) && !myLat.equals("") && getKmFromLatLong(myLat.toFloat(), myLong.toFloat(), user!!.lat!!.toFloat(), user!!.long!!.toFloat()) < 1) {
+                        if (!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)) && !myLat.equals("") && getKmFromLatLong(myLat.toFloat(), myLong.toFloat(), user!!.lat!!.toFloat(), user!!.long!!.toFloat()) <= 1) {
                             chatNearbyList.add(user!!)
                         }
-
 
                             binding!!.recyclerChatList.adapter =
                                 NearbyChatAdapter(requireActivity(), chatNearbyList!!)
@@ -72,6 +69,8 @@ class NearbyFragment : Fragment() {
                     }
 
 
+                }else{
+                    MyUtils.showToast(requireContext(),"no data")
                 }
             }
 

@@ -34,5 +34,11 @@ class Users() {
         set(value) {
             field = value
         }
+    var ghostMode:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
 
 }

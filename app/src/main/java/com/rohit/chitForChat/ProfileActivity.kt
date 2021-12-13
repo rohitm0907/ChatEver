@@ -33,7 +33,7 @@ class ProfileActivity : AppCompatActivity() {
             .getReference(NODE_USERS)
     lateinit var binding: ActivityProfileBinding
 
-    var date:String=""
+    var date: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +42,13 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.edtName.setText(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_NAME))
-        binding.edtCaptions.setText(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_CAPTIONS))
-        if(!MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE).equals("")) {
+        binding.edtCaptions.setText(
+            MyUtils.getStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_CAPTIONS
+            )
+        )
+        if (!MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE).equals("")) {
             Glide.with(this@ProfileActivity)
                 .load(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE))
                 .into(binding.imgUser)
@@ -130,15 +135,22 @@ class ProfileActivity : AppCompatActivity() {
             })
     }
 
-    private fun uploadData(phone: String, name: String, captions:String,imageUri: String) {
+    private fun uploadData(phone: String, name: String, captions: String, imageUri: String) {
         var users: Users = Users();
         users!!.name = name
         users.phone = phone
         users.image = imageUri!!
-        if(!captions.equals("")) {
+
+        if (!MyUtils.getStringValue(this@ProfileActivity, MyConstants.GHOST_MODE).equals("")) {
+            users.ghostMode = MyUtils.getStringValue(this@ProfileActivity, MyConstants.GHOST_MODE)
+        } else {
+            users.ghostMode = MyConstants.OFF
+        }
+
+        if (!captions.equals("")) {
             users.captions = captions
-        }else{
-            users.captions="No Captions"
+        } else {
+            users.captions = "No Captions"
         }
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
             MyUtils.stopProgress(this@ProfileActivity)
@@ -162,15 +174,22 @@ class ProfileActivity : AppCompatActivity() {
 
             MyUtils.saveStringValue(
                 this@ProfileActivity,
+                MyConstants.GHOST_MODE,
+                users.ghostMode.toString()
+            )
+
+
+            MyUtils.saveStringValue(
+                this@ProfileActivity,
                 MyConstants.USER_CAPTIONS,
                 users.captions.toString()
             )
 
-            if(MyUtils.getBooleanValue(this@ProfileActivity,MyConstants.IS_LOGIN,)) {
-                userImage=null
-                MyUtils.showToast(this@ProfileActivity,"Successfully Update")
-            }else{
-                userImage=null
+            if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
+                userImage = null
+                MyUtils.showToast(this@ProfileActivity, "Successfully Update")
+            } else {
+                userImage = null
                 startActivity(Intent(this, HomeActivity::class.java))
             }
 

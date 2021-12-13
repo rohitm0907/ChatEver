@@ -14,7 +14,7 @@
         android:roundIcon="@drawable/logo_orange"
         android:supportsRtl="true"
         android:theme="@style/Theme.Chit4Chat">
-        <activity android:name=".ChatLiveActivity"></activity>
+        <activity android:name=".ChatLiveActivity"/>
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".ProfileActivity"
