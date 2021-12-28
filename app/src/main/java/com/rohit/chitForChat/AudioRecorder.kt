@@ -7,9 +7,9 @@ class AudioRecorder {
     private var mediaRecorder: MediaRecorder? = null
     private fun initMediaRecorder() {
         mediaRecorder = MediaRecorder()
-        mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT)
-        mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+        mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+        mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
     }
 
     @Throws(IOException::class)

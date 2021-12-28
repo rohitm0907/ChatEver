@@ -331,9 +331,9 @@ audioRecording()
         val storageRef: StorageReference = storage.getReference()
 //        var file=File(videoUrl)
         val mountainvideosRef: StorageReference =
-            storageRef.child("audios/" + "rohit" + Calendar.getInstance().time )
-
-        val uploadTask: UploadTask = mountainvideosRef.putFile(audioUrl)
+            storageRef.child("audios/" + "rohit" + Calendar.getInstance().time+".3gp" )
+var uri:Uri=Uri.fromFile(File(recordFile!!.path))
+        val uploadTask: UploadTask = mountainvideosRef.putFile(uri)
         MyUtils.showProgress(this@ChatLiveActivity)
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
@@ -486,6 +486,9 @@ audioRecording()
         binding!!.recordView.setOnRecordListener(object : OnRecordListener {
             override fun onStart() {
                 //Start Recording..
+                binding!!.imgCamera.visibility=View.GONE
+                binding!!.imgSend.visibility=View.GONE
+                binding!!.edtMessage.visibility=View.GONE
 
                 audioRecorder = AudioRecorder()
                 recordFile = File(filesDir, UUID.randomUUID().toString() + ".3gp")
@@ -502,18 +505,27 @@ audioRecording()
             }
 
             override fun onCancel() {
-
+                binding!!.imgCamera.visibility=View.VISIBLE
+                binding!!.imgSend.visibility=View.VISIBLE
+                binding!!.edtMessage.visibility=View.VISIBLE
                 stopRecording(true)
             }
 
             override fun onFinish(recordTime: Long) {
+                binding!!.imgCamera.visibility=View.VISIBLE
+                binding!!.imgSend.visibility=View.VISIBLE
+                binding!!.edtMessage.visibility=View.VISIBLE
                 stopRecording(false);
                 var uri = Uri.fromFile(File(recordFile?.path))
+
                 uploadAudioOnFirebase(uri)
             }
 
        
             override fun onLessThanSecond() {
+                binding!!.imgCamera.visibility=View.VISIBLE
+                binding!!.imgSend.visibility=View.VISIBLE
+                binding!!.edtMessage.visibility=View.VISIBLE
                 stopRecording(true);
             }
         })

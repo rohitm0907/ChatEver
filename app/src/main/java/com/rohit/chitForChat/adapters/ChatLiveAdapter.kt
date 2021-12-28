@@ -2,8 +2,10 @@ package com.rohit.chitForChat.adapters
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.Context
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.net.Uri
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,12 +20,17 @@ import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
 
+
 class ChatLiveAdapter(
     var context: Activity,
     var chatsList: ArrayList<LiveChatModel>,
-    var roomId: String
-) :
-    RecyclerView.Adapter<ChatLiveAdapter.viewHolder>() {
+    var roomId: String,
+) : RecyclerView.Adapter<ChatLiveAdapter.viewHolder>() {
+    var mediaPlayer = MediaPlayer()
+    var currentPlay=-1
+    var previousPlay=-2
+    var currentSeekTo=0
+    lateinit var timer: CountDownTimer
     var firebaseChats =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
@@ -67,68 +74,233 @@ class ChatLiveAdapter(
         }
 
         if (chatsList.get(position).messageType.equals("text")) {
-            holder.imgPlay.visibility=View.GONE
+            holder.imgPlay.visibility = View.GONE
             holder.imgMessage.visibility = View.GONE
             holder.txtMessage.visibility = View.VISIBLE
-            holder.audioPause.visibility=View.GONE
-            holder.audioPlay.visibility=View.GONE
-            holder.audioSeekbar.visibility=View.GONE
+            holder.audioPause.visibility = View.GONE
+            holder.audioPlay.visibility = View.GONE
+            holder.audioSeekbar.visibility = View.GONE
             holder.txtMessage.text = chatsList[position].message
 
         } else if (chatsList.get(position).messageType.equals("image")) {
-            holder.audioPause.visibility=View.GONE
-            holder.audioPlay.visibility=View.GONE
-            holder.audioSeekbar.visibility=View.GONE
+            holder.audioPause.visibility = View.GONE
+            holder.audioPlay.visibility = View.GONE
+            holder.audioSeekbar.visibility = View.GONE
             holder.txtMessage.visibility = View.GONE
             holder.imgMessage.visibility = View.VISIBLE
             Glide.with(context)
                 .load(chatsList.get(position).message)
                 .into(holder.imgMessage)
-            holder.imgPlay.visibility=View.GONE
+            holder.imgPlay.visibility = View.GONE
         } else if (chatsList.get(position).messageType.equals("video")) {
-            holder.audioPause.visibility=View.GONE
-            holder.audioPlay.visibility=View.GONE
-            holder.audioSeekbar.visibility=View.GONE
-            holder.imgPlay.visibility=View.VISIBLE
+            holder.audioPause.visibility = View.GONE
+            holder.audioPlay.visibility = View.GONE
+            holder.audioSeekbar.visibility = View.GONE
+            holder.imgPlay.visibility = View.VISIBLE
             holder.txtMessage.visibility = View.GONE
             holder.imgMessage.visibility = View.VISIBLE
             Glide.with(context)
                 .load(chatsList.get(position).message)
                 .into(holder.imgMessage)
-        }else if(chatsList.get(position).messageType.equals("audio")){
-            holder.audioPause.visibility=View.INVISIBLE
-            holder.audioPlay.visibility=View.VISIBLE
-            holder.audioSeekbar.visibility=View.VISIBLE
-            holder.imgPlay.visibility=View.GONE
+        } else if (chatsList.get(position).messageType.equals("audio")) {
+            if(position==currentPlay){
+                holder.audioPause.visibility = View.VISIBLE
+                holder.audioPlay.visibility = View.INVISIBLE
+                holder.audioSeekbar.setProgress(currentSeekTo)
+            }else if(position==previousPlay){
+                holder.audioPause.visibility = View.INVISIBLE
+                holder.audioPlay.visibility = View.VISIBLE
+                holder.audioSeekbar.setProgress(0)
+            }else{
+                holder.audioPause.visibility = View.INVISIBLE
+                holder.audioPlay.visibility = View.VISIBLE
+            }
+
+            holder.imgPlay.visibility = View.GONE
             holder.imgMessage.visibility = View.GONE
             holder.txtMessage.visibility = View.GONE
         }
 
 
-        if (!MyConstants.DATE.equals(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))) {
-            holder.txtDate.visibility = View.VISIBLE
-            holder.txtDate.setText(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))
-            MyConstants.DATE = MyUtils.convertIntoDate(chatsList.get(position).time.toString())
-        } else {
-            holder.txtDate.visibility = View.GONE
-        }
+//        if (!MyConstants.DATE.equals(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))) {
+//            holder.txtDate.visibility = View.VISIBLE
+//            holder.txtDate.setText(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))
+//            MyConstants.DATE = MyUtils.convertIntoDate(chatsList.get(position).time.toString())
+//        } else {
+//            holder.txtDate.visibility = View.GONE
+//        }
         holder.txtTime.setText(MyUtils.convertIntoTime((chatsList.get(position).time).toString()))
 
         holder.imgPlay.setOnClickListener {
-            showDialog(chatsList.get(position).message, chatsList.get(position).messageType.toString())
+            showDialog(
+                chatsList.get(position).message,
+                chatsList.get(position).messageType.toString()
+            )
         }
         holder.imgMessage.setOnClickListener {
-            showDialog(chatsList.get(position).message, chatsList.get(position).messageType.toString())
+            showDialog(
+                chatsList.get(position).message,
+                chatsList.get(position).messageType.toString()
+            )
+        }
+
+
+
+        holder.audioPlay.setOnClickListener {
+
+            previousPlay=currentPlay
+            currentPlay=position
+
+            if(previousPlay==currentPlay){
+                playMediaPlayerFromResume(chatsList.get(position).message,holder)
+                notifyItemChanged(previousPlay)
+
+            }else{
+                playMediaPlayerFromBegin(chatsList.get(position).message,holder)
+                notifyItemChanged(previousPlay)
+            }
+
+            holder.audioPlay.visibility = View.INVISIBLE
+            holder.audioPause.visibility = View.VISIBLE
+
+
+        }
+
+        holder.audioPause.setOnClickListener {
+            holder.audioPlay.visibility = View.VISIBLE
+            holder.audioPause.visibility = View.INVISIBLE
+            mediaPlayer.pause()
+            timer.cancel()
         }
 
     }
 
-    private fun showDialog(url: String?,type:String) {
+    private fun playMediaPlayerFromBegin(audioUri: String?, holder:ChatLiveAdapter.viewHolder) {
+
+        if (mediaPlayer != null && mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+
+
+            if (timer != null) {
+                timer.cancel()
+            }
+
+        }
+        mediaPlayer = MediaPlayer()
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        mediaPlayer.setDataSource(audioUri.toString())
+        mediaPlayer.prepareAsync()
+        mediaPlayer.setOnPreparedListener(MediaPlayer.OnPreparedListener { mp ->
+            mp.start()
+
+            timer = object : CountDownTimer(1000000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+
+                    updateSeekbar(mp, holder.audioSeekbar)
+                }
+
+                override fun onFinish() {
+
+                }
+            }
+            timer.start()
+
+            mp.setOnCompletionListener {
+                timer.cancel()
+               holder.audioSeekbar!!.setProgress(0)
+                holder.audioPause.visibility = View.INVISIBLE
+                holder.audioPlay.visibility = View.VISIBLE
+            }
+
+
+           holder. audioSeekbar!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(p0: SeekBar?) {
+                    try {
+                        mp.seekTo(p0!!.progress)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
+                    }
+
+
+                }
+            })
+        })
+
+
+    }
+
+
+
+    private fun playMediaPlayerFromResume(audioUri: String?, holder:ChatLiveAdapter.viewHolder) {
+            mediaPlayer.start()
+
+            timer = object : CountDownTimer(1000000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+
+                    updateSeekbar(mediaPlayer, holder.audioSeekbar)
+                }
+
+                override fun onFinish() {
+
+                }
+            }
+            timer.start()
+
+            mediaPlayer.setOnCompletionListener {
+                timer.cancel()
+                holder.audioSeekbar!!.setProgress(0)
+                holder.audioPause.visibility = View.INVISIBLE
+                holder.audioPlay.visibility = View.VISIBLE
+            }
+
+
+            holder. audioSeekbar!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {
+
+                }
+
+                override fun onStopTrackingTouch(p0: SeekBar?) {
+                    try {
+                        mediaPlayer.seekTo(p0!!.progress)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
+                    }
+
+
+                }
+            })
+
+
+
+    }
+
+    private fun updateSeekbar(mp: MediaPlayer, audioSeekbar: SeekBar?) {
+//        currentSeekTo=mp.currentPosition
+//        notifyItemChanged(currentPlay)
+        audioSeekbar!!.max = mp.duration
+        audioSeekbar!!.setProgress(mp.currentPosition)
+
+    }
+
+    private fun showDialog(url: String?, type: String) {
         var dialog = Dialog(context)
         dialog.setContentView(R.layout.dialog_image)
 
         var imgUser = dialog.findViewById<ImageView>(R.id.imgUser)
-        var videoUser=dialog.findViewById<VideoView>(R.id.videoUser)
+        var videoUser = dialog.findViewById<VideoView>(R.id.videoUser)
 
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.black);
         dialog.window!!.setLayout(
@@ -136,9 +308,9 @@ class ChatLiveAdapter(
             GridLayoutManager.LayoutParams.WRAP_CONTENT
         )
 
-        if(type.equals("video")){
-            imgUser.visibility=View.GONE
-            videoUser.visibility=View.VISIBLE
+        if (type.equals("video")) {
+            imgUser.visibility = View.GONE
+            videoUser.visibility = View.VISIBLE
             var mediaController = MediaController(context)
 //            mediaController.setAnchorView(videoUser)
             videoUser.setMediaController(mediaController)
@@ -148,15 +320,16 @@ class ChatLiveAdapter(
                 videoUser.start()
                 mediaController.show(3000)
             }
-        }else {
-            imgUser.visibility=View.VISIBLE
-            videoUser.visibility=View.GONE
+        } else {
+            imgUser.visibility = View.VISIBLE
+            videoUser.visibility = View.GONE
             if (!url.equals("")) {
                 Glide.with(context).load(url).into(imgUser)
             }
         }
 
         dialog.show()
+
 
     }
 
@@ -188,6 +361,6 @@ class ChatLiveAdapter(
         var imgPlay = itemView.findViewById<ImageView>(R.id.imgPlay)
         var audioPlay = itemView.findViewById<ImageView>(R.id.audioPlay)
         var audioPause = itemView.findViewById<ImageView>(R.id.audioPause)
-        var audioSeekbar=itemView.findViewById<SeekBar>(R.id.audioSeekbar)
+        var audioSeekbar = itemView.findViewById<SeekBar>(R.id.audioSeekbar)
     }
 }
