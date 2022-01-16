@@ -147,7 +147,6 @@ class ChatLiveAdapter(
 
 
         holder.audioPlay.setOnClickListener {
-
             previousPlay=currentPlay
             currentPlay=position
 
@@ -235,7 +234,6 @@ class ChatLiveAdapter(
             })
         })
 
-
     }
 
 
@@ -305,7 +303,7 @@ class ChatLiveAdapter(
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.black);
         dialog.window!!.setLayout(
             GridLayoutManager.LayoutParams.MATCH_PARENT,
-            GridLayoutManager.LayoutParams.WRAP_CONTENT
+            GridLayoutManager.LayoutParams.MATCH_PARENT
         )
 
         if (type.equals("video")) {

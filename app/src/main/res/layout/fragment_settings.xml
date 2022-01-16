@@ -50,13 +50,12 @@
                 android:textSize="16sp" />
 
             <ImageView
+                android:id="@+id/imgInfo"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/txtGhostMode"
-            android:layout_centerVertical="true"
-                android:id="@+id/imgInfo"
-                android:src="@drawable/ic_info"
-            />
+                android:src="@drawable/ic_info" />
 
 
             <com.suke.widget.SwitchButton

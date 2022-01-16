@@ -10,7 +10,7 @@
         android:id="@+id/imgUser"
         android:src="@color/black"
         android:layout_centerVertical="true"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         />
 
     <VideoView
