@@ -30,7 +30,7 @@ class ChatLiveAdapter(
     var currentPlay=-1
     var previousPlay=-2
     var currentSeekTo=0
-    lateinit var timer: CountDownTimer
+     var timer: CountDownTimer?=null
     var firebaseChats =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
@@ -152,7 +152,7 @@ class ChatLiveAdapter(
 
             if(previousPlay==currentPlay){
                 playMediaPlayerFromResume(chatsList.get(position).message,holder)
-                notifyItemChanged(previousPlay)
+//                notifyItemChanged(previousPlay)
 
             }else{
                 playMediaPlayerFromBegin(chatsList.get(position).message,holder)
@@ -168,8 +168,10 @@ class ChatLiveAdapter(
         holder.audioPause.setOnClickListener {
             holder.audioPlay.visibility = View.VISIBLE
             holder.audioPause.visibility = View.INVISIBLE
+            if(mediaPlayer!=null)
             mediaPlayer.pause()
-            timer.cancel()
+            if(timer!=null)
+            timer!!.cancel()
         }
 
     }
@@ -182,7 +184,7 @@ class ChatLiveAdapter(
 
 
             if (timer != null) {
-                timer.cancel()
+                timer!!.cancel()
             }
 
         }
@@ -190,7 +192,9 @@ class ChatLiveAdapter(
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
         mediaPlayer.setDataSource(audioUri.toString())
         mediaPlayer.prepareAsync()
+        MyUtils.showProgress(context)
         mediaPlayer.setOnPreparedListener(MediaPlayer.OnPreparedListener { mp ->
+            MyUtils.stopProgress(context)
             mp.start()
 
             timer = object : CountDownTimer(1000000, 1000) {
@@ -203,10 +207,10 @@ class ChatLiveAdapter(
 
                 }
             }
-            timer.start()
+            timer!!.start()
 
             mp.setOnCompletionListener {
-                timer.cancel()
+                timer!!.cancel()
                holder.audioSeekbar!!.setProgress(0)
                 holder.audioPause.visibility = View.INVISIBLE
                 holder.audioPlay.visibility = View.VISIBLE
@@ -251,10 +255,10 @@ class ChatLiveAdapter(
 
                 }
             }
-            timer.start()
+            timer!!.start()
 
             mediaPlayer.setOnCompletionListener {
-                timer.cancel()
+                timer!!.cancel()
                 holder.audioSeekbar!!.setProgress(0)
                 holder.audioPause.visibility = View.INVISIBLE
                 holder.audioPlay.visibility = View.VISIBLE
