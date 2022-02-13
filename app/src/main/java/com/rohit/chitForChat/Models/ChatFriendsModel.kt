@@ -11,6 +11,8 @@ class ChatFriendsModel {
         image:String,
         origonalMessage:String,
         seenStatus:String,
+        blockStatus:String,
+        likedStatus:String
     ) {
         this.name = name
         this.userId = userId
@@ -18,7 +20,17 @@ class ChatFriendsModel {
         this.image = image
         this.seenStatus=seenStatus
         this.origonalMessage=origonalMessage
+        this.blockStatus=blockStatus
+        this.likedStatus=likedStatus
     }
+
+
+
+    var likedStatus: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
     var origonalMessage: String? = null
         get() = field
         set(value) {
@@ -46,6 +58,12 @@ class ChatFriendsModel {
             field = value
         }
     var lastMessage: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    var blockStatus: String? = null
         get() = field
         set(value) {
             field = value

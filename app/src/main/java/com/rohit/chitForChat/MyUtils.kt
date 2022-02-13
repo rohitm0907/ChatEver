@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import de.hdodenhof.circleimageview.CircleImageView
+import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -77,6 +78,7 @@ object MyUtils {
     }
 
     fun stopProgress(context: Context) {
+        if(dialog!=null)
         dialog!!.cancel()
     }
 
@@ -146,18 +148,20 @@ object MyUtils {
         return sdf.format(timeD)
     }
 
-    fun showProfileDialog(context: Context,imageUrl:String,captions:String) {
+    fun showProfileDialog(context: Context,imageUrl:String,captions:String,likes:String) {
         var dialog=Dialog(context)
         dialog.setContentView(R.layout.dialog_show_profile)
 
         var imgUser=dialog.findViewById<CircleImageView>(R.id.imgUser)
         var txtCaption=dialog.findViewById<TextView>(R.id.txtCaption)
+        var txtLikes=dialog.findViewById<TextView>(R.id.txtLikes);
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.transparent);
         dialog.window!!.setLayout(GridLayoutManager.LayoutParams.MATCH_PARENT,GridLayoutManager.LayoutParams.WRAP_CONTENT)
         if(!imageUrl.equals("")){
             Glide.with(context).load(imageUrl).into(imgUser)
         }
         txtCaption.setText(captions)
+        txtLikes.setText(likes)
         dialog.show()
 
     }

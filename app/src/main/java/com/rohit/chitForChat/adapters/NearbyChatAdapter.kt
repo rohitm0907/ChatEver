@@ -52,26 +52,27 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
 
         holder.imgUser.setOnClickListener {
 
-            firebaseUsers.child(chatNearbyList.get(position).phone.toString())
-                .child("captions").addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        if (snapshot.exists()) {
-                            var caption: String? = snapshot.getValue(String::class.java)
+//            firebaseUsers.child(chatNearbyList.get(position).phone.toString())
+//                .child("captions").addListenerForSingleValueEvent(object : ValueEventListener {
+//                    override fun onDataChange(snapshot: DataSnapshot) {
+//                        if (snapshot.exists()) {
+//                            var caption: String? = snapshot.getValue(String::class.java)
                             MyUtils.showProfileDialog(
                                 context,
                                 chatNearbyList.get(position).image.toString(),
-                                caption.toString()
+                                chatNearbyList.get(position).captions.toString(),
+                                chatNearbyList.get(position).totalLikes.toString()
                             )
 
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-
-                    }
-
-                })
-
+//                        }
+//                    }
+//
+//                    override fun onCancelled(error: DatabaseError) {
+//
+//                    }
+//
+//                })
+//
         }
     }
 

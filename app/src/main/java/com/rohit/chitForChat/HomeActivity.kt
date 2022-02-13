@@ -1,6 +1,7 @@
 package com.rohit.chitForChat
 
 import android.Manifest
+import android.Manifest.permission
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,6 +13,21 @@ import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.adapters.HomeTabApapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
 import java.util.*
+import android.content.DialogInterface
+
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+
+import androidx.core.app.ActivityCompat.requestPermissions
+
+import android.os.Build
+import androidx.appcompat.app.AlertDialog
+
+import com.google.android.material.snackbar.Snackbar
+
+import androidx.core.content.ContextCompat
+
+
+
 
 class HomeActivity : AppCompatActivity() {
     private val LOCATION_PERMISSION_REQUEST_CODE: Int = 1
@@ -142,4 +158,6 @@ class HomeActivity : AppCompatActivity() {
             ).child(MyConstants.NODE_ONLINE_STATUS).setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
 
     }
+
+
 }

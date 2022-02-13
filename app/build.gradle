@@ -63,5 +63,36 @@ dependencies {
     implementation 'net.alhazmy13.MediaPicker:libary:2.4.4'
     implementation 'com.devlomi.record-view:record-view:2.0.1'
 
+//    ripple effect
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+
+    // dependency for exoplayer
+
+    implementation 'com.google.android.exoplayer:exoplayer:r2.4.0'
+
+// for core support in exoplayer.
+
+    implementation 'com.google.android.exoplayer:exoplayer-core:r2.4.0'
+
+// for adding dash support in our exoplayer.
+
+    implementation 'com.google.android.exoplayer:exoplayer-dash:r2.4.0'
+
+// for adding hls support in exoplayer.
+
+    implementation 'com.google.android.exoplayer:exoplayer-hls:r2.4.0'
+
+// for smooth streaming of video in our exoplayer.
+
+    implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:r2.4.0'
+
+// for generating default ui of exoplayer
+
+    implementation 'com.google.android.exoplayer:exoplayer-ui:r2.4.0'// dependency for exoplayer
+
+    implementation 'com.guolindev.permissionx:permissionx:1.6.1'
+
+
+
 
 }

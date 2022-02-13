@@ -22,6 +22,7 @@ package com.rohit.chitForChat
      var USER_LONGITUDE="userLong"
      var OTHER_USER_NAME="otherUserName"
      var OTHER_USER_IMAGE="otherUserImage"
+     var LIKE_STATUS="likeStatus"
      var OTHER_USER_PHONE="otherUserPhone"
      var SEEN_STATUS="seenStatus"
      var FIREBASE_BASE_URL="https://chitforchat-d1ee5-default-rtdb.asia-southeast1.firebasedatabase.app/"

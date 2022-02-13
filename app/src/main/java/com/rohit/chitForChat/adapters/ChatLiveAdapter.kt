@@ -2,6 +2,7 @@ package com.rohit.chitForChat.adapters
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -10,15 +11,37 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.firebase.database.FirebaseDatabase
 import com.rohit.chitForChat.Models.LiveChatModel
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
+import com.google.android.exoplayer2.source.MediaSource
+
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+
+import com.google.android.exoplayer2.extractor.ExtractorsFactory
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
+
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+
+import com.google.android.exoplayer2.trackselection.TrackSelector
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView
+
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
+
+import com.google.android.exoplayer2.upstream.BandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 
 
 class ChatLiveAdapter(
@@ -78,6 +101,7 @@ class ChatLiveAdapter(
             holder.imgMessage.visibility = View.GONE
             holder.txtMessage.visibility = View.VISIBLE
             holder.audioPause.visibility = View.GONE
+            holder.imgLocation.visibility = View.GONE
             holder.audioPlay.visibility = View.GONE
             holder.audioSeekbar.visibility = View.GONE
             holder.txtMessage.text = chatsList[position].message
@@ -87,18 +111,33 @@ class ChatLiveAdapter(
             holder.audioPlay.visibility = View.GONE
             holder.audioSeekbar.visibility = View.GONE
             holder.txtMessage.visibility = View.GONE
+            holder.imgLocation.visibility = View.GONE
             holder.imgMessage.visibility = View.VISIBLE
             Glide.with(context)
                 .load(chatsList.get(position).message)
                 .into(holder.imgMessage)
             holder.imgPlay.visibility = View.GONE
-        } else if (chatsList.get(position).messageType.equals("video")) {
+        }else if (chatsList.get(position).messageType.equals("location")) {
+            holder.audioPause.visibility = View.GONE
+            holder.audioPlay.visibility = View.GONE
+            holder.audioSeekbar.visibility = View.GONE
+            holder.txtMessage.visibility = View.GONE
+            holder.imgLocation.visibility = View.VISIBLE
+            holder.imgMessage.visibility = View.VISIBLE
+            Glide.with(context)
+                .load(chatsList.get(position).message)
+                .into(holder.imgMessage)
+            holder.imgPlay.visibility = View.GONE
+        }
+
+        else if (chatsList.get(position).messageType.equals("video")) {
             holder.audioPause.visibility = View.GONE
             holder.audioPlay.visibility = View.GONE
             holder.audioSeekbar.visibility = View.GONE
             holder.imgPlay.visibility = View.VISIBLE
             holder.txtMessage.visibility = View.GONE
             holder.imgMessage.visibility = View.VISIBLE
+            holder.imgLocation.visibility = View.GONE
             Glide.with(context)
                 .load(chatsList.get(position).message)
                 .into(holder.imgMessage)
@@ -142,6 +181,22 @@ class ChatLiveAdapter(
                 chatsList.get(position).message,
                 chatsList.get(position).messageType.toString()
             )
+        }
+
+        holder.imgLocation.setOnClickListener {
+
+            var location=chatsList.get(position).message!!.split(",")
+            var latitude=location[0]
+            var logitude=location[1]
+            val strUri =
+                "http://maps.google.com/maps?q=loc:$latitude,$logitude (Another User location)"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(strUri))
+            intent.setClassName(
+                "com.google.android.apps.maps",
+                "com.google.android.maps.MapsActivity"
+            )
+            context.startActivity(intent!!)
+
         }
 
 
@@ -302,7 +357,7 @@ class ChatLiveAdapter(
         dialog.setContentView(R.layout.dialog_image)
 
         var imgUser = dialog.findViewById<ImageView>(R.id.imgUser)
-        var videoUser = dialog.findViewById<VideoView>(R.id.videoUser)
+        var exoPlayerView = dialog.findViewById<SimpleExoPlayerView>(R.id.idExoPlayerVIew)
 
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.black);
         dialog.window!!.setLayout(
@@ -312,19 +367,33 @@ class ChatLiveAdapter(
 
         if (type.equals("video")) {
             imgUser.visibility = View.GONE
-            videoUser.visibility = View.VISIBLE
-            var mediaController = MediaController(context)
-//            mediaController.setAnchorView(videoUser)
-            videoUser.setMediaController(mediaController)
-            videoUser.setVideoURI(Uri.parse(url))
-            videoUser.requestFocus()
-            videoUser.setOnPreparedListener {
-                videoUser.start()
-                mediaController.show(3000)
+            exoPlayerView.visibility = View.VISIBLE
+            try {
+                val bandwidthMeter: BandwidthMeter = DefaultBandwidthMeter()
+
+                val trackSelector: TrackSelector =
+                    DefaultTrackSelector(AdaptiveTrackSelection.Factory(bandwidthMeter))
+
+                var exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
+
+                val videouri = Uri.parse(url)
+
+                val dataSourceFactory = DefaultHttpDataSourceFactory("exoplayer_video")
+
+                val extractorsFactory: ExtractorsFactory = DefaultExtractorsFactory()
+
+                val mediaSource: MediaSource =
+                    ExtractorMediaSource(videouri, dataSourceFactory, extractorsFactory, null, null)
+
+                exoPlayerView.setPlayer(exoPlayer)
+                exoPlayer.prepare(mediaSource)
+                exoPlayer.setPlayWhenReady(true)
+            } catch (e:Exception){
+               MyUtils.showToast(context,"Unable to play video")
             }
         } else {
             imgUser.visibility = View.VISIBLE
-            videoUser.visibility = View.GONE
+            exoPlayerView.visibility = View.GONE
             if (!url.equals("")) {
                 Glide.with(context).load(url).into(imgUser)
             }
@@ -364,5 +433,6 @@ class ChatLiveAdapter(
         var audioPlay = itemView.findViewById<ImageView>(R.id.audioPlay)
         var audioPause = itemView.findViewById<ImageView>(R.id.audioPause)
         var audioSeekbar = itemView.findViewById<SeekBar>(R.id.audioSeekbar)
+        var imgLocation=itemView.findViewById<ImageView>(R.id.imgLocation)
     }
 }

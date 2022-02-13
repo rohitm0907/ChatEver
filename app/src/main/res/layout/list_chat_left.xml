@@ -33,7 +33,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-
                 android:text="Message"
                 android:visibility="gone"
                 android:textColor="@color/white" />
@@ -44,15 +43,26 @@
                     android:id="@+id/imgMessage"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-
-                    android:background="@color/black"
+                    android:scaleType="fitXY"
                     android:src="@drawable/user"
                     android:visibility="gone" />
+
+
+
+
+            <ImageView
+                android:id="@+id/imgLocation"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:scaleType="fitXY"
+                android:visibility="gone"
+                android:src="@drawable/ic_map" />
 
                 <ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:id="@+id/imgPlay"
+
                     android:visibility="gone"
                     android:layout_centerInParent="true"
                     android:src="@drawable/ic_play" />

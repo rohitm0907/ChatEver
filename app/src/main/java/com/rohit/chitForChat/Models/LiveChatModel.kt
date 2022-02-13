@@ -11,7 +11,7 @@ class LiveChatModel {
         messageType: String,
         key: String,
         time: String,
-    seenStatus:String
+        seenStatus:String,
     ) {
         this.sender = sender
         this.receiver = receiver
@@ -32,6 +32,7 @@ class LiveChatModel {
         set(value) {
             field = value
         }
+
     var sender: String? = null
         get() = field
         set(value) {

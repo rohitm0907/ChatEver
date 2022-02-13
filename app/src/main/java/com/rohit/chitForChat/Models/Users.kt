@@ -40,5 +40,11 @@ class Users() {
             field = value
         }
 
+    var totalLikes:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
 
 }

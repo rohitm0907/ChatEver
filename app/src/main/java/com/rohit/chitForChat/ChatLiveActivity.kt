@@ -1,17 +1,18 @@
 package com.rohit.chitForChat
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.media.AudioAttributes
-import android.media.AudioRecord
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -31,6 +32,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.permissionx.guolindev.PermissionX
 import com.rohit.chitForChat.Models.ChatFriendsModel
 import com.rohit.chitForChat.Models.LiveChatModel
 import com.rohit.chitForChat.MyConstants.FIREBASE_BASE_URL
@@ -44,8 +46,8 @@ import kotlin.collections.ArrayList
 
 
 class ChatLiveActivity : AppCompatActivity() {
-    private var audioRecorder: AudioRecorder?=null
-    private var recordFile: File?=null
+    private var audioRecorder: AudioRecorder? = null
+    private var recordFile: File? = null
     private var senderId: String = ""
     private var receiverId: String = ""
     var sentImage: Bitmap? = null
@@ -55,7 +57,9 @@ class ChatLiveActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
 
-
+    var firebaseUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_USERS)
     var firebaseChatFriends =
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
@@ -64,24 +68,43 @@ class ChatLiveActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
+    var likeStatus = "0"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
 
         binding = ActivityChatLiveBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+
+        getSupportActionBar()!!.hide();
+
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
-audioRecording()
+        if (intent.getStringExtra(MyConstants.LIKE_STATUS) != null) {
+            binding!!.imgLike.visibility = View.VISIBLE
+            likeStatus = intent.getStringExtra(MyConstants.LIKE_STATUS).toString()
+            if (likeStatus.equals("0")) {
+                binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
+            } else {
+                binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+            }
+        } else {
+            binding!!.imgLike.visibility = View.GONE
+        }
+
+        audioRecording()
         if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
             Glide.with(this@ChatLiveActivity)
                 .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
                 .into(binding!!.imgUser)
         }
 
+
+
         clicks()
         senderId = MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
         receiverId = intent.getStringExtra(MyConstants.OTHER_USER_PHONE).toString()
+
 
         getOnlineStatus(receiverId)
         if (senderId < receiverId) {
@@ -155,6 +178,42 @@ audioRecording()
         })
 
 
+        binding!!.imgLike.setOnClickListener {
+            if (likeStatus.equals("0")) {
+                firebaseUsers.child(receiverId).child("totalLikes")
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                var likes = snapshot.getValue(String::class.java)!!.toInt();
+                                likes++;
+                                firebaseUsers.child(receiverId).child("totalLikes")
+                                    .setValue(likes.toString()).addOnCompleteListener {
+                                        MyUtils.showToast(
+                                            this@ChatLiveActivity,
+                                            "likes successfully"
+                                        )
+                                        likeStatus = "1"
+                                        //set like of another user in our profile
+                                        firebaseChatFriends.child(senderId).child(receiverId)
+                                            .child("likedStatus").setValue("1")
+                                        binding!!.imgLike.setBackgroundResource(R.drawable.ic__liked)
+
+                                    }
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+
+                    })
+
+            } else {
+                MyUtils.showToast(this, "Already liked")
+            }
+        }
+
+
         binding!!.imgCamera.setOnClickListener {
 
 
@@ -186,7 +245,7 @@ audioRecording()
         builder.setTitle("Select to Share")
 // add a list
 // add a list
-        val animals = arrayOf("Image", "Video", "Music", "Cancel")
+        val animals = arrayOf("Image", "Video", "Location", "Cancel")
         builder.setItems(animals,
             DialogInterface.OnClickListener { dialog, which ->
                 when (which) {
@@ -199,7 +258,6 @@ audioRecording()
                                 1080
                             )    //Final image resolution will be less than 1080 x 1080(Optional)
                             .start()
-
                     }
                     1 -> {
 //                        VideoPicker.Builder(this@ChatLiveActivity)
@@ -219,6 +277,15 @@ audioRecording()
 
                     }
                     2 -> {
+
+                        var location = MyUtils.getStringValue(
+                            this@ChatLiveActivity,
+                            MyConstants.USER_LATITUDE,
+                        ) + "," + "" + MyUtils.getStringValue(
+                            this@ChatLiveActivity,
+                            MyConstants.USER_LONGITUDE,
+                        )
+                        sendMessageOnFirebase(location, "location")
                     }
                     3 -> {
                         builder.setCancelable(true)
@@ -275,7 +342,7 @@ audioRecording()
                 }
 
                 uploadImageOnFirebase(sentImage!!)
-            } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE ) {
+            } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
                 var mPaths: List<String> =
                     data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
 //
@@ -286,17 +353,17 @@ audioRecording()
 //
 //
 //                }
-            }else if (requestCode == 1 ) {
-                var uri=data!!.data
+            } else if (requestCode == 1) {
+                var uri = data!!.data
 
-                    uploadVideoOnFirebase(uri!!)
-                    //Your Code
+                uploadVideoOnFirebase(uri!!)
+                //Your Code
 
 
-            }else if (resultCode == ImagePicker.RESULT_ERROR) {
+            } else if (resultCode == ImagePicker.RESULT_ERROR) {
                 Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
             }
-        }else{
+        } else {
             Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()
 
         }
@@ -307,14 +374,14 @@ audioRecording()
         val storageRef: StorageReference = storage.getReference()
 //        var file=File(videoUrl)
         val mountainvideosRef: StorageReference =
-            storageRef.child("videos/" + "rohit" + Calendar.getInstance().time )
+            storageRef.child("videos/" + "rohit" + Calendar.getInstance().time)
 
         val uploadTask: UploadTask = mountainvideosRef.putFile(videoUrl)
         MyUtils.showProgress(this@ChatLiveActivity)
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
             MyUtils.stopProgress(this@ChatLiveActivity)
-            MyUtils.showToast(this@ChatLiveActivity,it.message.toString())
+            MyUtils.showToast(this@ChatLiveActivity, it.message.toString())
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
@@ -331,14 +398,14 @@ audioRecording()
         val storageRef: StorageReference = storage.getReference()
 //        var file=File(videoUrl)
         val mountainvideosRef: StorageReference =
-            storageRef.child("audios/" + "rohit" + Calendar.getInstance().time+".3gp" )
-var uri:Uri=Uri.fromFile(File(recordFile!!.path))
+            storageRef.child("audios/" + "rohit" + Calendar.getInstance().time + ".3gp")
+        var uri: Uri = Uri.fromFile(File(recordFile!!.path))
         val uploadTask: UploadTask = mountainvideosRef.putFile(uri)
         MyUtils.showProgress(this@ChatLiveActivity)
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
             MyUtils.stopProgress(this@ChatLiveActivity)
-            MyUtils.showToast(this@ChatLiveActivity,it.message.toString())
+            MyUtils.showToast(this@ChatLiveActivity, it.message.toString())
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
@@ -361,6 +428,7 @@ var uri:Uri=Uri.fromFile(File(recordFile!!.path))
                 key.toString(),
                 Calendar.getInstance().time.time.toString(),
                 "0"
+
             );
         firebaseChats.child(roomId!!).child(key.toString()).setValue(data)
             .addOnCompleteListener {
@@ -374,6 +442,11 @@ var uri:Uri=Uri.fromFile(File(recordFile!!.path))
                 if (messageType.equals("video")) {
                     message = "Video"
                 }
+
+                if (messageType.equals("location")) {
+                    message = "Location"
+                }
+
                 firebaseChatFriends.child(senderId).child(receiverId).setValue(
                     ChatFriendsModel(
                         receiverId,
@@ -381,21 +454,29 @@ var uri:Uri=Uri.fromFile(File(recordFile!!.path))
                         message.toString(),
                         intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString(),
                         message.toString(),
-                        "1"
+                        "1",
+                        "0",
+                        likeStatus
                     )
                 )
-                firebaseChatFriends.child(receiverId).child(senderId).setValue(
-                    ChatFriendsModel(
-                        senderId,
-                        MyUtils.getStringValue(
-                            this@ChatLiveActivity,
-                            MyConstants.USER_NAME
-                        ),
-                        "New Message",
-                        intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString(),
-                        message.toString(),
-                        "0"
+
+
+                var data: HashMap<String, String> = HashMap<String, String>()
+                data.put("userId", senderId)
+                data.put(
+                    "name", MyUtils.getStringValue(
+                        this@ChatLiveActivity,
+                        MyConstants.USER_NAME
                     )
+                )
+                data.put("lastMessage", "New Message")
+                data.put("image", intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString())
+                data.put("origonalMessage", message.toString())
+                data.put("seenStatus", "0")
+                data.put("blockStatus", "0")
+
+                firebaseChatFriends.child(receiverId).child(senderId).updateChildren(
+                    data as Map<String, Any>
                 )
                 binding!!.edtMessage.setText("")
             }
@@ -430,16 +511,12 @@ var uri:Uri=Uri.fromFile(File(recordFile!!.path))
     }
 
     private fun getOnlineStatus(receiverId: String) {
-
-
         firebaseOnlineStatus.child(receiverId).child(MyConstants.NODE_ONLINE_STATUS)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-
                         var onlineStatus = snapshot.getValue(String::class.java)
                         binding!!.txtOnlineStatus.setText(onlineStatus)
-
                     }
                 }
 
@@ -479,67 +556,103 @@ var uri:Uri=Uri.fromFile(File(recordFile!!.path))
             }
         })
     }
-    
-    fun audioRecording(){
+
+    fun audioRecording() {
         binding!!.recordButton.setRecordView(binding!!.recordView)
         binding!!.recordButton.setListenForRecord(true)
+        binding!!.recordButton.isSoundEffectsEnabled = false
+        binding!!.recordView.setSoundEnabled(false)
         binding!!.recordView.setOnRecordListener(object : OnRecordListener {
             override fun onStart() {
                 //Start Recording..
-                binding!!.imgCamera.visibility=View.GONE
-                binding!!.imgSend.visibility=View.GONE
-                binding!!.edtMessage.visibility=View.GONE
 
-                audioRecorder = AudioRecorder()
-                recordFile = File(filesDir, UUID.randomUUID().toString() + ".3gp")
+                checkMircrophonePermission()
 
-                if (!recordFile?.exists()!!) {
-                    recordFile?.createNewFile();
-                }
-
-                try {
-                    audioRecorder!!.start(recordFile?.path)
-                } catch (e: Exception) {
-
-                }
             }
 
             override fun onCancel() {
-                binding!!.imgCamera.visibility=View.VISIBLE
-                binding!!.imgSend.visibility=View.VISIBLE
-                binding!!.edtMessage.visibility=View.VISIBLE
+                binding!!.imgCamera.visibility = View.VISIBLE
+                binding!!.imgSend.visibility = View.VISIBLE
+                binding!!.edtMessage.visibility = View.VISIBLE
                 stopRecording(true)
             }
 
             override fun onFinish(recordTime: Long) {
-                binding!!.imgCamera.visibility=View.VISIBLE
-                binding!!.imgSend.visibility=View.VISIBLE
-                binding!!.edtMessage.visibility=View.VISIBLE
-                stopRecording(false);
-                var uri = Uri.fromFile(File(recordFile?.path))
 
-                uploadAudioOnFirebase(uri)
+                binding!!.imgCamera.visibility = View.VISIBLE
+                binding!!.imgSend.visibility = View.VISIBLE
+                binding!!.edtMessage.visibility = View.VISIBLE
+                stopRecording(false);
+                if (recordFile != null) {
+                    var uri = Uri.fromFile(File(recordFile?.path))
+                    uploadAudioOnFirebase(uri)
+                }
             }
 
-       
+
             override fun onLessThanSecond() {
-                binding!!.imgCamera.visibility=View.VISIBLE
-                binding!!.imgSend.visibility=View.VISIBLE
-                binding!!.edtMessage.visibility=View.VISIBLE
+                binding!!.imgCamera.visibility = View.VISIBLE
+                binding!!.imgSend.visibility = View.VISIBLE
+                binding!!.edtMessage.visibility = View.VISIBLE
                 stopRecording(true);
             }
         })
-        
+
     }
 
 
-
     private fun stopRecording(deleteFile: Boolean) {
-        audioRecorder!!.stop()
+        if (audioRecorder != null)
+            audioRecorder!!.stop()
         if (recordFile != null && deleteFile) {
             recordFile?.delete()
         }
     }
 
+
+    private fun checkMircrophonePermission() {
+        PermissionX.init(this@ChatLiveActivity)
+            .permissions(Manifest.permission.RECORD_AUDIO)
+            .onExplainRequestReason { scope, deniedList ->
+                scope.showRequestReasonDialog(
+                    deniedList,
+                    "Please provide Permission, to record the audio.",
+                    "OK",
+                    "Cancel"
+                )
+            }
+            .onForwardToSettings { scope, deniedList ->
+                scope.showForwardToSettingsDialog(
+                    deniedList,
+                    "Now,You need to allow necessary permissions in Settings manually",
+                    "OK",
+                    "Cancel"
+                )
+            }
+            .request { allGranted, grantedList, deniedList ->
+                if (allGranted) {
+                    binding!!.imgCamera.visibility = View.GONE
+                    binding!!.imgSend.visibility = View.GONE
+                    binding!!.edtMessage.visibility = View.GONE
+
+                    audioRecorder = AudioRecorder()
+                    recordFile = File(filesDir, UUID.randomUUID().toString() + ".3gp")
+
+                    if (!recordFile?.exists()!!) {
+                        recordFile?.createNewFile();
+                    }
+
+                    try {
+                        audioRecorder!!.start(recordFile?.path)
+                    } catch (e: Exception) {
+
+                    }
+                } else {
+                    checkMircrophonePermission()
+                    Toast.makeText(this, "Microphone permission needed.", Toast.LENGTH_LONG).show()
+
+                }
+            }
+    }
 }
     

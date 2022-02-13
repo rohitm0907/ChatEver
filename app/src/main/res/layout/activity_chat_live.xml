@@ -63,6 +63,14 @@
             android:layout_toRightOf="@id/imgUser"
             android:text="Offline"
             android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/imgLike"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic__dislike"/>
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -85,7 +93,6 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:elevation="2dp"
-
         android:padding="5dp">
 
 
@@ -104,6 +111,7 @@
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/imgSend"
             android:layout_toRightOf="@+id/imgCamera"
+            android:elevation="5dp"
             android:background="@drawable/bg_edt_message"
             android:hint="message..."
             android:padding="10dp" />

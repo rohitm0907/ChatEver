@@ -152,6 +152,10 @@ class ProfileActivity : AppCompatActivity() {
         } else {
             users.captions = "No Captions"
         }
+
+        users.lat="0"
+        users.long="0"
+        users.totalLikes="0"
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
             MyUtils.stopProgress(this@ProfileActivity)
 
@@ -187,7 +191,7 @@ class ProfileActivity : AppCompatActivity() {
 
             if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
                 userImage = null
-                MyUtils.showToast(this@ProfileActivity, "Successfully Update")
+                MyUtils.showToast(this@ProfileActivity, "Successfully Update.")
             } else {
                 userImage = null
                 startActivity(Intent(this, HomeActivity::class.java))

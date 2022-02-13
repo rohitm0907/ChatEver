@@ -52,7 +52,6 @@ class Settings : Fragment() {
         if( MyUtils.getStringValue(
                 requireContext(),
                 MyConstants.GHOST_MODE
-
             ).equals(MyConstants.ON)){
             binding!!.sbGhost.isChecked=true
         }
@@ -103,17 +102,10 @@ class Settings : Fragment() {
 
                 }
                 }
-
-
-
         })
 
 
         binding!!.imgInfo.setOnClickListener {
-
-
-
-
             SimpleTooltip.Builder(requireContext())
                 .anchorView(binding!!.imgInfo)
                 .textColor(resources.getColor(R.color.white))

@@ -16,25 +16,50 @@
         android:gravity="center"
         android:orientation="vertical">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src="@drawable/user"
-        android:id="@+id/imgUser"
-        android:layout_gravity="center_horizontal"
-        />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/user"
+            android:id="@+id/imgUser"
+            android:layout_gravity="center_horizontal"
+            />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:text="Captions"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/app_color"
-        android:id="@+id/txtCaption"
-        android:gravity="center"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic__liked"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:text="0"
+                android:layout_gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/app_color"
+                android:id="@+id/txtLikes"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:text="Captions"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/app_color"
+            android:id="@+id/txtCaption"
+            android:gravity="center"/>
 
 
     </LinearLayout>
