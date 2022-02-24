@@ -46,6 +46,7 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
                 Intent(context, ChatLiveActivity::class.java).putExtra(MyConstants.OTHER_USER_NAME,chatNearbyList.get(position).name)
                     .putExtra(MyConstants.OTHER_USER_PHONE,chatNearbyList.get(position).phone)
                     .putExtra(MyConstants.OTHER_USER_IMAGE,chatNearbyList.get(position).image)
+
             )
         }
 

@@ -4,6 +4,7 @@ package com.rohit.chitForChat.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -51,6 +52,9 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         holder.txtName.setText(chatFriendList.get(position).name)
         if (chatFriendList.get(position).seenStatus.equals("1")) {
             holder.txtLastMessage.setText(chatFriendList.get(position).origonalMessage)
+        }else{
+            holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
+            holder.txtLastMessage.setText(chatFriendList.get(position).lastMessage)
         }
 //        holder.txtTime.setText("2:00 pm")
         if(chatFriendList.get(position).blockStatus=="0"){
@@ -80,6 +84,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                         .putExtra(MyConstants.OTHER_USER_PHONE, chatFriendList.get(position).userId)
                         .putExtra(MyConstants.OTHER_USER_IMAGE, chatFriendList.get(position).image)
                         .putExtra(MyConstants.LIKE_STATUS, chatFriendList.get(position).likedStatus)
+                        .putExtra(MyConstants.FROM, MyConstants.CHAT_LIST_SCREEN)
 
                 )
             }else if(chatFriendList.get(position).blockStatus=="1"){

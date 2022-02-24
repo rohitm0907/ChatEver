@@ -168,6 +168,7 @@ class ChatLiveAdapter(
 //        } else {
 //            holder.txtDate.visibility = View.GONE
 //        }
+        if(chatsList.get(position).time!=null)
         holder.txtTime.setText(MyUtils.convertIntoTime((chatsList.get(position).time).toString()))
 
         holder.imgPlay.setOnClickListener {
@@ -357,6 +358,7 @@ class ChatLiveAdapter(
         dialog.setContentView(R.layout.dialog_image)
 
         var imgUser = dialog.findViewById<ImageView>(R.id.imgUser)
+        var imgBack=dialog.findViewById<ImageView>(R.id.imgBack)
         var exoPlayerView = dialog.findViewById<SimpleExoPlayerView>(R.id.idExoPlayerVIew)
 
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.black);
@@ -364,6 +366,9 @@ class ChatLiveAdapter(
             GridLayoutManager.LayoutParams.MATCH_PARENT,
             GridLayoutManager.LayoutParams.MATCH_PARENT
         )
+        imgBack.setOnClickListener {
+            dialog.cancel()
+        }
 
         if (type.equals("video")) {
             imgUser.visibility = View.GONE

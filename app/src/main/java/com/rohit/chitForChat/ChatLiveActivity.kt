@@ -5,14 +5,12 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -46,6 +44,7 @@ import kotlin.collections.ArrayList
 
 
 class ChatLiveActivity : AppCompatActivity() {
+    private var stateValueEventListner: ValueEventListener? = null
     private var audioRecorder: AudioRecorder? = null
     private var recordFile: File? = null
     private var senderId: String = ""
@@ -53,9 +52,12 @@ class ChatLiveActivity : AppCompatActivity() {
     var sentImage: Bitmap? = null
     var binding: ActivityChatLiveBinding? = null
     var roomId: String? = null
+    var onLiveChatScreen = true
     var firebaseChats =
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
+
+    var database: ValueEventListener? = null
 
     var firebaseUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
@@ -69,6 +71,7 @@ class ChatLiveActivity : AppCompatActivity() {
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
     var likeStatus = "0"
+    var token = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
@@ -78,15 +81,20 @@ class ChatLiveActivity : AppCompatActivity() {
 
         getSupportActionBar()!!.hide();
 
-        binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
-        if (intent.getStringExtra(MyConstants.LIKE_STATUS) != null) {
-            binding!!.imgLike.visibility = View.VISIBLE
-            likeStatus = intent.getStringExtra(MyConstants.LIKE_STATUS).toString()
-            if (likeStatus.equals("0")) {
-                binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
+
+        binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
+        if (intent.getStringExtra(MyConstants.FROM) != null) {
+            if (intent.getStringExtra(MyConstants.LIKE_STATUS) != null) {
+                binding!!.imgLike.visibility = View.VISIBLE
+                likeStatus = intent.getStringExtra(MyConstants.LIKE_STATUS).toString()
+                if (likeStatus.equals("0")) {
+                    binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
+                } else {
+                    binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+                }
             } else {
-                binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+                binding!!.imgLike.visibility = View.VISIBLE
             }
         } else {
             binding!!.imgLike.visibility = View.GONE
@@ -104,7 +112,7 @@ class ChatLiveActivity : AppCompatActivity() {
         clicks()
         senderId = MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
         receiverId = intent.getStringExtra(MyConstants.OTHER_USER_PHONE).toString()
-
+        getAnotherUserToken()
 
         getOnlineStatus(receiverId)
         if (senderId < receiverId) {
@@ -172,7 +180,7 @@ class ChatLiveActivity : AppCompatActivity() {
                             //send notification for stopped typing event
                         }
                     },
-                    3000
+                    1000
                 )
             }
         })
@@ -196,7 +204,7 @@ class ChatLiveActivity : AppCompatActivity() {
                                         //set like of another user in our profile
                                         firebaseChatFriends.child(senderId).child(receiverId)
                                             .child("likedStatus").setValue("1")
-                                        binding!!.imgLike.setBackgroundResource(R.drawable.ic__liked)
+                                        binding!!.imgLike.setImageResource(R.drawable.ic__liked)
 
                                     }
                             }
@@ -234,7 +242,25 @@ class ChatLiveActivity : AppCompatActivity() {
                     .child(chatsList.get(position).seenStatus.toString()).setValue("1")
             }
 
+
         }
+
+    }
+
+    private fun getAnotherUserToken() {
+        firebaseUsers.child(receiverId).child("token")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        token = snapshot.getValue(String::class.java)!!
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
 
     }
 
@@ -418,33 +444,43 @@ class ChatLiveActivity : AppCompatActivity() {
 
     private fun sendMessageOnFirebase(message: String?, messageType: String) {
         var message = message
+        var notificationMessage = " has sent you a new message"
         var key = firebaseChats.push().key
-        var data: LiveChatModel =
-            LiveChatModel(
-                senderId,
-                receiverId,
-                message.toString(),
-                messageType,
-                key.toString(),
-                Calendar.getInstance().time.time.toString(),
-                "0"
+        var data: LiveChatModel = LiveChatModel(
+            senderId,
+            receiverId,
+            message.toString(),
+            messageType,
+            key.toString(),
+            Calendar.getInstance().time.time.toString(),
+            "0"
+        );
 
-            );
+
+
+
         firebaseChats.child(roomId!!).child(key.toString()).setValue(data)
             .addOnCompleteListener {
                 MyUtils.stopProgress(this@ChatLiveActivity)
                 if (messageType.equals("image")) {
                     message = "Image"
+                    notificationMessage = " has sent you a image"
                 }
+
                 if (messageType.equals("audio")) {
                     message = "Audio"
+                    notificationMessage = " has sent you a audio"
                 }
+
                 if (messageType.equals("video")) {
                     message = "Video"
+                    notificationMessage = " has sent you a video"
+
                 }
 
                 if (messageType.equals("location")) {
                     message = "Location"
+                    notificationMessage = " has sent you a location"
                 }
 
                 firebaseChatFriends.child(senderId).child(receiverId).setValue(
@@ -456,7 +492,9 @@ class ChatLiveActivity : AppCompatActivity() {
                         message.toString(),
                         "1",
                         "0",
-                        likeStatus
+                        likeStatus,
+                        Calendar.getInstance().time.time.toString()
+
                     )
                 )
 
@@ -477,7 +515,16 @@ class ChatLiveActivity : AppCompatActivity() {
 
                 firebaseChatFriends.child(receiverId).child(senderId).updateChildren(
                     data as Map<String, Any>
-                )
+                ).addOnCompleteListener {
+                    if (!token.equals("")) {
+//                        MyNotification.sendNotification(
+//                            MyUtils.getStringValue(this,MyConstants.USER_NAME).toString(),
+//                            notificationMessage,
+//                            token,
+//                            MyConstants.NOTI_REQUEST_TYPE
+//                        )
+                    }
+                }
                 binding!!.edtMessage.setText("")
             }
 
@@ -528,10 +575,18 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun getChatsFromFirebase() {
+
+//        stateValueEventListner=
         firebaseChats.child(roomId!!).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     chatsList.clear()
+
+                    if (onLiveChatScreen) {
+                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
+                            .setValue("1")
+                    }
+
                     for (postSnapshot in snapshot.children) {
                         val chat: LiveChatModel? = postSnapshot.getValue(LiveChatModel::class.java)
                         chatsList.add(chat!!)
@@ -545,8 +600,7 @@ class ChatLiveActivity : AppCompatActivity() {
                     binding!!.rcChat.setItemViewCacheSize(chatsList.size)
 
                     binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-                    firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
-                        .setValue("1")
+
                 }
             }
 
@@ -555,6 +609,9 @@ class ChatLiveActivity : AppCompatActivity() {
 
             }
         })
+
+
+//        firebaseChats.addValueEventListener(stateValueEventListner!!);
     }
 
     fun audioRecording() {
@@ -654,5 +711,23 @@ class ChatLiveActivity : AppCompatActivity() {
                 }
             }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        onLiveChatScreen = false
+//        firebaseChats.removeEventListener(stateValueEventListner!!);
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        onLiveChatScreen = false
+//        firebaseChats.removeEventListener(stateValueEventListner!!);
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
 }
     

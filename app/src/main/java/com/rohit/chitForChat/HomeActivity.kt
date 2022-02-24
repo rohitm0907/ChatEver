@@ -16,17 +16,23 @@ import java.util.*
 import android.content.DialogInterface
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.graphics.Typeface
 
 import androidx.core.app.ActivityCompat.requestPermissions
 
 import android.os.Build
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 
 import com.google.android.material.snackbar.Snackbar
 
 import androidx.core.content.ContextCompat
-
-
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.android.material.tabs.TabLayout
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class HomeActivity : AppCompatActivity() {
@@ -42,34 +48,50 @@ class HomeActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
+
+    var gotoChat=false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        tokenGenerateAndUpdate()
+        handleTab()
         binding.myViewPager.adapter = HomeTabApapter(supportFragmentManager)
         binding.myTablayout.setupWithViewPager(binding.myViewPager)
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this@HomeActivity)
 
-        when {
-            MyUtils.isAccessFineLocationGranted(this) -> {
-                when {
-                    MyUtils.isLocationEnabled(this) -> {
-                        setUpLocationListener()
-                    }
-                    else -> {
-                        MyUtils.showGPSNotEnabledDialog(this)
-                    }
+
+    }
+
+    private fun handleTab() {
+        binding.myTablayout
+            .addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    val tabLayout = ( binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
+                        tab!!.position
+                    ) as LinearLayout
+                    val tabTextView = tabLayout.getChildAt(1) as TextView
+                    tabTextView.setTypeface(tabTextView.typeface, Typeface.BOLD)
+
                 }
-            }
-            else -> {
-                MyUtils.requestAccessFineLocationPermission(
-                    this,
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
-        }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+                    val tabLayout = ( binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
+                        tab!!.position
+                    ) as LinearLayout
+                    val tabTextView = tabLayout.getChildAt(1) as TextView
+                    tabTextView.setTypeface(null, Typeface.NORMAL)
+                    tabTextView.textSize=14F
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            });
     }
 
 
@@ -131,8 +153,32 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
+
+
     override fun onResume() {
         super.onResume()
+
+        when {
+            MyUtils.isAccessFineLocationGranted(this) -> {
+                when {
+                    MyUtils.isLocationEnabled(this) -> {
+                        setUpLocationListener()
+                    }
+                    else -> {
+                        MyUtils.showGPSNotEnabledDialog(this)
+                    }
+                }
+            }
+            else -> {
+                MyUtils.requestAccessFineLocationPermission(
+                    this,
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
+
+
+        var gotoChat=false
         if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
             firebaseOnlineStatus.child(
                 MyUtils.getStringValue(
@@ -144,11 +190,11 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
             firebaseOnlineStatus.child(
                 MyUtils.getStringValue(
@@ -158,6 +204,32 @@ class HomeActivity : AppCompatActivity() {
             ).child(MyConstants.NODE_ONLINE_STATUS).setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
 
     }
+
+    override fun onPause() {
+        super.onPause()
+
+    }
+
+    private fun tokenGenerateAndUpdate() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task: Task<String?> ->
+                if (!task.isSuccessful) {
+                    //Could not get FirebaseMessagingToken
+                    return@addOnCompleteListener
+                }
+                if (null != task.result) {
+                    //Got FirebaseMessagingToken
+                    val firebaseMessagingToken = Objects.requireNonNull(task.result)!!
+
+                    firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("token").setValue(firebaseMessagingToken)
+
+                    //Use firebaseMessagingToken further
+                }
+            }
+    }
+
+
+
 
 
 }

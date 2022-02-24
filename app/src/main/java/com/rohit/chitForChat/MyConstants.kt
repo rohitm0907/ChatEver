@@ -1,6 +1,9 @@
 package com.rohit.chitForChat
 
  object MyConstants {
+     val CHAT_LIST_SCREEN: String?="chatListScreen"
+     val FROM: String?="fromScreen"
+     val OTHER_USER_TOKEN: String="token"
      val GHOST_MODE: String="ghostMode"
      val ON: String?="on"
      val OFF: String?="off"
@@ -9,6 +12,7 @@ package com.rohit.chitForChat
      var PHONE_NUMBER="phoneNumber"
      var NODE_USERS="Users"
      var NODE_CHATS="Chats"
+     var NOTI_REQUEST_TYPE = "request"
      var NODE_CHAT_FIRENDS="ChatFriends"
      var NODE_ONLINE_STATUS="onlineStatus"
      var NODE_NAME="Name"

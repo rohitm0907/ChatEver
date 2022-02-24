@@ -21,6 +21,14 @@
         android:theme="@style/Theme.Chit4Chat">
         <activity android:name=".ChatLiveActivity"
          />
+
+        <service
+            android:name=".Firebase.MyFireBaseMessagingService" android:exported="true" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".ProfileActivity"

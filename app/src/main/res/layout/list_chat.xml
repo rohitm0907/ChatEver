@@ -45,7 +45,6 @@
         android:layout_below="@+id/txtName"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/imgUser"
-        android:text="this is my message."
         android:id="@+id/txtLastMessage"
         android:textColor="@color/black" />
     </RelativeLayout>

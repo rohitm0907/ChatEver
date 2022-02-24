@@ -140,6 +140,7 @@ class ProfileActivity : AppCompatActivity() {
         users!!.name = name
         users.phone = phone
         users.image = imageUri!!
+        users.token = ""
 
         if (!MyUtils.getStringValue(this@ProfileActivity, MyConstants.GHOST_MODE).equals("")) {
             users.ghostMode = MyUtils.getStringValue(this@ProfileActivity, MyConstants.GHOST_MODE)

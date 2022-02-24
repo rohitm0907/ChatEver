@@ -19,8 +19,7 @@ class NearbyFragment : Fragment() {
     var binding: FragmentNearbyBinding? = null
     var myLat: String = "0"
     var myLong: String = "0"
-    var firebaseUsers =
-        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+    var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
 
     var chatNearbyList: ArrayList<Users> = ArrayList()

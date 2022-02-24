@@ -46,5 +46,11 @@ class Users() {
             field = value
         }
 
+    var token:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
 
 }

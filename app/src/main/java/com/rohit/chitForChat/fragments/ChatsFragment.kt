@@ -17,6 +17,8 @@ import com.rohit.chitForChat.adapters.ChatListAdapter
 import com.rohit.chitForChat.adapters.ChatLiveAdapter
 import com.rohit.chitForChat.databinding.FragmentChatsBinding
 import android.app.Activity
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ChatsFragment : Fragment() {
     var firebaseChatFriends =
@@ -52,13 +54,22 @@ class ChatsFragment : Fragment() {
                             chatFriendList.add(user!!)
                             // here you can access to name property like university.name
                         }
+                        chatFriendList.sortedWith(compareBy { it.time })
 
+                        if (activity != null) {
+                            binding!!.recyclerChatList.adapter =
+                                ChatListAdapter(requireActivity(), chatFriendList!!)
+                            // etc ...
+                        }
+                    }else{
+                        chatFriendList.clear()
                         val activity: Activity? = activity
                         if (activity != null) {
                             binding!!.recyclerChatList.adapter =
                                 ChatListAdapter(requireActivity(), chatFriendList!!)
                             // etc ...
                         }
+
                     }
                 }
 

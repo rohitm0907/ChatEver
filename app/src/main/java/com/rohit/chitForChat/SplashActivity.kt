@@ -15,7 +15,8 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-        checkLocationPermissions()
+
+        getSupportActionBar()!!.hide();
     }
 
     private fun checkLocationPermissions() {
@@ -67,5 +68,10 @@ class SplashActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .create()
             .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkLocationPermissions()
     }
 }
