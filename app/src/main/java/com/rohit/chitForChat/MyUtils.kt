@@ -1,6 +1,7 @@
 package com.rohit.chitForChat
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
@@ -22,6 +23,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
+import com.rohit.chitForChat.Models.ChatFriendsModel
+import com.rohit.chitForChat.Models.Users
 import de.hdodenhof.circleimageview.CircleImageView
 import org.w3c.dom.Text
 import java.text.SimpleDateFormat
@@ -29,7 +32,11 @@ import java.util.*
 
 
 object MyUtils {
+    var applyFilterType = "No Filter"
     var dialog: Dialog? = null;
+    var chatNearbyList: ArrayList<Users> = ArrayList()
+    var listFriends: ArrayList<String> = ArrayList()
+
     fun showToast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
@@ -83,7 +90,7 @@ object MyUtils {
     }
 
 
-    fun requestAccessFineLocationPermission(activity: AppCompatActivity, requestId: Int) {
+    fun requestAccessFineLocationPermission(activity: Activity, requestId: Int) {
         ActivityCompat.requestPermissions(
             activity,
             arrayOf(
@@ -136,7 +143,7 @@ object MyUtils {
     fun convertIntoTime(timeStamp: String): String {
         var Timestamp: Long = timeStamp.toLong()
         var timeD: Date = Date(Timestamp)
-        var sdf: SimpleDateFormat = SimpleDateFormat("HH:mm a")
+        var sdf: SimpleDateFormat = SimpleDateFormat("hh:mm a")
         return sdf.format(timeD)
     }
 
@@ -151,7 +158,6 @@ object MyUtils {
     fun showProfileDialog(context: Context,imageUrl:String,captions:String,likes:String) {
         var dialog=Dialog(context)
         dialog.setContentView(R.layout.dialog_show_profile)
-
         var imgUser=dialog.findViewById<CircleImageView>(R.id.imgUser)
         var txtCaption=dialog.findViewById<TextView>(R.id.txtCaption)
         var txtLikes=dialog.findViewById<TextView>(R.id.txtLikes);

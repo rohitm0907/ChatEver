@@ -13,4 +13,17 @@
     <string name="required_for_this_app">Location is require for this app</string>
     <string name="enable_now">Enable Now</string>
     <string name="Captions">Captions</string>
+    <string name="men">Men</string>
+    <string name="none">None</string>
+    <string name="women">Women</string>
+    <string name="both">Both</string>
+    <string name="gender">Gender</string>
+    <string name="others">Others</string>
+    <string name="no_filter">No Filter</string>
+
+    <string-array name="list_gender">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Others</item>
+    </string-array>
 </resources>

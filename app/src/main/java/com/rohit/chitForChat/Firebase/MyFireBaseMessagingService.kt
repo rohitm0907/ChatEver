@@ -6,8 +6,8 @@ import androidx.annotation.RequiresApi
 import android.os.Build
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.rohit.chitForChat.ChatLiveActivity
 import com.rohit.chitForChat.R
 
 class MyFireBaseMessagingService : FirebaseMessagingService() {
@@ -16,7 +16,6 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
     var type: String? = null
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-
         title = remoteMessage.data["Title"]
         message = remoteMessage.data["Message"]
         type = remoteMessage.data["Type"]
@@ -35,6 +34,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
             (applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
         notificationManager.createNotificationChannel(channel)
     }
+
     fun notification(message: String?) {
         // make the channel. The method has been discussed before.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -64,5 +64,13 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
             (applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
         notificationManager.notify(1, notification.build())
         // it is better to not use 0 as notification id, so used 1.
+
+
+        if (message.equals("You have been block")) {
+            if(ChatLiveActivity.getInstance()!=null){
+                ChatLiveActivity!!.getInstance()!!.onBlock(title!!);
+            }
+        }
+
     }
 }

@@ -356,7 +356,7 @@ class ChatLiveAdapter(
     private fun showDialog(url: String?, type: String) {
         var dialog = Dialog(context)
         dialog.setContentView(R.layout.dialog_image)
-
+        var exoPlayer:ExoPlayer?=null
         var imgUser = dialog.findViewById<ImageView>(R.id.imgUser)
         var imgBack=dialog.findViewById<ImageView>(R.id.imgBack)
         var exoPlayerView = dialog.findViewById<SimpleExoPlayerView>(R.id.idExoPlayerVIew)
@@ -379,7 +379,7 @@ class ChatLiveAdapter(
                 val trackSelector: TrackSelector =
                     DefaultTrackSelector(AdaptiveTrackSelection.Factory(bandwidthMeter))
 
-                var exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
+                 exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector)
 
                 val videouri = Uri.parse(url)
 
@@ -401,6 +401,12 @@ class ChatLiveAdapter(
             exoPlayerView.visibility = View.GONE
             if (!url.equals("")) {
                 Glide.with(context).load(url).into(imgUser)
+            }
+        }
+
+        dialog.setOnCancelListener {
+            if(exoPlayer!=null){
+                exoPlayer.stop()
             }
         }
 

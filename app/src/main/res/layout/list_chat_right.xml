@@ -45,7 +45,7 @@
                     android:id="@+id/imgMessage"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:scaleType="fitXY"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/user"
                     android:visibility="gone" />
 

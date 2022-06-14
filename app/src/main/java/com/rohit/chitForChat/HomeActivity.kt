@@ -48,21 +48,17 @@ class HomeActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
-
-    var gotoChat=false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        tokenGenerateAndUpdate()
-        handleTab()
         binding.myViewPager.adapter = HomeTabApapter(supportFragmentManager)
         binding.myTablayout.setupWithViewPager(binding.myViewPager)
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this@HomeActivity)
-
+        tokenGenerateAndUpdate()
+        handleTab()
 
     }
 
@@ -93,92 +89,10 @@ class HomeActivity : AppCompatActivity() {
                 }
             });
     }
-
-
-    private fun setUpLocationListener() {
-        // for getting the current location update after every 2 seconds with high accuracy
-        locationRequest = LocationRequest().setInterval(10000).setFastestInterval(10000)
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                super.onLocationResult(locationResult)
-                var lat = ""
-                var longi = ""
-                for (location in locationResult.locations) {
-                    lat = location.latitude.toString()
-                    longi = location.longitude.toString()
-                }
-
-
-                firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("lat").setValue(lat)
-                firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("long").setValue(longi).addOnCompleteListener {
-                    MyUtils.saveStringValue(
-                        this@HomeActivity,
-                        MyConstants.USER_LATITUDE,
-                        lat
-                    )
-                    MyUtils.saveStringValue(
-                        this@HomeActivity,
-                        MyConstants.USER_LONGITUDE,
-                       longi
-                    )
-                }
-
-            }
-        }
-        fusedLocationProviderClient!!.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
-
-    }
-
-
+    //getting current location of user
 
     override fun onResume() {
         super.onResume()
-
-        when {
-            MyUtils.isAccessFineLocationGranted(this) -> {
-                when {
-                    MyUtils.isLocationEnabled(this) -> {
-                        setUpLocationListener()
-                    }
-                    else -> {
-                        MyUtils.showGPSNotEnabledDialog(this)
-                    }
-                }
-            }
-            else -> {
-                MyUtils.requestAccessFineLocationPermission(
-                    this,
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
-        }
-
-
-        var gotoChat=false
         if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
             firebaseOnlineStatus.child(
                 MyUtils.getStringValue(
@@ -193,8 +107,8 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         if (!MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE).equals(""))
             firebaseOnlineStatus.child(
                 MyUtils.getStringValue(
@@ -202,11 +116,6 @@ class HomeActivity : AppCompatActivity() {
                     MyConstants.USER_PHONE
                 )
             ).child(MyConstants.NODE_ONLINE_STATUS).setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
-
-    }
-
-    override fun onPause() {
-        super.onPause()
 
     }
 
@@ -222,14 +131,9 @@ class HomeActivity : AppCompatActivity() {
                     val firebaseMessagingToken = Objects.requireNonNull(task.result)!!
 
                     firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("token").setValue(firebaseMessagingToken)
-
+                    MyUtils.saveStringValue(this, MyConstants.TOKEN,firebaseMessagingToken)
                     //Use firebaseMessagingToken further
                 }
             }
     }
-
-
-
-
-
 }

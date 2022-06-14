@@ -16,7 +16,9 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.*
+import androidx.core.net.toUri
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.devlomi.record_view.OnRecordListener
 import com.github.dhaval2404.imagepicker.ImagePicker
@@ -40,7 +42,6 @@ import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ChatLiveActivity : AppCompatActivity() {
@@ -56,7 +57,7 @@ class ChatLiveActivity : AppCompatActivity() {
     var firebaseChats =
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
-
+    var isScrolling = true
     var database: ValueEventListener? = null
 
     var firebaseUsers =
@@ -66,21 +67,41 @@ class ChatLiveActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
     var chatsList: ArrayList<LiveChatModel> = ArrayList()
+
     var firebaseOnlineStatus =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
     var likeStatus = "0"
     var token = ""
+
+
+    companion object {
+        private var instance: ChatLiveActivity? = null
+
+        fun getInstance(): ChatLiveActivity? {
+            return instance
+        }
+
+    }
+
+    fun onBlock(name:String) {
+        // if blocked by other user
+        if(intent.getStringExtra(MyConstants.OTHER_USER_NAME).equals(name)){
+            finish()
+        }
+
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
-
+        instance = this@ChatLiveActivity;
         binding = ActivityChatLiveBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
 
         getSupportActionBar()!!.hide();
-
 
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
@@ -234,15 +255,13 @@ class ChatLiveActivity : AppCompatActivity() {
 
         binding!!.rcChat.addScrollListener { position: Int ->
 
-            if (chatsList.get(position).seenStatus.equals("0") && chatsList.get(position).receiver.equals(
+            if (chatsList.size>0 && chatsList.get(position).seenStatus.equals("0") && chatsList.get(position).receiver.equals(
                     senderId
                 )
             ) {
                 firebaseChats.child(roomId.toString()).child(chatsList.get(position).key.toString())
                     .child(chatsList.get(position).seenStatus.toString()).setValue("1")
             }
-
-
         }
 
     }
@@ -286,21 +305,19 @@ class ChatLiveActivity : AppCompatActivity() {
                             .start()
                     }
                     1 -> {
-//                        VideoPicker.Builder(this@ChatLiveActivity)
-//                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
-//                            .directory(VideoPicker.Directory.DEFAULT)
-//                            .extension(VideoPicker.Extension.MP4)
-//                            .enableDebuggingMode(true)
-//                            .build()
-                        val intent = Intent()
-                        intent.type = "video/*"
-                        intent.action = Intent.ACTION_GET_CONTENT
-                        startActivityForResult(
-                            Intent.createChooser(intent, "Select Video"),
-                            1
-                        )
-
-
+                        VideoPicker.Builder(this@ChatLiveActivity)
+                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
+                            .directory(VideoPicker.Directory.DEFAULT)
+                            .extension(VideoPicker.Extension.MP4)
+                            .enableDebuggingMode(true)
+                            .build()
+//                        val intent = Intent()
+//                        intent.type = "video/*"
+//                        intent.action = Intent.ACTION_GET_CONTENT
+//                        startActivityForResult(
+//                            Intent.createChooser(intent, "Select Video"),
+//                            1
+//                        )
                     }
                     2 -> {
 
@@ -369,16 +386,17 @@ class ChatLiveActivity : AppCompatActivity() {
 
                 uploadImageOnFirebase(sentImage!!)
             } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
+
                 var mPaths: List<String> =
                     data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
 //
-//                mPaths.forEachIndexed { index, s ->
-//
-//                    uploadVideoOnFirebase(mPaths.get(index))
-//                    //Your Code
-//
-//
-//                }
+                mPaths.forEachIndexed { index, s ->
+
+                    uploadVideoOnFirebase(mPaths.get(index).toUri())
+                    //Your Code
+
+
+                }
             } else if (requestCode == 1) {
                 var uri = data!!.data
 
@@ -494,7 +512,6 @@ class ChatLiveActivity : AppCompatActivity() {
                         "0",
                         likeStatus,
                         Calendar.getInstance().time.time.toString()
-
                     )
                 )
 
@@ -508,10 +525,14 @@ class ChatLiveActivity : AppCompatActivity() {
                     )
                 )
                 data.put("lastMessage", "New Message")
-                data.put("image", intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString())
+                data.put("image",MyUtils.getStringValue(
+                    this@ChatLiveActivity,
+                    MyConstants.USER_IMAGE
+                ).toString())
                 data.put("origonalMessage", message.toString())
                 data.put("seenStatus", "0")
                 data.put("blockStatus", "0")
+                data.put("time", Calendar.getInstance().time.time.toString())
 
                 firebaseChatFriends.child(receiverId).child(senderId).updateChildren(
                     data as Map<String, Any>
@@ -571,7 +592,6 @@ class ChatLiveActivity : AppCompatActivity() {
 
                 }
             })
-
     }
 
     private fun getChatsFromFirebase() {
@@ -598,8 +618,10 @@ class ChatLiveActivity : AppCompatActivity() {
                         ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
 
                     binding!!.rcChat.setItemViewCacheSize(chatsList.size)
-
+//                    if (isScrolling) {
+//                        isScrolling = false
                     binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+//                    }
 
                 }
             }
@@ -724,10 +746,32 @@ class ChatLiveActivity : AppCompatActivity() {
 //        firebaseChats.removeEventListener(stateValueEventListner!!);
     }
 
+
     override fun onResume() {
         super.onResume()
+        if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE).equals(""))
+            firebaseOnlineStatus.child(
+                MyUtils.getStringValue(
+                    this@ChatLiveActivity,
+                    MyConstants.USER_PHONE
+                )
+            ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Online")
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE).equals(""))
+            firebaseOnlineStatus.child(
+                MyUtils.getStringValue(
+                    this@ChatLiveActivity,
+                    MyConstants.USER_PHONE
+                )
+            ).child(MyConstants.NODE_ONLINE_STATUS)
+                .setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
 
     }
+
 
 }
     

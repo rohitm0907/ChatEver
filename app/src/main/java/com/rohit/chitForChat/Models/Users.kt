@@ -52,5 +52,11 @@ class Users() {
             field = value
         }
 
+    var gender:String?=null
+        get() = field
+        set(value) {
+            field = value
+        }
+
 
 }

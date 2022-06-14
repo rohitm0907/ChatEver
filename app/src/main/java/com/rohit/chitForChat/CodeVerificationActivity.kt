@@ -9,6 +9,7 @@ import android.util.Log
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
+
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -18,11 +19,12 @@ import com.mukesh.OnOtpCompletionListener
 import com.rohit.chitForChat.Models.Users
 import java.util.concurrent.TimeUnit
 
+
 class CodeVerificationActivity : AppCompatActivity() {
     var VerificationId = ""
     var auth: FirebaseAuth? = null
     var firebaseUsers =
-        FirebaseDatabase.getInstance("https://chitforchat-d1ee5-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,82 +34,18 @@ class CodeVerificationActivity : AppCompatActivity() {
         setContentView(binding.root)
         auth = FirebaseAuth.getInstance()
 //        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
-        binding.txtMobile.setText("+91"+intent.getStringExtra(MyConstants.PHONE_NUMBER))
+        binding.txtMobile.setText(intent.getStringExtra(MyConstants.COUNTRY_CODE)+intent.getStringExtra(MyConstants.PHONE_NUMBER))
 
         binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
             override fun onOtpCompleted(otp: String) {
                 // do Stuff
 //                verifyOtp(otp)
-
-
-                firebaseUsers.child(intent.getStringExtra(MyConstants.PHONE_NUMBER).toString())
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-
-                            if (snapshot.exists()) {
-                                startActivity(
-                                    Intent(
-                                        this@CodeVerificationActivity,
-                                        HomeActivity::class.java
-                                    ).putExtra(
-                                        MyConstants.PHONE_NUMBER,
-                                        intent.getStringExtra(MyConstants.PHONE_NUMBER)
-                                    )
-                                )
-
-                                var data: Users? = snapshot.getValue(Users::class.java)
-
-                                MyUtils.saveStringValue(
-                                    this@CodeVerificationActivity,
-                                    MyConstants.USER_NAME,
-                                    data!!.name.toString()
-                                )
-                                MyUtils.saveStringValue(
-                                    this@CodeVerificationActivity,
-                                    MyConstants.USER_IMAGE,
-                                    data!!.image.toString()
-                                )
-                                MyUtils.saveStringValue(
-                                    this@CodeVerificationActivity,
-                                    MyConstants.USER_PHONE,
-                                    data!!.phone.toString()
-                                )
-                                MyUtils.saveBooleanValue(
-                                    this@CodeVerificationActivity,
-                                    MyConstants.IS_LOGIN,
-                                    true
-                                )
-
-                                MyUtils.saveStringValue(
-                                    this@CodeVerificationActivity,
-                                    MyConstants.USER_CAPTIONS,
-                                    data!!.captions.toString()
-                                )
-
-
-                            } else {
-                                startActivity(
-                                    Intent(
-                                        this@CodeVerificationActivity,
-                                        ProfileActivity::class.java
-                                    ).putExtra(
-                                        MyConstants.PHONE_NUMBER,
-                                        intent.getStringExtra(MyConstants.PHONE_NUMBER)
-                                    )
-                                )
-
-                            }
-
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
-                        }
-
-                    })
+                checkAlreadyRegister()
 
             }
         })
+
+
 
 //        sentOtp(intent!!.getStringExtra(MyConstants.PhoneNumber).toString());
 
@@ -130,7 +68,7 @@ class CodeVerificationActivity : AppCompatActivity() {
 
                 } else {
                     // Sign in failed, display a message and update the UI
-                        MyUtils.stopProgress(this@CodeVerificationActivity)
+                    MyUtils.stopProgress(this@CodeVerificationActivity)
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     MyUtils.showToast(this, "Invalid OTP")
                     // Update UI
@@ -140,7 +78,6 @@ class CodeVerificationActivity : AppCompatActivity() {
 
 
     private fun sentOtp(phoneNumber: String) {
-
         MyUtils.showProgress(this@CodeVerificationActivity)
         var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
@@ -158,7 +95,7 @@ class CodeVerificationActivity : AppCompatActivity() {
             override fun onVerificationFailed(e: FirebaseException) {
                 // This callback is invoked in an invalid request for verification is made,
                 // for instance if the the phone number format is not valid.
-                Log.w(ContentValues.TAG, "onVerificationFailed", e)
+//                Log.w(ContentValues.TAG, "onVerificationFailed", e)
                 MyUtils.stopProgress(this@CodeVerificationActivity)
                 MyUtils.showToast(this@CodeVerificationActivity, e.toString())
                 if (e is FirebaseAuthInvalidCredentialsException) {
@@ -179,7 +116,7 @@ class CodeVerificationActivity : AppCompatActivity() {
                 // now need to ask the user to enter the code and then construct a credential
                 // by combining the code with a verification ID.
                 Log.d(ContentValues.TAG, "onCodeSent:$verificationId")
-                MyUtils.showToast(this@CodeVerificationActivity, "Code Successfully Sent")
+                MyUtils.showToast(this@CodeVerificationActivity, "OTP Sent Successfully")
                 // Save verification ID and resending token so we can use them later
                 VerificationId = verificationId
 
@@ -187,7 +124,7 @@ class CodeVerificationActivity : AppCompatActivity() {
         }
 
         val options = PhoneAuthOptions.newBuilder(auth!!)
-            .setPhoneNumber("+91" + phoneNumber)       // Phone number to verify
+            .setPhoneNumber(intent.getStringExtra(MyConstants.COUNTRY_CODE) + phoneNumber)       // Phone number to verify
             .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
             .setActivity(this)                 // Activity (for callback binding)
             .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks
@@ -203,18 +140,7 @@ class CodeVerificationActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     MyUtils.stopProgress(this@CodeVerificationActivity)
                     if (snapshot.exists()) {
-                        startActivity(
-                            Intent(
-                                this@CodeVerificationActivity,
-                                HomeActivity::class.java
-                            ).putExtra(
-                                MyConstants.PHONE_NUMBER,
-                                intent.getStringExtra(MyConstants.PHONE_NUMBER)
-                            )
-                        )
-
                         var data: Users? = snapshot.getValue(Users::class.java)
-
                         MyUtils.saveStringValue(
                             this@CodeVerificationActivity,
                             MyConstants.USER_NAME,
@@ -230,12 +156,27 @@ class CodeVerificationActivity : AppCompatActivity() {
                             MyConstants.USER_PHONE,
                             data!!.phone.toString()
                         )
+
+                        MyUtils.saveStringValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.USER_GENDER,
+                            data!!.gender.toString()
+                        )
                         MyUtils.saveBooleanValue(
                             this@CodeVerificationActivity,
                             MyConstants.IS_LOGIN,
                             true
                         )
-
+                        finishAffinity()
+                        startActivity(
+                            Intent(
+                                this@CodeVerificationActivity,
+                                HomeActivity::class.java
+                            ).putExtra(
+                                MyConstants.PHONE_NUMBER,
+                                intent.getStringExtra(MyConstants.PHONE_NUMBER)
+                            )
+                        )
 
                     } else {
                         startActivity(

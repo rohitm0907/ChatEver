@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.rohit.chitForChat.ChatLiveActivity
+import com.rohit.chitForChat.Firebase.FirebaseNotification.MyNotification
 import com.rohit.chitForChat.Models.ChatFriendsModel
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
@@ -52,30 +53,29 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         holder.txtName.setText(chatFriendList.get(position).name)
         if (chatFriendList.get(position).seenStatus.equals("1")) {
             holder.txtLastMessage.setText(chatFriendList.get(position).origonalMessage)
-        }else{
+        } else {
             holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
             holder.txtLastMessage.setText(chatFriendList.get(position).lastMessage)
         }
 //        holder.txtTime.setText("2:00 pm")
-        if(chatFriendList.get(position).blockStatus=="0"){
+        if (chatFriendList.get(position).blockStatus == "0") {
             holder.itemView.setBackgroundColor(context.getColor(android.R.color.white))
-        }
-        else if(chatFriendList.get(position).blockStatus=="1"){
+        } else if (chatFriendList.get(position).blockStatus == "1") {
             holder.txtName.setTextColor(context.resources.getColor(R.color.white))
             holder.txtLastMessage.setTextColor(context.resources.getColor(R.color.white))
             holder.itemView.setBackgroundColor(context.getColor(android.R.color.holo_red_light))
-        }else if(chatFriendList.get(position).blockStatus=="2"){
+        } else if (chatFriendList.get(position).blockStatus == "2") {
             holder.txtName.setTextColor(context.resources.getColor(R.color.white))
             holder.txtLastMessage.setTextColor(context.resources.getColor(R.color.white))
             holder.itemView.setBackgroundColor(context.getColor(android.R.color.darker_gray))
         }
 
-            if (!chatFriendList.get(position).image.equals("")) {
-                Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
-            }
+        if (!chatFriendList.get(position).image.equals("")) {
+            Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
+        }
 
         holder.itemView.setOnClickListener {
-            if(chatFriendList.get(position).blockStatus=="0"){
+            if (chatFriendList.get(position).blockStatus == "0") {
                 context.startActivity(
                     Intent(
                         context,
@@ -87,10 +87,10 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                         .putExtra(MyConstants.FROM, MyConstants.CHAT_LIST_SCREEN)
 
                 )
-            }else if(chatFriendList.get(position).blockStatus=="1"){
-              MyUtils.showToast(context,"you have blocked by other user.")
-            }else if(chatFriendList.get(position).blockStatus=="2"){
-                MyUtils.showToast(context,"you have blocked this user.")
+            } else if (chatFriendList.get(position).blockStatus == "1") {
+                MyUtils.showToast(context, "you have blocked by other user.")
+            } else if (chatFriendList.get(position).blockStatus == "2") {
+                MyUtils.showToast(context, "you have blocked this user.")
             }
         }
 
@@ -127,12 +127,15 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
     private fun showPoppupDialog(position: Int, view: View) {
         val popup = PopupMenu(context, view.findViewById(R.id.imgUser))
         popup.getMenuInflater().inflate(com.rohit.chitForChat.R.menu.pop_menu, popup.menu)
-        var menu: Menu =popup.menu
-        if(chatFriendList.get(position).blockStatus.equals("1")){
+        var menu: Menu = popup.menu
+        if (chatFriendList.get(position).blockStatus.equals("1")) {
             menu.findItem(R.id.txtBlock).setVisible(false)
             menu.findItem(R.id.txtUnblock).setVisible(false)
-        }else if(chatFriendList.get(position).blockStatus.equals("2")){
+
+        } else if (chatFriendList.get(position).blockStatus.equals("2")) {
             menu.findItem(R.id.txtBlock).setVisible(false)
+        } else {
+            menu.findItem(R.id.txtUnblock).setVisible(false)
         }
 
 
@@ -140,25 +143,66 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
             when (it.itemId) {
                 R.id.txtBlock -> {
+                    firebaseUsers.child(chatFriendList.get(position).userId.toString())
+                        .child("token")
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    var token = snapshot.getValue(String::class.java)!!
+                                    MyNotification.sendNotification(
+                                        MyUtils.getStringValue(context, MyConstants.USER_NAME)
+                                            .toString(),
+                                        "You have been block",
+                                        token,
+                                        MyConstants.NOTI_REQUEST_TYPE
+                                    )
+                                }
+                            }
 
-                    firebasefriendList.child(chatFriendList.get(position).userId.toString()).child(MyUtils.getStringValue(context, MyConstants.USER_PHONE)).child("blockStatus").setValue("1")
-                    firebasefriendList.child(MyUtils.getStringValue(context, MyConstants.USER_PHONE)).child(chatFriendList.get(position).userId.toString()).child("blockStatus").setValue("2")
+                            override fun onCancelled(error: DatabaseError) {
+
+                            }
+
+                        })
+                    firebasefriendList.child(chatFriendList.get(position).userId.toString())
+                        .child(MyUtils.getStringValue(context, MyConstants.USER_PHONE))
+                        .child("blockStatus").setValue("1")
+                    firebasefriendList.child(
+                        MyUtils.getStringValue(
+                            context,
+                            MyConstants.USER_PHONE
+                        )
+                    ).child(chatFriendList.get(position).userId.toString()).child("blockStatus")
+                        .setValue("2")
                         .addOnSuccessListener(OnSuccessListener {
-                            MyUtils.showToast(context,"block User")
+                            MyUtils.showToast(context, "block User")
                         })
 
 
                 }
 
-                R.id.txtUnblock->{
-                    firebasefriendList.child(chatFriendList.get(position).userId.toString()).child(MyUtils.getStringValue(context, MyConstants.USER_PHONE)).child("blockStatus").setValue("0")
-                    firebasefriendList.child(MyUtils.getStringValue(context, MyConstants.USER_PHONE)).child(chatFriendList.get(position).userId.toString()).child("blockStatus").setValue("0")
+                R.id.txtUnblock -> {
+                    firebasefriendList.child(chatFriendList.get(position).userId.toString())
+                        .child(MyUtils.getStringValue(context, MyConstants.USER_PHONE))
+                        .child("blockStatus").setValue("0")
+                    firebasefriendList.child(
+                        MyUtils.getStringValue(
+                            context,
+                            MyConstants.USER_PHONE
+                        )
+                    ).child(chatFriendList.get(position).userId.toString()).child("blockStatus")
+                        .setValue("0")
                         .addOnSuccessListener(OnSuccessListener {
-                        MyUtils.showToast(context,"Unblock User")
-                    })
+                            MyUtils.showToast(context, "Unblock User")
+                        })
                 }
-                R.id.txtDeleteChat->{
-                    firebasefriendList.child(MyUtils.getStringValue(context, MyConstants.USER_PHONE)).child(chatFriendList.get(position).userId.toString()).removeValue()
+                R.id.txtDeleteChat -> {
+                    firebasefriendList.child(
+                        MyUtils.getStringValue(
+                            context,
+                            MyConstants.USER_PHONE
+                        )
+                    ).child(chatFriendList.get(position).userId.toString()).removeValue()
 
                 }
 

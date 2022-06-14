@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -40,14 +41,22 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
             Glide.with(context).load(chatNearbyList.get(position).image).into(holder.imgUser)
         }
 
+        if(MyUtils.listFriends.contains(chatNearbyList.get(position).phone)){
+           holder.txtTitle.setText("Already Friends")
+        }
+
         holder.txtStatus.setText(chatNearbyList.get(position).captions)
         holder.itemView.setOnClickListener {
+            if(!holder.txtTitle.text.toString().equals("Already Friends")){
             context.startActivity(
                 Intent(context, ChatLiveActivity::class.java).putExtra(MyConstants.OTHER_USER_NAME,chatNearbyList.get(position).name)
                     .putExtra(MyConstants.OTHER_USER_PHONE,chatNearbyList.get(position).phone)
                     .putExtra(MyConstants.OTHER_USER_IMAGE,chatNearbyList.get(position).image)
 
             )
+            }else{
+                MyUtils.showToast(context,"Already Friends")
+            }
         }
 
 
@@ -84,6 +93,7 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
     class viewHolder(itemView: View) : ViewHolder(itemView) {
         var txtName = itemView.findViewById<TextView>(R.id.txtName)
         var txtStatus = itemView.findViewById<TextView>(R.id.txtStatus)
+        var txtTitle = itemView.findViewById<TextView>(R.id.txtTitle)
         var imgUser = itemView.findViewById<CircleImageView>(R.id.imgUser)
 
 

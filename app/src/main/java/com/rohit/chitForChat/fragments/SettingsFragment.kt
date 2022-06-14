@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.firebase.database.FirebaseDatabase
+import com.rohit.chitForChat.LoginActivity
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.ProfileActivity
@@ -66,7 +67,10 @@ class Settings : Fragment() {
                 ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
             }
             MyUtils.clearAllData(requireActivity())
-            requireActivity()!!.finish()
+            MyUtils.applyFilterType="No Filter"
+            MyUtils.chatNearbyList.clear()
+            startActivity(Intent(requireContext(),LoginActivity::class.java))
+            requireActivity()!!.finishAffinity()
         }
 
         binding!!.sbGhost.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
@@ -78,7 +82,6 @@ class Settings : Fragment() {
                         MyConstants.USER_PHONE
                     )
                 ).child(MyConstants.GHOST_MODE).setValue(MyConstants.ON).addOnCompleteListener {
-
                     MyUtils.saveStringValue(
                         requireContext(),
                         MyConstants.GHOST_MODE,
