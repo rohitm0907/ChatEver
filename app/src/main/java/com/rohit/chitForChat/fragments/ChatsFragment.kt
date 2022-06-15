@@ -17,11 +17,13 @@ import com.rohit.chitForChat.adapters.ChatListAdapter
 import com.rohit.chitForChat.adapters.ChatLiveAdapter
 import com.rohit.chitForChat.databinding.FragmentChatsBinding
 import android.app.Activity
+import android.util.Log
 import com.google.android.material.tabs.TabLayout
 import com.rohit.chitForChat.MyUtils.listFriends
 import com.rohit.chitForChat.R
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class ChatsFragment : Fragment() {
     var firebaseChatFriends =
@@ -45,6 +47,10 @@ var countUnreadMessages=0
     }
 
     private fun getChatsFromFirebase() {
+
+
+
+
         firebaseChatFriends.child(MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE))
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {

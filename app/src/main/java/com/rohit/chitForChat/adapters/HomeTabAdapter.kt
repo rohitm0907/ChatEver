@@ -3,13 +3,14 @@ package com.rohit.chitForChat.adapters
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.rohit.chitForChat.fragments.ChatsFragment
+import com.rohit.chitForChat.fragments.ContactsFragment
 import com.rohit.chitForChat.fragments.NearbyFragment
 import com.rohit.chitForChat.fragments.Settings
 
-class HomeTabApapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm) {
+class HomeTabAdapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm) {
 
     override fun getCount(): Int {
-        return 3;
+        return 4;
 
     }
 
@@ -17,6 +18,7 @@ class HomeTabApapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerA
         if (position == 0) return NearbyFragment();
         if (position == 1) return ChatsFragment()
         if (position == 2) return Settings();
+        if (position == 3) return ContactsFragment();
         else return NearbyFragment()
     }
 
@@ -25,6 +27,7 @@ class HomeTabApapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerA
         if (position == 0) return "Nearby";
         if (position == 1) return "Chat"
         if (position == 2) return "Settings"
+        if (position == 3) return "Contacts"
         else return "Nearby"
         return super.getPageTitle(position)
 

@@ -1,35 +1,19 @@
 package com.rohit.chitForChat
 
-import android.Manifest
-import android.Manifest.permission
-import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
-import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.firebase.database.FirebaseDatabase
-import com.rohit.chitForChat.Models.Users
-import com.rohit.chitForChat.adapters.HomeTabApapter
+import com.rohit.chitForChat.adapters.HomeTabAdapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
 import java.util.*
-import android.content.DialogInterface
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.graphics.Typeface
 
-import androidx.core.app.ActivityCompat.requestPermissions
-
-import android.os.Build
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 
-import com.google.android.material.snackbar.Snackbar
-
-import androidx.core.content.ContextCompat
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.messaging.FirebaseMessaging
@@ -53,7 +37,7 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.myViewPager.adapter = HomeTabApapter(supportFragmentManager)
+        binding.myViewPager.adapter = HomeTabAdapter(supportFragmentManager)
         binding.myTablayout.setupWithViewPager(binding.myViewPager)
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this@HomeActivity)

@@ -124,7 +124,7 @@ class ChatLiveActivity : AppCompatActivity() {
         audioRecording()
         if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
             Glide.with(this@ChatLiveActivity)
-                .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
+                .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE)).placeholder(R.drawable.user)
                 .into(binding!!.imgUser)
         }
 

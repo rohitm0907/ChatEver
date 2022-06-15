@@ -20,7 +20,10 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
@@ -38,7 +41,7 @@ class ProfileActivity : AppCompatActivity() {
     var userImage: Bitmap? = null
     var imgUri: Uri? = null
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
-            .getReference(NODE_USERS)
+        .getReference(NODE_USERS)
     lateinit var binding: ActivityProfileBinding
 
     var date: String = ""
@@ -236,7 +239,6 @@ class ProfileActivity : AppCompatActivity() {
         if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
 
 
-
 //            val query: Query = firebaseChatFriends.chil.orderByChild("image").equalTo("")
 //            val valueEventListener: ValueEventListener = object : ValueEventListener {
 //                override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -283,11 +285,12 @@ class ProfileActivity : AppCompatActivity() {
                 users.ghostMode.toString()
             )
 
-            MyUtils.saveStringValue(this@ProfileActivity, MyConstants.USER_GENDER,selectedGender)
+            MyUtils.saveStringValue(this@ProfileActivity, MyConstants.USER_GENDER, selectedGender)
 
             if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
                 userImage = null
                 MyUtils.showToast(this@ProfileActivity, "Updated Successfully")
+                updateImage(imageUri,captions,name)
             } else {
                 userImage = null
                 finishAffinity()
@@ -300,6 +303,46 @@ class ProfileActivity : AppCompatActivity() {
                 true
             )
         }
+    }
+
+    private fun updateImage(name:String,image:String,caption:String) {
+        firebaseChatFriends.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                for (postSnapshot in snapshot.children) {
+                    var keyValue = postSnapshot.key
+
+                    val hashMap: HashMap<String, String>? =
+                        postSnapshot.getValue() as HashMap<String, String>
+                    var value = hashMap!!.keys
+                    println("Key_Data==" + value)
+
+                    var userList = value.filter {
+                        it.toString().equals(
+                            MyUtils.getStringValue(
+                                this@ProfileActivity,
+                                MyConstants.USER_PHONE
+                            )
+                        )
+                    }
+                    if (userList.size > 0) {
+                        firebaseChatFriends.child(keyValue.toString()).child(userList[0])
+                            .child("image").setValue(image)
+                        firebaseChatFriends.child(keyValue.toString()).child(userList[0])
+                            .child("name").setValue(name)
+                        firebaseChatFriends.child(keyValue.toString()).child(userList[0])
+                            .child("caption").setValue(caption)
+                    }
+//                    println("rohit: "+keyValue)
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
     }
 
     override fun onSupportNavigateUp(): Boolean {
