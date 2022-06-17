@@ -70,7 +70,7 @@
             android:layout_height="30dp"
             android:layout_alignParentRight="true"
             android:layout_marginTop="3dp"
-            android:src="@drawable/ic__dislike"/>
+            android:src="@drawable/ic__dislike" />
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

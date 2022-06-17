@@ -48,9 +48,6 @@ var countUnreadMessages=0
 
     private fun getChatsFromFirebase() {
 
-
-
-
         firebaseChatFriends.child(MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE))
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {

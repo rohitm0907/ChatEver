@@ -12,7 +12,6 @@ class ChatFriendsModel {
         origonalMessage:String,
         seenStatus:String,
         blockStatus:String,
-        likedStatus:String,
         time:String
     ) {
         this.name = name
@@ -22,7 +21,6 @@ class ChatFriendsModel {
         this.seenStatus=seenStatus
         this.origonalMessage=origonalMessage
         this.blockStatus=blockStatus
-        this.likedStatus=likedStatus
         this.time=time
     }
 

@@ -29,6 +29,7 @@ import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
 import de.hdodenhof.circleimageview.CircleImageView
+import java.util.HashMap
 
 
 class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFriendsModel>) :
@@ -41,6 +42,9 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
 
+    var firebaselikedList =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_LIKED_USERS)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatListAdapter.viewHolder {
         var view = LayoutInflater.from(context).inflate(R.layout.list_chat, parent, false)
         return viewHolder(view)
@@ -107,12 +111,39 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             var data: Users? = snapshot.getValue(Users::class.java)
-                            MyUtils.showProfileDialog(
-                                context,
-                                chatFriendList.get(position).image.toString(),
-                                data!!.captions.toString(),
-                                data!!.totalLikes.toString()
-                            )
+
+                            firebaselikedList.child(chatFriendList.get(position).userId.toString())
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+
+                                        if (snapshot.exists()) {
+
+
+                                            MyUtils.showProfileDialog(
+                                                context,
+                                                chatFriendList.get(position).image.toString(),
+                                                data!!.captions.toString(),
+                                                snapshot.childrenCount.toString()
+                                            )
+                                        } else {
+                                            MyUtils.showProfileDialog(
+                                                context,
+                                                chatFriendList.get(position).image.toString(),
+                                                data!!.captions.toString(),
+                                                "0"
+                                            )
+                                        }
+
+
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+
+                                    }
+
+                                })
+
+
 
                         }
                     }

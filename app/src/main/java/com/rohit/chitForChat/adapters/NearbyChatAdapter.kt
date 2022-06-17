@@ -1,5 +1,6 @@
 package com.rohit.chitForChat.adapters
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.rohit.chitForChat.ChatLiveActivity
+import com.rohit.chitForChat.Models.ChatFriendsModel
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
@@ -27,6 +29,10 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
     var firebaseUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
+    var firebaselikedUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_LIKED_USERS)
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -61,18 +67,38 @@ class NearbyChatAdapter(var context: Context, var chatNearbyList: ArrayList<User
 
 
         holder.imgUser.setOnClickListener {
-
 //            firebaseUsers.child(chatNearbyList.get(position).phone.toString())
 //                .child("captions").addListenerForSingleValueEvent(object : ValueEventListener {
 //                    override fun onDataChange(snapshot: DataSnapshot) {
 //                        if (snapshot.exists()) {
 //                            var caption: String? = snapshot.getValue(String::class.java)
-                            MyUtils.showProfileDialog(
-                                context,
-                                chatNearbyList.get(position).image.toString(),
-                                chatNearbyList.get(position).captions.toString(),
-                                chatNearbyList.get(position).totalLikes.toString()
-                            )
+
+
+            firebaselikedUsers.child(chatNearbyList.get(position).phone.toString()).addListenerForSingleValueEvent(object :ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    if(snapshot.exists()){
+                        MyUtils.showProfileDialog(
+                            context,
+                            chatNearbyList.get(position).image.toString(),
+                            chatNearbyList.get(position).captions.toString(),
+                            snapshot.childrenCount.toString()
+                        )
+
+                    }else{
+                        MyUtils.showProfileDialog(
+                            context,
+                            chatNearbyList.get(position).image.toString(),
+                            chatNearbyList.get(position).captions.toString(),
+                            "0"
+                        )
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+
+            })
 
 //                        }
 //                    }

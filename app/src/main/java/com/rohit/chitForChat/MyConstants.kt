@@ -1,6 +1,7 @@
 package com.rohit.chitForChat
 
  object MyConstants {
+     val NODE_LIKED_USERS: String="likedUsers"
      val USER_GENDER: String="userGender"
      val TOKEN: String="myToken"
      val COUNTRY_CODE: String?="countryCode"

@@ -46,7 +46,6 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
         }
 
         if(MyUtils.listAllUsersNumbers.contains(listContacts.get(position).mobileNumber.toString())) {
-
             var pos =
                 MyUtils.listAllUsersNumbers.indexOf(listContacts.get(position).mobileNumber.toString())
      Glide.with(context).load(MyUtils.listAllUsers.get(pos).image).into(holder.imgUser)
@@ -55,7 +54,6 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
             holder.txtStatus.setText(listContacts.get(position).mobileNumber)
         holder.itemView.setOnClickListener {
             if(MyUtils.listAllUsersNumbers.contains(listContacts.get(position).mobileNumber.toString())){
-
               var pos=  MyUtils.listAllUsersNumbers.indexOf(listContacts.get(position).mobileNumber.toString())
             context.startActivity(
                 Intent(context, ChatLiveActivity::class.java).putExtra(MyConstants.OTHER_USER_NAME,listContacts.get(position).name)

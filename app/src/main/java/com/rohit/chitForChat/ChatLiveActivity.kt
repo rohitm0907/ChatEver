@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +43,7 @@ import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
+import java.util.function.LongFunction
 
 
 class ChatLiveActivity : AppCompatActivity() {
@@ -63,6 +65,9 @@ class ChatLiveActivity : AppCompatActivity() {
     var firebaseUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
+    var firebaseLikedUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_LIKED_USERS)
     var firebaseChatFriends =
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
@@ -85,9 +90,9 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
-    fun onBlock(name:String) {
+    fun onBlock(name: String) {
         // if blocked by other user
-        if(intent.getStringExtra(MyConstants.OTHER_USER_NAME).equals(name)){
+        if (intent.getStringExtra(MyConstants.OTHER_USER_NAME).equals(name)) {
             finish()
         }
 
@@ -105,26 +110,13 @@ class ChatLiveActivity : AppCompatActivity() {
 
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
-        if (intent.getStringExtra(MyConstants.FROM) != null) {
-            if (intent.getStringExtra(MyConstants.LIKE_STATUS) != null) {
-                binding!!.imgLike.visibility = View.VISIBLE
-                likeStatus = intent.getStringExtra(MyConstants.LIKE_STATUS).toString()
-                if (likeStatus.equals("0")) {
-                    binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
-                } else {
-                    binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-                }
-            } else {
-                binding!!.imgLike.visibility = View.VISIBLE
-            }
-        } else {
-            binding!!.imgLike.visibility = View.GONE
-        }
+
 
         audioRecording()
         if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
             Glide.with(this@ChatLiveActivity)
-                .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE)).placeholder(R.drawable.user)
+                .load(intent.getStringExtra(MyConstants.OTHER_USER_IMAGE))
+                .placeholder(R.drawable.user)
                 .into(binding!!.imgUser)
         }
 
@@ -134,7 +126,11 @@ class ChatLiveActivity : AppCompatActivity() {
         senderId = MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
         receiverId = intent.getStringExtra(MyConstants.OTHER_USER_PHONE).toString()
         getAnotherUserToken()
-
+        if (intent.getStringExtra(MyConstants.FROM) != null) {
+            handleLikedStatus()
+        } else {
+            binding!!.imgLike.visibility = View.GONE
+        }
         getOnlineStatus(receiverId)
         if (senderId < receiverId) {
             roomId = senderId + receiverId
@@ -208,38 +204,41 @@ class ChatLiveActivity : AppCompatActivity() {
 
 
         binding!!.imgLike.setOnClickListener {
-            if (likeStatus.equals("0")) {
-                firebaseUsers.child(receiverId).child("totalLikes")
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            if (snapshot.exists()) {
-                                var likes = snapshot.getValue(String::class.java)!!.toInt();
-                                likes++;
-                                firebaseUsers.child(receiverId).child("totalLikes")
-                                    .setValue(likes.toString()).addOnCompleteListener {
-                                        MyUtils.showToast(
-                                            this@ChatLiveActivity,
-                                            "likes successfully"
-                                        )
-                                        likeStatus = "1"
-                                        //set like of another user in our profile
-                                        firebaseChatFriends.child(senderId).child(receiverId)
-                                            .child("likedStatus").setValue("1")
-                                        binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+            firebaseLikedUsers.child(receiverId).child(senderId).setValue("true")
+            binding!!.imgLike.setImageResource(R.drawable.ic__liked)
 
-                                    }
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-
-                        }
-
-                    })
-
-            } else {
-                MyUtils.showToast(this, "Already liked")
-            }
+//            if (likeStatus.equals("0")) {
+//                firebaseUsers.child(receiverId).child("totalLikes")
+//                    .addListenerForSingleValueEvent(object : ValueEventListener {
+//                        override fun onDataChange(snapshot: DataSnapshot) {
+//                            if (snapshot.exists()) {
+//                                var likes = snapshot.getValue(String::class.java)!!.toInt();
+//                                likes++;
+//                                firebaseUsers.child(receiverId).child("totalLikes")
+//                                    .setValue(likes.toString()).addOnCompleteListener {
+//                                        MyUtils.showToast(
+//                                            this@ChatLiveActivity,
+//                                            "likes successfully"
+//                                        )
+//                                        likeStatus = "1"
+//                                        //set like of another user in our profile
+//                                        firebaseChatFriends.child(senderId).child(receiverId)
+//                                            .child("likedStatus").setValue("1")
+//                                        binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+//
+//                                    }
+//                            }
+//                        }
+//
+//                        override fun onCancelled(error: DatabaseError) {
+//
+//                        }
+//
+//                    })
+//
+//            } else {
+//                MyUtils.showToast(this, "Already liked")
+//            }
         }
 
 
@@ -255,7 +254,9 @@ class ChatLiveActivity : AppCompatActivity() {
 
         binding!!.rcChat.addScrollListener { position: Int ->
 
-            if (chatsList.size>0 && chatsList.get(position).seenStatus.equals("0") && chatsList.get(position).receiver.equals(
+            if (chatsList.size > 0 && chatsList.get(position).seenStatus.equals("0") && chatsList.get(
+                    position
+                ).receiver.equals(
                     senderId
                 )
             ) {
@@ -263,6 +264,26 @@ class ChatLiveActivity : AppCompatActivity() {
                     .child(chatsList.get(position).seenStatus.toString()).setValue("1")
             }
         }
+
+    }
+
+    private fun handleLikedStatus() {
+        firebaseLikedUsers.child(receiverId).child(senderId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                   if(snapshot.exists()) {
+                           binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+                       } else {
+                           binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
+                       }
+
+                }
+
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+            })
 
     }
 
@@ -510,7 +531,6 @@ class ChatLiveActivity : AppCompatActivity() {
                         message.toString(),
                         "1",
                         "0",
-                        likeStatus,
                         Calendar.getInstance().time.time.toString()
                     )
                 )
@@ -525,10 +545,12 @@ class ChatLiveActivity : AppCompatActivity() {
                     )
                 )
                 data.put("lastMessage", "New Message")
-                data.put("image",MyUtils.getStringValue(
-                    this@ChatLiveActivity,
-                    MyConstants.USER_IMAGE
-                ).toString())
+                data.put(
+                    "image", MyUtils.getStringValue(
+                        this@ChatLiveActivity,
+                        MyConstants.USER_IMAGE
+                    ).toString()
+                )
                 data.put("origonalMessage", message.toString())
                 data.put("seenStatus", "0")
                 data.put("blockStatus", "0")
