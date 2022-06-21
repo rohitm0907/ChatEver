@@ -7,6 +7,7 @@ package com.rohit.chitForChat
      val COUNTRY_CODE: String?="countryCode"
      val CHAT_LIST_SCREEN: String?="chatListScreen"
      val FROM: String?="fromScreen"
+     val DELETE_TIME: String?="deleteTime"
      val OTHER_USER_TOKEN: String="token"
      val GHOST_MODE: String="ghostMode"
      val ON: String?="on"

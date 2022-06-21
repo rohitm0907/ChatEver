@@ -61,13 +61,18 @@ var countUnreadMessages=0
                             if(user!!.seenStatus.equals("0")){
                                 countUnreadMessages++
                             }
-                            chatFriendList.add(user!!)
-
+                            if(user.deleteTime!=null){
+                                if(user.deleteTime!!.toLong()<user.time!!.toLong()){
+                                    chatFriendList.add(user!!)
+                                    listFriends.add(user.userId!!)
+                                }
+                            }else{
+                                chatFriendList.add(user!!)
+                                listFriends.add(user.userId!!)
+                            }
                             // for check in nearby list, user is already friend or not
-                            listFriends.add(user.userId!!)
                             // here you can access to name property like university.name
                         }
-
                         chatFriendList.sortByDescending {chatFriendsModel ->
                             chatFriendsModel.time!!.toDouble()
                         }

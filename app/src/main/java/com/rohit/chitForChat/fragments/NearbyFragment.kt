@@ -234,9 +234,7 @@ class NearbyFragment : Fragment() {
                                 user!!.long!!.toFloat()
                             )) <= 1
                         ) {
-
                                chatNearbyList.add(user!!)
-
                         }
 
 

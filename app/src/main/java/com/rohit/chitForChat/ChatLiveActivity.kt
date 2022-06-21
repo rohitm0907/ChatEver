@@ -10,6 +10,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -42,6 +43,7 @@ import com.rohit.chitForChat.databinding.ActivityChatLiveBinding
 import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.lang.NullPointerException
 import java.util.*
 import java.util.function.LongFunction
 
@@ -99,6 +101,7 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
+    var lastDeleteTime:Long=0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
@@ -111,7 +114,9 @@ class ChatLiveActivity : AppCompatActivity() {
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
-
+        if (intent.getStringExtra(MyConstants.DELETE_TIME)!=null) {
+            lastDeleteTime= intent.getStringExtra(MyConstants.DELETE_TIME)!!.toLong()
+        }
         audioRecording()
         if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
             Glide.with(this@ChatLiveActivity)
@@ -253,7 +258,6 @@ class ChatLiveActivity : AppCompatActivity() {
         getChatsFromFirebase();
 
         binding!!.rcChat.addScrollListener { position: Int ->
-
             if (chatsList.size > 0 && chatsList.get(position).seenStatus.equals("0") && chatsList.get(
                     position
                 ).receiver.equals(
@@ -522,18 +526,33 @@ class ChatLiveActivity : AppCompatActivity() {
                     notificationMessage = " has sent you a location"
                 }
 
-                firebaseChatFriends.child(senderId).child(receiverId).setValue(
-                    ChatFriendsModel(
-                        receiverId,
-                        intent.getStringExtra(MyConstants.OTHER_USER_NAME).toString(),
-                        message.toString(),
-                        intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString(),
-                        message.toString(),
-                        "1",
-                        "0",
-                        Calendar.getInstance().time.time.toString()
-                    )
+//                firebaseChatFriends.child(senderId).child(receiverId).setValue(
+//                    ChatFriendsModel(
+//                        userId=  receiverId,
+//                        name = intent.getStringExtra(MyConstants.OTHER_USER_NAME).toString(),
+//                        lastMessage = message.toString(),
+//                        image = intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString(),
+//                        origonalMessage = message.toString(),
+//                        seenStatus = "1",
+//                        blockStatus =  "0",
+//                        time = Calendar.getInstance().time.time.toString(),
+//                    )
+//                )
+
+                var senderData: HashMap<String, String> = HashMap<String, String>()
+                senderData.put("userId", receiverId)
+                senderData.put(
+                    "name",intent.getStringExtra(MyConstants.OTHER_USER_NAME).toString()
                 )
+                senderData.put("lastMessage", "New Message")
+                senderData.put(
+                    "image", intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).toString()
+                )
+                senderData.put("origonalMessage", message.toString())
+                senderData.put("seenStatus", "1")
+                senderData.put("blockStatus", "0")
+                senderData.put("time", Calendar.getInstance().time.time.toString())
+                firebaseChatFriends.child(senderId).child(receiverId).setValue(senderData)
 
 
                 var data: HashMap<String, String> = HashMap<String, String>()
@@ -617,22 +636,17 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun getChatsFromFirebase() {
-
 //        stateValueEventListner=
         firebaseChats.child(roomId!!).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     chatsList.clear()
-
-                    if (onLiveChatScreen) {
-                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
-                            .setValue("1")
-                    }
-
                     for (postSnapshot in snapshot.children) {
                         val chat: LiveChatModel? = postSnapshot.getValue(LiveChatModel::class.java)
-                        chatsList.add(chat!!)
-                        // here you can access to name property like university.name
+                       if(chat!!.time!!.toLong()>lastDeleteTime){
+                           chatsList.add(chat!!)
+                       }
+//                         here you can access to name property like university.name
 
                     }
                     MyConstants.DATE = ""
@@ -643,8 +657,28 @@ class ChatLiveActivity : AppCompatActivity() {
 //                    if (isScrolling) {
 //                        isScrolling = false
                     binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-//                    }
 
+                    if(chatsList.size==1){
+                    if (onLiveChatScreen) {
+                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus").addListenerForSingleValueEvent(object :ValueEventListener{
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if(snapshot.exists()){
+                                    firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
+                                        .setValue("1")
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+
+                            }
+                        })
+
+                    }
+                    }else{
+                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
+                            .setValue("1")
+                    }
+//                    }
                 }
             }
 

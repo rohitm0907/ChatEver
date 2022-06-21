@@ -29,7 +29,8 @@ import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
 import de.hdodenhof.circleimageview.CircleImageView
-import java.util.HashMap
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFriendsModel>) :
@@ -89,7 +90,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                         .putExtra(MyConstants.OTHER_USER_IMAGE, chatFriendList.get(position).image)
                         .putExtra(MyConstants.LIKE_STATUS, chatFriendList.get(position).likedStatus)
                         .putExtra(MyConstants.FROM, MyConstants.CHAT_LIST_SCREEN)
-
+                        .putExtra(MyConstants.DELETE_TIME, chatFriendList.get(position).deleteTime)
                 )
             } else if (chatFriendList.get(position).blockStatus == "1") {
                 MyUtils.showToast(context, "you have blocked by other user.")
@@ -208,8 +209,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                         .addOnSuccessListener(OnSuccessListener {
                             MyUtils.showToast(context, "block User")
                         })
-
-
                 }
 
                 R.id.txtUnblock -> {
@@ -233,7 +232,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                             context,
                             MyConstants.USER_PHONE
                         )
-                    ).child(chatFriendList.get(position).userId.toString()).removeValue()
+                    ).child(chatFriendList.get(position).userId.toString()).child("deleteTime").setValue(Calendar.getInstance().timeInMillis.toString())
 
                 }
 

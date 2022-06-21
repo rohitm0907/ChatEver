@@ -1,9 +1,7 @@
 package com.rohit.chitForChat.Models
 
 class ChatFriendsModel {
-    constructor(){
-
-    }
+    constructor()
     constructor(
         userId: String,
         name: String,
@@ -12,7 +10,8 @@ class ChatFriendsModel {
         origonalMessage:String,
         seenStatus:String,
         blockStatus:String,
-        time:String
+        time:String,
+        deleteTime:String
     ) {
         this.name = name
         this.userId = userId
@@ -22,8 +21,14 @@ class ChatFriendsModel {
         this.origonalMessage=origonalMessage
         this.blockStatus=blockStatus
         this.time=time
+        this.deleteTime=deleteTime
     }
 
+    var deleteTime: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
 
     var time: String? = null
         get() = field

@@ -289,8 +289,9 @@ class ProfileActivity : AppCompatActivity() {
 
             if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
                 userImage = null
-                MyUtils.showToast(this@ProfileActivity, "Updated Successfully")
-                updateImage(imageUri,captions,name)
+                updateImage(name,imageUri,captions)
+
+
             } else {
                 userImage = null
                 finishAffinity()
@@ -306,7 +307,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateImage(name:String,image:String,caption:String) {
-        firebaseChatFriends.addValueEventListener(object : ValueEventListener {
+        firebaseChatFriends.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 for (postSnapshot in snapshot.children) {
@@ -336,6 +337,7 @@ class ProfileActivity : AppCompatActivity() {
 //                    println("rohit: "+keyValue)
 
                 }
+                MyUtils.showToast(this@ProfileActivity, "Updated Successfully")
             }
 
             override fun onCancelled(error: DatabaseError) {

@@ -46,9 +46,13 @@ var binding:FragmentContactsBinding?=null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getContacts()
+
         if(MyUtils.listAllUsersNumbers.size>0){
-            getContacts()
+            try{
+                getContacts()
+            }catch (e:Exception){
+
+            }
         }else{
             fetchAllUsers()
         }
@@ -66,9 +70,17 @@ var binding:FragmentContactsBinding?=null
                     MyUtils.listAllUsersNumbers.add(user!!.phone.toString())
                 }
 
-                getContacts()
+                try{
+                    getContacts()
+                }catch (e:Exception){
+
+                }
             } else {
-              getContacts()
+                try{
+                    getContacts()
+                }catch (e:Exception){
+
+                }
             }
         }
 
