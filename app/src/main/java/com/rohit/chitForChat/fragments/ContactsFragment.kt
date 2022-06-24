@@ -1,11 +1,14 @@
 package com.rohit.chitForChat.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.os.Bundle
 import android.os.Handler
 import android.provider.ContactsContract
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -16,6 +19,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.nabinbhandari.android.permissions.PermissionHandler
+import com.nabinbhandari.android.permissions.Permissions
+
 import com.rohit.chitForChat.Models.ContactModel
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
@@ -34,6 +40,8 @@ class ContactsFragment : Fragment() {
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
         .getReference(MyConstants.NODE_USERS)
 var listContacts:ArrayList<ContactModel> = ArrayList()
+var filterContacts:ArrayList<ContactModel> = ArrayList()
+
 var binding:FragmentContactsBinding?=null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,17 +54,81 @@ var binding:FragmentContactsBinding?=null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        checkContactPermission()
+handleSearching()
+    }
 
-        if(MyUtils.listAllUsersNumbers.size>0){
-            try{
-                getContacts()
-            }catch (e:Exception){
+    private fun handleSearching() {
+        binding!!.edtSearch.addTextChangedListener(object :TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
 
             }
-        }else{
-            fetchAllUsers()
-        }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+           searching(s)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+        })
     }
+
+    private fun searching(searchText: CharSequence?) {
+
+        filterContacts= listContacts.filter { contactModel ->
+            contactModel.name!!.toLowerCase()!!.contains(searchText.toString().toLowerCase()) ||  contactModel.mobileNumber!!.toLowerCase().contains(searchText.toString().toLowerCase())
+        } as ArrayList<ContactModel>
+
+        setAdapter()
+
+
+    }
+
+
+    fun checkContactPermission() {
+        var alertType = ""
+        lateinit var perms: Array<String>
+
+            alertType = "This app needs access to your contacts"
+            perms = arrayOf<String>(
+                Manifest.permission.INTERNET,
+                Manifest.permission.READ_CONTACTS
+            )
+
+
+        val rationale = alertType
+        val options: Permissions.Options = Permissions.Options()
+            .setRationaleDialogTitle("Info")
+            .setSettingsDialogTitle("Warning")
+
+        Permissions.check(
+            requireActivity()/*context*/,
+            perms,
+            rationale,
+            options,
+            object : PermissionHandler() {
+                override fun onGranted() {
+                    if(MyUtils.listAllUsersNumbers.size>0){
+                        try{
+                            getContacts()
+                        }catch (e:Exception){
+
+                        }
+                    }else{
+                        fetchAllUsers()
+                    }
+                }
+
+                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                    // permission denied, block the feature.
+                }
+            })
+
+
+    }
+
     fun fetchAllUsers(){
         firebaseUsers.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
@@ -66,8 +138,11 @@ var binding:FragmentContactsBinding?=null
                 for (postSnapshot in snapshot.children) {
                     val user: Users? =
                         postSnapshot.getValue(Users::class.java)
-                    listAllUsers.add(user!!)
-                    MyUtils.listAllUsersNumbers.add(user!!.phone.toString())
+                    if(!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE))) {
+                        listAllUsers.add(user!!)
+                        MyUtils.listAllUsersNumbers.add(PhoneNumberWithoutCountryCode(user!!.phone.toString())!!)
+
+                    }
                 }
 
                 try{
@@ -98,8 +173,9 @@ var binding:FragmentContactsBinding?=null
         return phoneNumberWithCountryCode.replace(compile.pattern().toRegex(), "")
     }
 private fun setAdapter() {
-        binding!!.recyclerChatList.adapter =
-            ContactsAdapter(requireActivity(), listContacts)
+    println("users: ${MyUtils.listAllUsersNumbers.toString()}")
+    binding!!.recyclerChatList.adapter =
+            ContactsAdapter(requireActivity(), filterContacts)
     binding!!.recyclerChatList.setItemViewCacheSize(listContacts.size                                                                       )
     }
 
@@ -122,19 +198,18 @@ private fun setAdapter() {
             var contact=ContactModel()
             contact.name=name
             contact.mobileNumber=PhoneNumberWithoutCountryCode(phoneNumber.replace(" ",""))
-
             var list=listContacts.filter { contactModel ->
                 contactModel.mobileNumber==contact.mobileNumber
             }
             if(list.size==0) {
                 listContacts.add(contact)
             }
-
-
         }
         listContacts.sortBy { contactModel ->
             contactModel.name
         }
+
+        filterContacts=listContacts
         setAdapter()
         phones.close()
     }

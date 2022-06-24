@@ -78,7 +78,7 @@ class ProfileActivity : AppCompatActivity() {
         if (!MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE).equals("")) {
             Glide.with(this@ProfileActivity)
                 .load(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE))
-                .into(binding.imgUser)
+                .placeholder(R.drawable.user).into(binding.imgUser)
         }
 
 
@@ -142,7 +142,7 @@ class ProfileActivity : AppCompatActivity() {
         Glide.with(context).load(url).placeholder(R.drawable.user).into(imgUser)
 
         if (imgUri != null) {
-            Glide.with(context).load(File(imgUri!!.path)).into(imgUser)
+            Glide.with(context).load(File(imgUri!!.path)).placeholder(R.drawable.user).into(imgUser)
         }
         dialog.show()
     }

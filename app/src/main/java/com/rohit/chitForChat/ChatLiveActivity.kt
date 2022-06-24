@@ -3,14 +3,17 @@ package com.rohit.chitForChat
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +21,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,8 +38,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.nabinbhandari.android.permissions.PermissionHandler
+import com.nabinbhandari.android.permissions.Permissions
 import com.permissionx.guolindev.PermissionX
-import com.rohit.chitForChat.Models.ChatFriendsModel
+import com.rohit.chitForChat.Firebase.FirebaseNotification.MyNotification
 import com.rohit.chitForChat.Models.LiveChatModel
 import com.rohit.chitForChat.MyConstants.FIREBASE_BASE_URL
 import com.rohit.chitForChat.adapters.ChatLiveAdapter
@@ -43,12 +49,14 @@ import com.rohit.chitForChat.databinding.ActivityChatLiveBinding
 import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.lang.NullPointerException
+import java.security.AccessController.getContext
 import java.util.*
-import java.util.function.LongFunction
 
 
 class ChatLiveActivity : AppCompatActivity() {
+    private var fileUri: Uri? = null
+    private var REQUEST_TAKE_GALLERY_VIDEO: Int = 0
+    private var VIDEO_CAPTURE: Int = 0
     private var stateValueEventListner: ValueEventListener? = null
     private var audioRecorder: AudioRecorder? = null
     private var recordFile: File? = null
@@ -110,7 +118,8 @@ class ChatLiveActivity : AppCompatActivity() {
         setContentView(binding!!.root)
 
         getSupportActionBar()!!.hide();
-
+        REQUEST_TAKE_GALLERY_VIDEO=1256
+        VIDEO_CAPTURE=2345
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
@@ -167,7 +176,6 @@ class ChatLiveActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable) {
-
                 if (!isTyping) {
                     if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
                             .equals("")
@@ -211,7 +219,6 @@ class ChatLiveActivity : AppCompatActivity() {
         binding!!.imgLike.setOnClickListener {
             firebaseLikedUsers.child(receiverId).child(senderId).setValue("true")
             binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-
 //            if (likeStatus.equals("0")) {
 //                firebaseUsers.child(receiverId).child("totalLikes")
 //                    .addListenerForSingleValueEvent(object : ValueEventListener {
@@ -248,11 +255,7 @@ class ChatLiveActivity : AppCompatActivity() {
 
 
         binding!!.imgCamera.setOnClickListener {
-
-
             showOptionsDialog()
-
-
         }
 
         getChatsFromFirebase();
@@ -320,29 +323,10 @@ class ChatLiveActivity : AppCompatActivity() {
             DialogInterface.OnClickListener { dialog, which ->
                 when (which) {
                     0 -> {
-                        ImagePicker.with(this)
-                            .crop()                    //Crop image(Optional), Check Customization for more option
-                            .compress(1024)            //Final image size will be less than 1 MB(Optional)
-                            .maxResultSize(
-                                1080,
-                                1080
-                            )    //Final image resolution will be less than 1080 x 1080(Optional)
-                            .start()
+                        checkImagePermissions()
                     }
                     1 -> {
-                        VideoPicker.Builder(this@ChatLiveActivity)
-                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
-                            .directory(VideoPicker.Directory.DEFAULT)
-                            .extension(VideoPicker.Extension.MP4)
-                            .enableDebuggingMode(true)
-                            .build()
-//                        val intent = Intent()
-//                        intent.type = "video/*"
-//                        intent.action = Intent.ACTION_GET_CONTENT
-//                        startActivityForResult(
-//                            Intent.createChooser(intent, "Select Video"),
-//                            1
-//                        )
+                        checkVideoPermissions()
                     }
                     2 -> {
 
@@ -369,6 +353,106 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
+    private fun checkImagePermissions() {
+
+
+        var alertType = ""
+        lateinit var perms: Array<String>
+
+        alertType = "This app needs access to your camera and storage"
+        perms = arrayOf<String>(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+
+
+        val rationale = alertType
+        val options: Permissions.Options = Permissions.Options()
+            .setRationaleDialogTitle("Info")
+            .setSettingsDialogTitle("Warning")
+
+        Permissions.check(
+            this/*context*/,
+            perms,
+            rationale,
+            options,
+            object : PermissionHandler() {
+                override fun onGranted() {
+                    ImagePicker.with(this@ChatLiveActivity)
+                        .crop()                    //Crop image(Optional), Check Customization for more option
+                        .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                        .maxResultSize(
+                            1080,
+                            1080
+                        )    //Final image resolution will be less than 1080 x 1080(Optional)
+                        .start()
+
+                }
+
+                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                    // permission denied, block the feature.
+                }
+            })
+
+
+    }
+
+    private fun checkVideoPermissions() {
+
+
+
+        var alertType = ""
+        lateinit var perms: Array<String>
+
+        alertType = "This app needs access to your camera and storage"
+        perms = arrayOf<String>(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+
+
+        val rationale = alertType
+        val options: Permissions.Options = Permissions.Options()
+            .setRationaleDialogTitle("Info")
+            .setSettingsDialogTitle("Warning")
+
+        Permissions.check(
+            this/*context*/,
+            perms,
+            rationale,
+            options,
+            object : PermissionHandler() {
+                override fun onGranted() {
+                    selectVideo()
+                }
+
+                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                    // permission denied, block the feature.
+                }
+            })
+
+
+
+
+
+    }
+
+    // UPDATED!
+    fun getPath(uri: Uri?): String? {
+        val projection = arrayOf(MediaStore.Video.Media.DATA)
+        val cursor: Cursor? = contentResolver.query(uri!!, projection, null, null, null)
+        return if (cursor != null) {
+            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            val column_index: Int = cursor
+                .getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            cursor.moveToFirst()
+            cursor.getString(column_index)
+        } else null
+    }
+
     fun RecyclerView.addScrollListener(onScroll: (position: Int) -> Unit) {
         var lastPosition = 0
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -387,11 +471,73 @@ class ChatLiveActivity : AppCompatActivity() {
         })
     }
 
+    private fun selectVideo() {
+        try {
+            val pm = packageManager
+            val hasPerm = pm.checkPermission(
+                Manifest.permission.CAMERA,
+                packageName
+            )
+            if (hasPerm == PackageManager.PERMISSION_GRANTED) {
+                val options = arrayOf<CharSequence>("Take Video", "Choose From Gallery", "Cancel")
+                val builder: AlertDialog.Builder =
+                  AlertDialog.Builder(this)
+                builder.setTitle("Select Option")
+                builder.setItems(options, DialogInterface.OnClickListener { dialog, item ->
+                    if (options[item] == "Take Video") {
+                        dialog.dismiss()
+                        startVideoRecording()
+                    } else if (options[item] == "Choose From Gallery") {
+                        dialog.dismiss()
+                        fetchvideoFromGallery()
+                    } else if (options[item] == "Cancel") {
+                        dialog.dismiss()
+                    }
+                })
+                builder.show()
+            } else Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show()
+        } catch (e: java.lang.Exception) {
+            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+
+    private fun fetchvideoFromGallery()
+    {
+        val intent = Intent()
+        intent.type = "video/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(
+            Intent.createChooser(intent, "Select Video"),
+            REQUEST_TAKE_GALLERY_VIDEO
+        )
+    }
+
+    fun startVideoRecording() {
+        val imageFileName = "IMG_" + System.currentTimeMillis().toString() + "_"
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(imageFileName, ".jpg", storageDir)
+
+        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 5)
+       // fileUri = Uri.fromFile(mediaFile)
+        fileUri= FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", image);
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
+        startActivityForResult(intent, VIDEO_CAPTURE)
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             //Image Uri will not be null for RESULT_OK
+
+            if(requestCode==VIDEO_CAPTURE)
+            {
+                val selectedPhotoUrl: Uri = data!!.getData()!!
+                uploadVideoOnFirebase(selectedPhotoUrl)
+            }else
 
             if (requestCode == ImagePicker.REQUEST_CODE) {
                 val uri: Uri = data?.data!!
@@ -411,26 +557,34 @@ class ChatLiveActivity : AppCompatActivity() {
 
                 uploadImageOnFirebase(sentImage!!)
             } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
-
                 var mPaths: List<String> =
                     data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
 //
                 mPaths.forEachIndexed { index, s ->
+                    Log.d("video url",mPaths.get(index).toUri().toString())
 
-                    uploadVideoOnFirebase(mPaths.get(index).toUri())
+                    uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
                     //Your Code
 
 
                 }
             } else if (requestCode == 1) {
-                var uri = data!!.data
-
+                var uri = data!!.data!!.path!!.toUri()
                 uploadVideoOnFirebase(uri!!)
                 //Your Code
 
 
             } else if (resultCode == ImagePicker.RESULT_ERROR) {
                 Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+            } else if (requestCode === REQUEST_TAKE_GALLERY_VIDEO) {
+                val selectedImageUri: Uri = data!!.getData()!!
+
+                // OI FILE Manager
+               var filemanagerstring = selectedImageUri.path
+
+                // MEDIA GALLERY
+                var selectedImagePath = getPath(selectedImageUri)
+                uploadVideoOnFirebase(selectedImageUri)
             }
         } else {
             Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()
@@ -439,6 +593,7 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun uploadVideoOnFirebase(videoUrl: Uri) {
+       Log.d("mylog",videoUrl.toString())
         val storage: FirebaseStorage = FirebaseStorage.getInstance()
         val storageRef: StorageReference = storage.getReference()
 //        var file=File(videoUrl)
@@ -552,7 +707,7 @@ class ChatLiveActivity : AppCompatActivity() {
                 senderData.put("seenStatus", "1")
                 senderData.put("blockStatus", "0")
                 senderData.put("time", Calendar.getInstance().time.time.toString())
-                firebaseChatFriends.child(senderId).child(receiverId).setValue(senderData)
+                firebaseChatFriends.child(senderId).child(receiverId).updateChildren(senderData as Map<String, Any>)
 
 
                 var data: HashMap<String, String> = HashMap<String, String>()
@@ -579,15 +734,24 @@ class ChatLiveActivity : AppCompatActivity() {
                     data as Map<String, Any>
                 ).addOnCompleteListener {
                     if (!token.equals("")) {
-//                        MyNotification.sendNotification(
-//                            MyUtils.getStringValue(this,MyConstants.USER_NAME).toString(),
-//                            notificationMessage,
-//                            token,
-//                            MyConstants.NOTI_REQUEST_TYPE
-//                        )
+                        MyNotification.sendNotification(
+                            MyUtils.getStringValue(this,MyConstants.USER_NAME).toString(),
+                            notificationMessage,
+                            token,
+                            MyConstants.NOTI_REQUEST_TYPE
+                        )
                     }
                 }
                 binding!!.edtMessage.setText("")
+
+                if(chatsList.size==0 || chatsList.size==1){
+                    if(intent.getStringExtra(MyConstants.FROM) == null){
+                        if(!MyUtils.listFriends.contains(receiverId)) {
+                            MyUtils.listFriends.add(receiverId)
+                        }
+                    }
+
+                }
             }
 
     }
@@ -649,7 +813,7 @@ class ChatLiveActivity : AppCompatActivity() {
 //                         here you can access to name property like university.name
 
                     }
-                    MyConstants.DATE = ""
+
                     binding!!.rcChat.adapter =
                         ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
 
@@ -700,9 +864,7 @@ class ChatLiveActivity : AppCompatActivity() {
         binding!!.recordView.setOnRecordListener(object : OnRecordListener {
             override fun onStart() {
                 //Start Recording..
-
                 checkMircrophonePermission()
-
             }
 
             override fun onCancel() {
@@ -713,7 +875,6 @@ class ChatLiveActivity : AppCompatActivity() {
             }
 
             override fun onFinish(recordTime: Long) {
-
                 binding!!.imgCamera.visibility = View.VISIBLE
                 binding!!.imgSend.visibility = View.VISIBLE
                 binding!!.edtMessage.visibility = View.VISIBLE
@@ -744,6 +905,11 @@ class ChatLiveActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkAudioPermission(): Boolean {
+        val permission = Manifest.permission.RECORD_AUDIO
+        val res: Int =checkCallingOrSelfPermission(permission)
+        return res == PackageManager.PERMISSION_GRANTED
+    }
 
     private fun checkMircrophonePermission() {
         PermissionX.init(this@ChatLiveActivity)
@@ -766,9 +932,13 @@ class ChatLiveActivity : AppCompatActivity() {
             }
             .request { allGranted, grantedList, deniedList ->
                 if (allGranted) {
-                    binding!!.imgCamera.visibility = View.GONE
-                    binding!!.imgSend.visibility = View.GONE
-                    binding!!.edtMessage.visibility = View.GONE
+                    if(audioPermissionEnable){
+                        binding!!.imgCamera.visibility = View.GONE
+                        binding!!.imgSend.visibility = View.GONE
+                        binding!!.edtMessage.visibility = View.GONE
+                    }else{
+                        audioPermissionEnable=true
+                    }
 
                     audioRecorder = AudioRecorder()
                     recordFile = File(filesDir, UUID.randomUUID().toString() + ".3gp")
@@ -776,13 +946,16 @@ class ChatLiveActivity : AppCompatActivity() {
                     if (!recordFile?.exists()!!) {
                         recordFile?.createNewFile();
                     }
-
                     try {
+
                         audioRecorder!!.start(recordFile?.path)
+
+
                     } catch (e: Exception) {
 
                     }
                 } else {
+
                     checkMircrophonePermission()
                     Toast.makeText(this, "Microphone permission needed.", Toast.LENGTH_LONG).show()
 
@@ -802,9 +975,13 @@ class ChatLiveActivity : AppCompatActivity() {
 //        firebaseChats.removeEventListener(stateValueEventListner!!);
     }
 
-
+var audioPermissionEnable=false
     override fun onResume() {
         super.onResume()
+
+        audioPermissionEnable=checkAudioPermission()
+
+
         if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE).equals(""))
             firebaseOnlineStatus.child(
                 MyUtils.getStringValue(

@@ -18,16 +18,26 @@
         android:layout_height="70dp"
         android:src="@drawable/user" />
 
-    <TextView
-        android:id="@+id/txtName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_toRightOf="@id/imgUser"
-        android:text="Name"
-        android:textColor="@color/black"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/txtName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:singleLine="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="30dp"
+            android:layout_toRightOf="@id/imgUser"
+            android:text="Name"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imgDots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_dots"></ImageView>
 
 <!--    <TextView-->
 <!--        android:id="@+id/txtTime"-->
@@ -39,13 +49,14 @@
 <!--        android:layout_alignParentRight="true"-->
 <!--      />-->
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/txtName"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/imgUser"
-        android:id="@+id/txtLastMessage"
-        android:textColor="@color/black" />
+        <TextView
+            android:id="@+id/txtLastMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtName"
+            android:layout_marginLeft="10dp"
+            android:singleLine="true"
+            android:layout_toRightOf="@id/imgUser"
+            android:textColor="@color/black" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

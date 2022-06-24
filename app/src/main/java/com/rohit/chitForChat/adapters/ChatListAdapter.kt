@@ -9,10 +9,9 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -30,7 +29,6 @@ import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
 import de.hdodenhof.circleimageview.CircleImageView
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFriendsModel>) :
@@ -46,6 +44,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
     var firebaselikedList =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_LIKED_USERS)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatListAdapter.viewHolder {
         var view = LayoutInflater.from(context).inflate(R.layout.list_chat, parent, false)
         return viewHolder(view)
@@ -100,9 +99,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         }
 
 
-        holder.itemView.setOnLongClickListener {
+        holder.imgDots.setOnClickListener {
             showPoppupDialog(position, holder.itemView)
-            return@setOnLongClickListener false
         }
 
 
@@ -145,7 +143,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                                 })
 
 
-
                         }
                     }
 
@@ -157,7 +154,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
     }
 
     private fun showPoppupDialog(position: Int, view: View) {
-        val popup = PopupMenu(context, view.findViewById(R.id.imgUser))
+        val popup = PopupMenu(context, view.findViewById(R.id.imgDots))
         popup.getMenuInflater().inflate(com.rohit.chitForChat.R.menu.pop_menu, popup.menu)
         var menu: Menu = popup.menu
         if (chatFriendList.get(position).blockStatus.equals("1")) {
@@ -166,6 +163,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
         } else if (chatFriendList.get(position).blockStatus.equals("2")) {
             menu.findItem(R.id.txtBlock).setVisible(false)
+            menu.findItem(R.id.txtDeleteChat).setVisible(false)
         } else {
             menu.findItem(R.id.txtUnblock).setVisible(false)
         }
@@ -232,16 +230,20 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                             context,
                             MyConstants.USER_PHONE
                         )
-                    ).child(chatFriendList.get(position).userId.toString()).child("deleteTime").setValue(Calendar.getInstance().timeInMillis.toString())
+                    ).child(chatFriendList.get(position).userId.toString()).child("deleteTime")
+                        .setValue(Calendar.getInstance().timeInMillis.toString())
 
+
+                    if (MyUtils.listFriends.contains(chatFriendList.get(position).userId)) {
+                        var pos = MyUtils.listFriends.indexOf(chatFriendList.get(position).userId)
+                        MyUtils.listFriends.removeAt(pos)
+                    }
                 }
 
             }
 
             false;
         })
-
-
         popup.show() //showing popup menu
 
     }
@@ -253,6 +255,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
     class viewHolder(itemView: View) : ViewHolder(itemView) {
         var txtName = itemView.findViewById<TextView>(R.id.txtName)
         var txtLastMessage = itemView.findViewById<TextView>(R.id.txtLastMessage)
+        var imgDots = itemView.findViewById<ImageView>(R.id.imgDots)
 
         //        var txtTime = itemView.findViewById<TextView>(R.id.txtTime)
         var imgUser = itemView.findViewById<CircleImageView>(R.id.imgUser)

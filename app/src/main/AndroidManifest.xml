@@ -11,7 +11,7 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
-
+<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
@@ -51,15 +51,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-<!--        <provider-->
-<!--            android:name="android.support.v4.content.FileProvider"-->
-<!--            android:authorities="com.rohit.chitForChat.fileprovider"-->
-<!--            android:exported="false"-->
-<!--            android:grantUriPermissions="true">-->
-<!--            <meta-data-->
-<!--                android:name="android.support.FILE_PROVIDER_PATHS"-->
-<!--                android:resource="@xml/provider_paths" />-->
-<!--        </provider>-->
+<provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.provider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/provider_paths" />
+    </provider>
     </application>
 </manifest>

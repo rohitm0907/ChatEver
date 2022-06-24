@@ -166,7 +166,7 @@ object MyUtils {
         dialog.getWindow()!!.setBackgroundDrawableResource(android.R.color.transparent);
         dialog.window!!.setLayout(GridLayoutManager.LayoutParams.MATCH_PARENT,GridLayoutManager.LayoutParams.WRAP_CONTENT)
         if(!imageUrl.equals("")){
-            Glide.with(context).load(imageUrl).into(imgUser)
+            Glide.with(context).load(imageUrl).placeholder(R.drawable.user).into(imgUser)
         }
         txtCaption.setText(captions)
         txtLikes.setText(likes)

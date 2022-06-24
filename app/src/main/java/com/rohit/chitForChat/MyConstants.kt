@@ -13,7 +13,7 @@ package com.rohit.chitForChat
      val ON: String?="on"
      val OFF: String?="off"
      val USER_CAPTIONS: String="userCaptions"
-     var DATE: String=""
+
      var PHONE_NUMBER="phoneNumber"
      var NODE_USERS="Users"
      var NODE_CHATS="Chats"

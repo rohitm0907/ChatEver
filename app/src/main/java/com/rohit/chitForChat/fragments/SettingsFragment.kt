@@ -1,21 +1,22 @@
 package com.rohit.chitForChat.fragments
 
-import android.R
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.ViewSwitcher
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import com.google.firebase.database.FirebaseDatabase
-import com.rohit.chitForChat.LoginActivity
-import com.rohit.chitForChat.MyConstants
-import com.rohit.chitForChat.MyUtils
-import com.rohit.chitForChat.ProfileActivity
+import com.rohit.chitForChat.*
 import com.rohit.chitForChat.databinding.FragmentSettingsBinding
 import com.suke.widget.SwitchButton
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
+import kotlinx.android.synthetic.main.dialog_yes_no.*
 
 
 class Settings : Fragment() {
@@ -58,20 +59,7 @@ class Settings : Fragment() {
         }
 
         binding!!.btnLogout.setOnClickListener {
-            if(!MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE).equals("")) {
-                firebaseOnlineStatus.child(
-                    MyUtils.getStringValue(
-                        requireContext(),
-                        MyConstants.USER_PHONE
-                    )
-                ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
-            }
-            MyUtils.clearAllData(requireActivity())
-            MyUtils.applyFilterType="No Filter"
-            MyUtils.chatNearbyList.clear()
-            startActivity(Intent(requireContext(),LoginActivity::class.java))
-            requireActivity()!!.finishAffinity()
-        }
+showDialog("Are you sure you wants to logout ?");        }
 
         binding!!.sbGhost.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
 
@@ -104,7 +92,7 @@ class Settings : Fragment() {
                     )
 
                 }
-                }
+            }
         })
 
 
@@ -127,6 +115,50 @@ class Settings : Fragment() {
     }
 
 
+    fun showDialog(message:String){
 
+        var dialog:Dialog=Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_yes_no)
+        dialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window!!.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+        var txtTitle=dialog.findViewById<TextView>(R.id.txtTitle)
+        var btnYes=dialog.findViewById<AppCompatButton>(R.id.btnYes)
+        var btnNo=dialog.findViewById<AppCompatButton>(R.id.btnNo)
+
+        txtTitle.text=message
+
+        btnYes.setOnClickListener {
+            dialog.dismiss()
+            if(!MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE).equals("")) {
+                firebaseOnlineStatus.child(
+                    MyUtils.getStringValue(
+                        requireContext(),
+                        MyConstants.USER_PHONE
+                    )
+                ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
+            }
+
+            firebaseUsers.child(
+                MyUtils.getStringValue(
+                    requireContext(),
+                    MyConstants.USER_PHONE
+                )
+            ).child("token").setValue("")
+
+            MyUtils.clearAllData(requireActivity())
+            MyUtils.applyFilterType="No Filter"
+            MyUtils.chatNearbyList.clear()
+            startActivity(Intent(requireContext(),LoginActivity::class.java))
+            requireActivity()!!.finishAffinity()
+        }
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+
+
+    }
 
 }
+

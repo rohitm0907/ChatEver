@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="80dp"
             android:layout_marginTop="10dp"
             android:layout_toRightOf="@id/imgUser"
             android:text="Name"
@@ -31,7 +32,7 @@
             android:textStyle="bold" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/txtTitle"
+            android:id="@+id/btnInvite"
             android:layout_width="80dp"
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
@@ -40,21 +41,10 @@
             android:text="Invite"
            android:textSize="12sp"
             android:textAllCaps="false"
-            android:background="@color/app_color"
+            android:background="@drawable/bg_invite"
             android:textColor="@color/white" />
 
-        <TextView
-            android:id="@+id/txtAlreadyAdded"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="20dp"
-            android:text="Already Added"
-            android:textSize="12sp"
-            android:textAllCaps="false"
-            android:background="@color/app_color"
-            android:textColor="@color/white" />
+
 
 
         <TextView
@@ -63,6 +53,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtName"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="80dp"
+            android:singleLine="true"
             android:layout_toRightOf="@id/imgUser"
             android:text="Status"
             android:textColor="@color/black" />

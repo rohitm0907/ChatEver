@@ -7,41 +7,36 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.CountDownTimer
+import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.extractor.ExtractorsFactory
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.trackselection.TrackSelector
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView
+import com.google.android.exoplayer2.upstream.BandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.firebase.database.FirebaseDatabase
 import com.rohit.chitForChat.Models.LiveChatModel
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.R
-import com.google.android.exoplayer2.source.MediaSource
-
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-
-import com.google.android.exoplayer2.extractor.ExtractorsFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
-
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
-
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-
-import com.google.android.exoplayer2.trackselection.TrackSelector
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView
-
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
-
-import com.google.android.exoplayer2.upstream.BandwidthMeter
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ChatLiveAdapter(
@@ -71,6 +66,8 @@ class ChatLiveAdapter(
     }
 
     override fun onBindViewHolder(holder: ChatLiveAdapter.viewHolder, position: Int) {
+
+
         if (chatsList.get(position).sender.equals(
                 MyUtils.getStringValue(
                     context,
@@ -160,14 +157,16 @@ class ChatLiveAdapter(
             holder.txtMessage.visibility = View.GONE
         }
 
-
-//        if (!MyConstants.DATE.equals(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))) {
-//            holder.txtDate.visibility = View.VISIBLE
-//            holder.txtDate.setText(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))
-//            MyConstants.DATE = MyUtils.convertIntoDate(chatsList.get(position).time.toString())
-//        } else {
-//            holder.txtDate.visibility = View.GONE
-//        }
+Log.d("position",position.toString())
+        if(position==0){
+            holder.txtDate.visibility = View.VISIBLE
+            holder.txtDate.setText(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))
+        }else if (!MyUtils.convertIntoDate(chatsList.get(position).time.toString()).equals(MyUtils.convertIntoDate(chatsList.get(position-1).time.toString()))) {
+            holder.txtDate.visibility = View.VISIBLE
+            holder.txtDate.setText(getFormattedDate(chatsList.get(position).time.toString().toLong()))
+        } else {
+            holder.txtDate.visibility = View.GONE
+        }
         if(chatsList.get(position).time!=null)
         holder.txtTime.setText(MyUtils.convertIntoTime((chatsList.get(position).time).toString()))
 
@@ -230,6 +229,24 @@ class ChatLiveAdapter(
             timer!!.cancel()
         }
 
+    }
+
+
+    fun getFormattedDate( smsTimeInMilis: Long): String? {
+        val smsTime: Calendar = Calendar.getInstance()
+        smsTime.setTimeInMillis(smsTimeInMilis)
+        val now: Calendar = Calendar.getInstance()
+        val dateTimeFormatString = "dd/MM/yyyy"
+        val HOURS = (60 * 60 * 60).toLong()
+        return if (now.get(Calendar.DATE) === smsTime.get(Calendar.DATE)) {
+            "Today"
+        } else if (now.get(Calendar.DATE) - smsTime.get(Calendar.DATE) === 1) {
+            "Yesterday"
+        } else if (now.get(Calendar.YEAR) === smsTime.get(Calendar.YEAR)) {
+            DateFormat.format(dateTimeFormatString, smsTime).toString()
+        } else {
+            DateFormat.format("dd/MM/yyyy", smsTime).toString()
+        }
     }
 
     private fun playMediaPlayerFromBegin(audioUri: String?, holder:ChatLiveAdapter.viewHolder) {
@@ -400,18 +417,17 @@ class ChatLiveAdapter(
             imgUser.visibility = View.VISIBLE
             exoPlayerView.visibility = View.GONE
             if (!url.equals("")) {
-                Glide.with(context).load(url).into(imgUser)
+                Glide.with(context).load(url).placeholder(R.drawable.user).into(imgUser)
             }
         }
 
-        dialog.setOnCancelListener {
-            if(exoPlayer!=null){
-                exoPlayer.stop()
-            }
-        }
+//        dialog.setOnCancelListener {
+//            if(exoPlayer!=null){
+//                exoPlayer.stop()
+//            }
+//        }
 
         dialog.show()
-
 
     }
 

@@ -102,6 +102,7 @@
             android:layout_alignBottom="@id/rlMessage"
             android:layout_toRightOf="@+id/rlMessage"
             android:text="10:19 pm"
+            android:layout_marginLeft="10dp"
             android:textColor="@color/white" />
 
         <View

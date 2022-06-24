@@ -80,7 +80,6 @@ class CodeVerificationActivity : AppCompatActivity() {
     private fun sentOtp(phoneNumber: String) {
         MyUtils.showProgress(this@CodeVerificationActivity)
         var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                 // This callback will be invoked in two situations:
                 // 1 - Instant verification. In some cases the phone number can be instantly
@@ -103,7 +102,6 @@ class CodeVerificationActivity : AppCompatActivity() {
                 } else if (e is FirebaseTooManyRequestsException) {
                     // The SMS quota for the project has been exceeded
                 }
-
                 // Show a message and update the UI
             }
 

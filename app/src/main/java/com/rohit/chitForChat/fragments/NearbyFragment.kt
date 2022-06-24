@@ -1,6 +1,7 @@
 package com.rohit.chitForChat.fragments
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -15,6 +16,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.database.*
+import com.nabinbhandari.android.permissions.PermissionHandler
+import com.nabinbhandari.android.permissions.Permissions
 import com.rohit.chitForChat.Models.Users
 import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
@@ -69,13 +72,9 @@ class NearbyFragment : Fragment() {
         var bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme);
         bottomSheet.setContentView(R.layout.bottom_sheet_filter)
 
-
         if (applyFilterType.equals("Others")) {
-
             bottomSheet.btnOthers.setCardBackgroundColor(resources.getColor(R.color.app_color))
             bottomSheet.txtOthers.setTextColor(resources.getColor(R.color.white))
-
-
         } else if (applyFilterType.equals("Men")) {
             bottomSheet.btnMen.setCardBackgroundColor(resources.getColor(R.color.app_color))
             bottomSheet.txtMen.setTextColor(resources.getColor(R.color.white))
@@ -190,11 +189,20 @@ class NearbyFragment : Fragment() {
     }
 
     private fun setAdapter() {
-        binding!!.recyclerChatList.adapter =
-            NearbyChatAdapter(requireActivity(), chatNearbyList!!)
+        var activity = getActivity();
+        if (activity != null && isAdded()) {
+            if(chatNearbyList.size==0){
+                binding!!.txtNoOneFound.visibility=View.VISIBLE
+            }else{
+                binding!!.txtNoOneFound.visibility=View.GONE
+            }
+            binding!!.recyclerChatList.adapter =
+                NearbyChatAdapter(activity, chatNearbyList!!)
+        }
     }
 
     private fun searchNearby() {
+        binding!!.txtNoOneFound.visibility=View.GONE
         binding!!.rippleEffect.startRippleAnimation()
         binding!!.rippleEffect.visibility = View.VISIBLE
         binding!!.recyclerChatList.visibility = View.INVISIBLE
@@ -203,86 +211,87 @@ class NearbyFragment : Fragment() {
 //        MyUtils.showProgress(requireActivity())
         myLat = MyUtils.getStringValue(requireActivity(), MyConstants.USER_LATITUDE)
         myLong = MyUtils.getStringValue(requireActivity(), MyConstants.USER_LONGITUDE)
-
-        val queryRef: Query = firebaseUsers.orderByChild("ghostMode").equalTo("off")
-        queryRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+if(!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
+    val queryRef: Query = firebaseUsers.orderByChild("ghostMode").equalTo("off")
+    queryRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
 //                MyUtils.stopProgress(requireActivity())
-                if (snapshot.exists()) {
-                    chatNearbyList.clear()
-                    for (postSnapshot in snapshot.children) {
-                        val user: Users? =
-                            postSnapshot.getValue(Users::class.java)
+            if (snapshot.exists()) {
+                chatNearbyList.clear()
+                for (postSnapshot in snapshot.children) {
+                    val user: Users? =
+                        postSnapshot.getValue(Users::class.java)
 
-                        Log.d(
-                            "mylog DISTANCE", (getKmFromLatLong(
-                                myLat.toFloat(),
-                                myLong.toFloat(),
-                                user!!.lat!!.toFloat(),
-                                user!!.long!!.toFloat()
-                            )).toString()
-                        )
-                        if (!user!!.phone.equals(
-                                MyUtils.getStringValue(
-                                    requireActivity(),
-                                    MyConstants.USER_PHONE
-                                )
-                            ) && !myLat.equals("") && (getKmFromLatLong(
-                                myLat.toFloat(),
-                                myLong.toFloat(),
-                                user!!.lat!!.toFloat(),
-                                user!!.long!!.toFloat()
-                            )) <= 1
-                        ) {
-                               chatNearbyList.add(user!!)
-                        }
-
-
-
-                        Handler().postDelayed({
-                            binding!!.rippleEffect.stopRippleAnimation()
-                            binding!!.rippleEffect.visibility = View.INVISIBLE
-                            binding!!.recyclerChatList.visibility = View.VISIBLE
-                            binding!!.imgSearch.visibility = View.VISIBLE
-                            binding!!.imgFilter.visibility = View.VISIBLE
-                            if (applyFilterType.equals("No Filter")) {
-                                setAdapter()
-                            } else if (applyFilterType.equals("Men")) {
-                                filterList =
-                                    chatNearbyList.filter { users -> users.gender.equals("Male") } as ArrayList<Users>
-                                setAdapterFilterList()
-                            } else if (applyFilterType.equals("Women")) {
-                                filterList =
-                                    chatNearbyList.filter { users -> users.gender.equals("Female") } as ArrayList<Users>
-                                setAdapterFilterList()
-                            } else if (applyFilterType.equals("Others")) {
-                                filterList =
-                                    chatNearbyList.filter { users -> users.gender.equals("Others") } as ArrayList<Users>
-                                setAdapterFilterList()
-                            }
-
-                        }, 3000)
-
-//                        binding!!.rippleEffect.stopRippleAnimation()
-//                        binding!!.rippleEffect.visibility = View.INVISIBLE
-                        // here you can access to name property like university.name
+                    Log.d(
+                        "mylog DISTANCE", (getKmFromLatLong(
+                            myLat.toFloat(),
+                            myLong.toFloat(),
+                            user!!.lat!!.toFloat(),
+                            user!!.long!!.toFloat()
+                        )).toString()
+                    )
+                    if (!user!!.phone.equals(
+                            MyUtils.getStringValue(
+                                requireActivity(),
+                                MyConstants.USER_PHONE
+                            )
+                        ) && !myLat.equals("") && (getKmFromLatLong(
+                            myLat.toFloat(),
+                            myLong.toFloat(),
+                            user!!.lat!!.toFloat(),
+                            user!!.long!!.toFloat()
+                        )) <= 1
+                    ) {
+                        chatNearbyList.add(user!!)
                     }
 
 
-                } else {
-                    binding!!.rippleEffect.visibility = View.INVISIBLE
-                    binding!!.recyclerChatList.visibility = View.VISIBLE
-                    binding!!.imgSearch.visibility = View.VISIBLE
-                }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
+                    Handler().postDelayed({
+                        binding!!.rippleEffect.stopRippleAnimation()
+                        binding!!.rippleEffect.visibility = View.INVISIBLE
+                        binding!!.recyclerChatList.visibility = View.VISIBLE
+                        binding!!.imgSearch.visibility = View.VISIBLE
+                        binding!!.imgFilter.visibility = View.VISIBLE
+                        if (applyFilterType.equals("No Filter")) {
+                            setAdapter()
+                        } else if (applyFilterType.equals("Men")) {
+                            filterList =
+                                chatNearbyList.filter { users -> users.gender.equals("Male") } as ArrayList<Users>
+                            setAdapterFilterList()
+                        } else if (applyFilterType.equals("Women")) {
+                            filterList =
+                                chatNearbyList.filter { users -> users.gender.equals("Female") } as ArrayList<Users>
+                            setAdapterFilterList()
+                        } else if (applyFilterType.equals("Others")) {
+                            filterList =
+                                chatNearbyList.filter { users -> users.gender.equals("Others") } as ArrayList<Users>
+                            setAdapterFilterList()
+                        }
+
+                    }, 3000)
+
+//                        binding!!.rippleEffect.stopRippleAnimation()
+//                        binding!!.rippleEffect.visibility = View.INVISIBLE
+                    // here you can access to name property like university.name
+                }
+
+
+            } else {
                 binding!!.rippleEffect.visibility = View.INVISIBLE
                 binding!!.recyclerChatList.visibility = View.VISIBLE
                 binding!!.imgSearch.visibility = View.VISIBLE
             }
+        }
 
-        })
+        override fun onCancelled(error: DatabaseError) {
+            binding!!.rippleEffect.visibility = View.INVISIBLE
+            binding!!.recyclerChatList.visibility = View.VISIBLE
+            binding!!.imgSearch.visibility = View.VISIBLE
+        }
+
+    })
+}
     }
 
     fun getKmFromLatLong(lat1: Float, lng1: Float, lat2: Float, lng2: Float): Float {
@@ -296,26 +305,55 @@ class NearbyFragment : Fragment() {
         return distanceInMeters / 1000
     }
 
-    override fun onResume() {
-        super.onResume()
-        when {
-            MyUtils.isAccessFineLocationGranted(requireContext()) -> {
-                when {
-                    MyUtils.isLocationEnabled(requireContext()) -> {
-                        setUpLocationListener()
-                    }
-                    else -> {
-                        MyUtils.showGPSNotEnabledDialog(requireContext())
+
+    fun checkLocationPermission() {
+        var alertType = ""
+        lateinit var perms: Array<String>
+        alertType = "This app needs access to your Location"
+        perms = arrayOf<String>(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
+        val rationale = alertType
+        val options: Permissions.Options = Permissions.Options()
+            .setRationaleDialogTitle("Info")
+            .setSettingsDialogTitle("Warning")
+
+        Permissions.check(
+            requireActivity()/*context*/,
+            perms,
+            rationale,
+            options,
+            object : PermissionHandler() {
+                override fun onGranted() {
+                    when {
+                        MyUtils.isLocationEnabled(requireContext()) -> {
+                            try{
+                                setUpLocationListener()
+                            }catch (e:Exception){
+
+                            }
+                        }
+                        else -> {
+                            MyUtils.showGPSNotEnabledDialog(requireContext())
+                        }
                     }
                 }
-            }
-            else -> {
-                MyUtils.requestAccessFineLocationPermission(
-                    requireActivity(),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
-        }
+
+                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                    checkLocationPermission()
+                }
+            })
+
+
+    }
+
+
+
+    override fun onResume() {
+        super.onResume()
+        checkLocationPermission()
     }
 
     private fun setUpLocationListener() {
@@ -354,7 +392,7 @@ class NearbyFragment : Fragment() {
 
                 var users: Users = Users();
 //                users.name = MyUtils.getStringValue(requireContext(), MyConstants.USER_NAME)
-                users.phone = MyUtils.getStringValue(requireContext(), MyConstants.USER_PHONE)
+                users.phone = MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE)
 //                users.image = MyUtils.getStringValue(requireContext(), MyConstants.USER_IMAGE)
 //                users.captions = MyUtils.getStringValue(requireContext(), MyConstants.USER_CAPTIONS)
 //                users.ghostMode=MyUtils.getStringValue(requireContext(),MyConstants.GHOST_MODE)
@@ -390,21 +428,23 @@ class NearbyFragment : Fragment() {
             locationCallback,
             Looper.getMainLooper()
         )
-
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        if(fusedLocationProviderClient!=null && locationCallback!=null)
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if(fusedLocationProviderClient!=null && locationCallback!=null)
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
     override fun onDetach() {
         super.onDetach()
+        if(fusedLocationProviderClient!=null && locationCallback!=null)
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 }
