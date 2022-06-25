@@ -14,9 +14,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -49,7 +51,6 @@ import com.rohit.chitForChat.databinding.ActivityChatLiveBinding
 import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.security.AccessController.getContext
 import java.util.*
 
 
@@ -62,6 +63,7 @@ class ChatLiveActivity : AppCompatActivity() {
     private var recordFile: File? = null
     private var senderId: String = ""
     private var receiverId: String = ""
+    private var currentPosition=-1
     var sentImage: Bitmap? = null
     var binding: ActivityChatLiveBinding? = null
     var roomId: String? = null
@@ -164,7 +166,6 @@ class ChatLiveActivity : AppCompatActivity() {
             var isTyping = false
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-
             }
 
             var timer = Timer();
@@ -216,41 +217,33 @@ class ChatLiveActivity : AppCompatActivity() {
         })
 
 
+
+        binding!!.rcChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                     currentPosition = getCurrentItem()
+                }
+            }
+        })
+
         binding!!.imgLike.setOnClickListener {
-            firebaseLikedUsers.child(receiverId).child(senderId).setValue("true")
-            binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-//            if (likeStatus.equals("0")) {
-//                firebaseUsers.child(receiverId).child("totalLikes")
-//                    .addListenerForSingleValueEvent(object : ValueEventListener {
-//                        override fun onDataChange(snapshot: DataSnapshot) {
-//                            if (snapshot.exists()) {
-//                                var likes = snapshot.getValue(String::class.java)!!.toInt();
-//                                likes++;
-//                                firebaseUsers.child(receiverId).child("totalLikes")
-//                                    .setValue(likes.toString()).addOnCompleteListener {
-//                                        MyUtils.showToast(
-//                                            this@ChatLiveActivity,
-//                                            "likes successfully"
-//                                        )
-//                                        likeStatus = "1"
-//                                        //set like of another user in our profile
-//                                        firebaseChatFriends.child(senderId).child(receiverId)
-//                                            .child("likedStatus").setValue("1")
-//                                        binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-//
-//                                    }
-//                            }
-//                        }
-//
-//                        override fun onCancelled(error: DatabaseError) {
-//
-//                        }
-//
-//                    })
-//
-//            } else {
-//                MyUtils.showToast(this, "Already liked")
-//            }
+            if(isLikedProfile==false){
+                firebaseLikedUsers.child(receiverId).child(senderId).setValue("true")
+                binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+                    if (!token.equals("")) {
+                        MyNotification.sendNotification(
+                            MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
+                            "has liked your profile.",
+                            token,
+                            MyConstants.NOTI_REQUEST_TYPE
+                        )
+                    }
+                isLikedProfile=true
+            }
+          else {
+                MyUtils.showToast(this, "Already liked")
+            }
         }
 
 
@@ -274,13 +267,17 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
+
+    var isLikedProfile=false
     private fun handleLikedStatus() {
         firebaseLikedUsers.child(receiverId).child(senderId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                    if(snapshot.exists()) {
+                       isLikedProfile=true
                            binding!!.imgLike.setImageResource(R.drawable.ic__liked)
                        } else {
+                           isLikedProfile=false
                            binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
                        }
 
@@ -294,19 +291,23 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
+    private fun getCurrentItem(): Int {
+        return (binding!!.rcChat.getLayoutManager() as LinearLayoutManager)
+            .findFirstCompletelyVisibleItemPosition()
+    }
     private fun getAnotherUserToken() {
         firebaseUsers.child(receiverId).child("token")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         token = snapshot.getValue(String::class.java)!!
+                    }else{
+                        token=""
                     }
                 }
-
                 override fun onCancelled(error: DatabaseError) {
 
                 }
-
             })
 
     }
@@ -329,7 +330,6 @@ class ChatLiveActivity : AppCompatActivity() {
                         checkVideoPermissions()
                     }
                     2 -> {
-
                         var location = MyUtils.getStringValue(
                             this@ChatLiveActivity,
                             MyConstants.USER_LATITUDE,
@@ -642,7 +642,7 @@ class ChatLiveActivity : AppCompatActivity() {
 
     private fun sendMessageOnFirebase(message: String?, messageType: String) {
         var message = message
-        var notificationMessage = " has sent you a new message"
+        var notificationMessage = "has sent you a new message"
         var key = firebaseChats.push().key
         var data: LiveChatModel = LiveChatModel(
             senderId,
@@ -662,23 +662,23 @@ class ChatLiveActivity : AppCompatActivity() {
                 MyUtils.stopProgress(this@ChatLiveActivity)
                 if (messageType.equals("image")) {
                     message = "Image"
-                    notificationMessage = " has sent you a image"
+                    notificationMessage = "has sent you a image"
                 }
 
                 if (messageType.equals("audio")) {
                     message = "Audio"
-                    notificationMessage = " has sent you a audio"
+                    notificationMessage = "has sent you a audio"
                 }
 
                 if (messageType.equals("video")) {
                     message = "Video"
-                    notificationMessage = " has sent you a video"
+                    notificationMessage = "has sent you a video"
 
                 }
 
                 if (messageType.equals("location")) {
                     message = "Location"
-                    notificationMessage = " has sent you a location"
+                    notificationMessage = "has sent you a location"
                 }
 
 //                firebaseChatFriends.child(senderId).child(receiverId).setValue(
@@ -789,7 +789,18 @@ class ChatLiveActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         var onlineStatus = snapshot.getValue(String::class.java)
-                        binding!!.txtOnlineStatus.setText(onlineStatus)
+                        if(!onlineStatus.equals("Online")){
+                            try{
+                                    binding!!.txtOnlineStatus.setText("Last Seen: "+getFormattedDate(onlineStatus!!.toLong())+"                                                ")
+                            }catch (e:Exception){
+                                binding!!.txtOnlineStatus.setText("Offline")
+                            }
+                        }else{
+                            binding!!.txtOnlineStatus.setText(onlineStatus)
+                        }
+                        Handler().postDelayed({
+                            binding!!.txtOnlineStatus.isSelected = true
+                        },3000)
                     }
                 }
 
@@ -820,7 +831,14 @@ class ChatLiveActivity : AppCompatActivity() {
                     binding!!.rcChat.setItemViewCacheSize(chatsList.size)
 //                    if (isScrolling) {
 //                        isScrolling = false
-                    binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+
+                    try {
+                        if (currentPosition == -1) {
+                            binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+                        } else {
+                            binding!!.rcChat.scrollToPosition(currentPosition)
+                        }
+                    }catch (e:java.lang.Exception){}
 
                     if(chatsList.size==1){
                     if (onLiveChatScreen) {
@@ -1001,10 +1019,71 @@ var audioPermissionEnable=false
                     MyConstants.USER_PHONE
                 )
             ).child(MyConstants.NODE_ONLINE_STATUS)
-                .setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
+                .setValue(Calendar.getInstance().timeInMillis.toString())
 
     }
 
 
+
+    fun getFormattedDate( smsTimeInMilis: Long): String? {
+        val smsTime: Calendar = Calendar.getInstance()
+        smsTime.setTimeInMillis(smsTimeInMilis)
+        val now: Calendar = Calendar.getInstance()
+        val dateTimeFormatString = "dd/MM/yyyy"
+        val HOURS = (60 * 60 * 60).toLong()
+
+        return if (now.get(Calendar.DATE) === smsTime.get(Calendar.DATE)) {
+            "Today at "+DateFormat.format("hh:mm a", smsTime).toString()
+        } else if (now.get(Calendar.DATE) - smsTime.get(Calendar.DATE) === 1) {
+            "Yesterday at"+DateFormat.format("hh:mm a", smsTime).toString()
+        } else if (now.get(Calendar.YEAR) === smsTime.get(Calendar.YEAR)) {
+            DateFormat.format(dateTimeFormatString, smsTime).toString()+" at "+DateFormat.format("hh:mm a", smsTime).toString()
+        } else {
+            DateFormat.format("dd/MM/yyyy", smsTime).toString()+" at "+DateFormat.format("hh:mm a", smsTime).toString()
+        }
+    }
+
+
+    fun getDisplayableTime(delta: Long): String? {
+        var difference: Long = 0
+        val mDate = Calendar.getInstance().timeInMillis
+        if (mDate >= delta) {
+            difference = mDate - delta
+            val seconds = difference / 1000
+            val minutes = seconds / 60
+            val hours = minutes / 60
+            val days = hours / 24
+            val months = days / 31
+            val years = days / 365
+            return if (seconds < 0) {
+                "not yet"
+            } else if (seconds < 60) {
+                if (seconds == 1L) "one second ago" else "$seconds seconds ago"
+            } else if (seconds < 120) {
+                "a minute ago"
+            } else if (seconds < 2700) // 45 * 60
+            {
+                "$minutes minutes ago"
+            } else if (seconds < 5400) // 90 * 60
+            {
+                "an hour ago"
+            } else if (seconds < 86400) // 24 * 60 * 60
+            {
+                "$hours hours ago"
+            } else if (seconds < 172800) // 48 * 60 * 60
+            {
+                "yesterday"
+            } else if (seconds < 2592000) // 30 * 24 * 60 * 60
+            {
+                "$days days ago"
+            } else if (seconds < 31104000) // 12 * 30 * 24 * 60 * 60
+            {
+                if (months <= 1) "one month ago" else "$days months ago"
+            } else {
+                if (years <= 1) "one year ago" else "$years years ago"
+            }
+        }
+        return null
+    }
 }
     

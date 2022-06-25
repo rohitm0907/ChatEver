@@ -1,14 +1,18 @@
 package com.rohit.chitForChat.Firebase
 
-import com.google.firebase.messaging.FirebaseMessagingService
-import com.google.firebase.messaging.RemoteMessage
-import androidx.annotation.RequiresApi
-import android.os.Build
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
 import com.rohit.chitForChat.ChatLiveActivity
+import com.rohit.chitForChat.HomeActivity
 import com.rohit.chitForChat.R
+import kotlin.random.Random
 
 class MyFireBaseMessagingService : FirebaseMessagingService() {
     var title: String? = null
@@ -39,8 +43,8 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
         // make the channel. The method has been discussed before.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             makeNotificationChannel(
-                "CHANNEL_1",
-                "Example channel",
+                title,
+                title,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
         }
@@ -50,19 +54,20 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
         // the second parameter is the channel id.
         // it should be the same as passed to the makeNotificationChannel() method
 
-//        if(type.equalsIgnoreCase(AppConstants.NOTI_REQUEST_TYPE)) {
-//            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-//                    new Intent(this, RequestsActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-//            notification.setContentIntent(contentIntent);
-//        }
+        val contentIntent = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, HomeActivity::class.java), PendingIntent.FLAG_MUTABLE
+        )
+        val id= Random(System.currentTimeMillis()).nextInt(1000)
+        notification.setContentIntent(contentIntent)
         notification
             .setSmallIcon(R.drawable.logo) // can use any other icon
             .setContentTitle(title)
             .setContentText(message)
-            .setNumber(1) // this shows a number in the notification dots
+//         this shows a number in the notification dots
         val notificationManager =
             (applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-        notificationManager.notify(1, notification.build())
+        notificationManager.notify(title!!.get(0).toInt(), notification.build())
         // it is better to not use 0 as notification id, so used 1.
 
 

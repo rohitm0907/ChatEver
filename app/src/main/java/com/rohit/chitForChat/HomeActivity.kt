@@ -99,7 +99,7 @@ class HomeActivity : AppCompatActivity() {
                     this@HomeActivity,
                     MyConstants.USER_PHONE
                 )
-            ).child(MyConstants.NODE_ONLINE_STATUS).setValue(MyUtils.convertIntoTime(Calendar.getInstance().timeInMillis.toString()))
+            ).child(MyConstants.NODE_ONLINE_STATUS).setValue(Calendar.getInstance().timeInMillis.toString())
 
     }
 

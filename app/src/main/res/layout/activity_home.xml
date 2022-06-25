@@ -10,6 +10,9 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/myTablayout"
         android:layout_width="match_parent"
+        app:tabMode="scrollable"
+        app:tabGravity="center"
+        android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content" />
 
     <androidx.viewpager.widget.ViewPager

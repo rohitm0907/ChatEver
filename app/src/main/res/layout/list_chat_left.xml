@@ -9,8 +9,15 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:text="12/10/21"
+        android:textStyle="bold"
+        android:elevation="3dp"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+      android:layout_marginVertical="10dp"
         android:textColor="@color/app_color"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:background="@drawable/bg_date"
+       />
 
     <RelativeLayout
         android:id="@+id/rlView"

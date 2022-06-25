@@ -17,6 +17,7 @@ import com.rohit.chitForChat.databinding.FragmentSettingsBinding
 import com.suke.widget.SwitchButton
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.android.synthetic.main.dialog_yes_no.*
+import java.util.*
 
 
 class Settings : Fragment() {
@@ -116,7 +117,6 @@ showDialog("Are you sure you wants to logout ?");        }
 
 
     fun showDialog(message:String){
-
         var dialog:Dialog=Dialog(requireContext())
         dialog.setContentView(R.layout.dialog_yes_no)
         dialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -136,7 +136,7 @@ showDialog("Are you sure you wants to logout ?");        }
                         requireContext(),
                         MyConstants.USER_PHONE
                     )
-                ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Offline")
+                ).child(MyConstants.NODE_ONLINE_STATUS).setValue(Calendar.getInstance().timeInMillis.toString())
             }
 
             firebaseUsers.child(

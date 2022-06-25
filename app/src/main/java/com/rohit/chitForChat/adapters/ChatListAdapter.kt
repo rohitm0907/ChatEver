@@ -223,6 +223,31 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                         .addOnSuccessListener(OnSuccessListener {
                             MyUtils.showToast(context, "Unblock User")
                         })
+
+
+
+                    firebaseUsers.child(chatFriendList.get(position).userId.toString())
+                        .child("token")
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    var token = snapshot.getValue(String::class.java)!!
+                                    MyNotification.sendNotification(
+                                        MyUtils.getStringValue(context, MyConstants.USER_NAME)
+                                            .toString(),
+                                        "You have been Unblock",
+                                        token,
+                                        MyConstants.NOTI_REQUEST_TYPE
+                                    )
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+
+                            }
+
+                        })
+
                 }
                 R.id.txtDeleteChat -> {
                     firebasefriendList.child(

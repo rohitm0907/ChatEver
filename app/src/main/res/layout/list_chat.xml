@@ -55,8 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtName"
             android:layout_marginLeft="10dp"
-            android:singleLine="true"
             android:layout_toRightOf="@id/imgUser"
+            android:singleLine="true"
             android:textColor="@color/black" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>
