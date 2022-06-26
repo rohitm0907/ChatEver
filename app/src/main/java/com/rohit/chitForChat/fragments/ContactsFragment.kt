@@ -140,8 +140,7 @@ handleSearching()
                         postSnapshot.getValue(Users::class.java)
                     if(!user!!.phone.equals(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE))) {
                         listAllUsers.add(user!!)
-                        MyUtils.listAllUsersNumbers.add(PhoneNumberWithoutCountryCode(user!!.phone.toString())!!)
-
+                        MyUtils.listAllUsersNumbers.add(user!!.phone.toString().replace("+",""))
                     }
                 }
 
@@ -197,7 +196,7 @@ private fun setAdapter() {
                 phones!!.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
             var contact=ContactModel()
             contact.name=name
-            contact.mobileNumber=PhoneNumberWithoutCountryCode(phoneNumber.replace(" ",""))
+            contact.mobileNumber=phoneNumber.replace(" ","").replace("+","")
             var list=listContacts.filter { contactModel ->
                 contactModel.mobileNumber==contact.mobileNumber
             }

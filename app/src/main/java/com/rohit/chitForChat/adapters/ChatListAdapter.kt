@@ -117,7 +117,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
                                         if (snapshot.exists()) {
 
-
                                             MyUtils.showProfileDialog(
                                                 context,
                                                 chatFriendList.get(position).image.toString(),

@@ -290,7 +290,7 @@ Log.d("position",position.toString())
             }
 
 
-           holder. audioSeekbar!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+           holder.audioSeekbar!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
 
                 }
@@ -421,11 +421,14 @@ Log.d("position",position.toString())
             }
         }
 
-//        dialog.setOnCancelListener {
-//            if(exoPlayer!=null){
-//                exoPlayer.stop()
-//            }
-//        }
+
+
+
+        dialog.setOnCancelListener {
+            if(exoPlayer!=null){
+                exoPlayer.stop()
+            }
+        }
 
         dialog.show()
 

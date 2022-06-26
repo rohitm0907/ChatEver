@@ -8,23 +8,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="12/10/21"
-        android:textStyle="bold"
+        android:layout_marginVertical="10dp"
+        android:background="@drawable/bg_date"
         android:elevation="3dp"
         android:paddingHorizontal="20dp"
         android:paddingVertical="10dp"
-      android:layout_marginVertical="10dp"
+        android:text="12/10/21"
         android:textColor="@color/app_color"
-        android:visibility="gone"
-        android:background="@drawable/bg_date"
-       />
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rlView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtdate"
-        android:layout_margin="5dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="5dp"
         android:background="@drawable/bg_chat_left"
         android:elevation="10dp"
         android:padding="5dp">
@@ -39,22 +41,24 @@
                 android:id="@+id/txtMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="100dp"
                 android:padding="10dp"
                 android:text="Message"
-                android:visibility="gone"
-                android:textColor="@color/white" />
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:textIsSelectable="true"
+                android:visibility="gone" />
 
 
-
-                <ImageView
-                    android:id="@+id/imgMessage"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/user"
-                    android:visibility="gone" />
-
-
+            <ImageView
+                android:id="@+id/imgMessage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginHorizontal="5dp"
+                android:layout_marginBottom="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/user"
+                android:visibility="gone" />
 
 
             <ImageView
@@ -62,33 +66,31 @@
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:scaleType="fitXY"
-                android:visibility="gone"
-                android:src="@drawable/ic_map" />
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:id="@+id/imgPlay"
-
-                    android:visibility="gone"
-                    android:layout_centerInParent="true"
-                    android:src="@drawable/ic_play" />
-
+                android:src="@drawable/ic_map"
+                android:visibility="gone" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/audioPlay"
-                android:layout_centerVertical="true"
+                android:id="@+id/imgPlay"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
                 android:src="@drawable/ic_play"
-                />
+                android:visibility="gone" />
+
+
             <ImageView
+                android:id="@+id/audioPlay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/audioPause"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_pause"
-                />
+                android:src="@drawable/ic_play" />
+
+            <ImageView
+                android:id="@+id/audioPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_pause" />
 
 
             <SeekBar
@@ -105,21 +107,25 @@
             android:id="@+id/txtTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/rlMessage"
+            android:layout_below="@+id/rlMessage"
+            android:layout_marginStart="-55dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="-10dp"
             android:layout_toRightOf="@+id/rlMessage"
             android:text="10:19 pm"
-            android:layout_marginLeft="10dp"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textSize="12sp" />
 
         <View
             android:id="@+id/viewSeen"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_alignBottom="@+id/rlMessage"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_below="@+id/rlMessage"
             android:layout_marginLeft="5dp"
-            android:layout_marginBottom="3dp"
+            android:layout_marginTop="-4dp"
             android:layout_toRightOf="@id/txtTime"
-            android:background="@drawable/bg_message_unseen" />
+            android:background="@drawable/bg_message_unseen"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

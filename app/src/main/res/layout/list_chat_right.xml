@@ -25,7 +25,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtdate"
         android:layout_alignParentRight="true"
-        android:layout_margin="5dp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="50dp"
         android:background="@drawable/bg_chat_right"
         android:elevation="10dp"
         android:padding="5dp">
@@ -41,7 +43,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textIsSelectable="true"
                 android:text="Message"
+                android:textSize="14sp"
+                android:minWidth="100dp"
                 android:textColor="@color/black"
                 android:visibility="invisible" />
 
@@ -52,7 +57,10 @@
                 android:layout_height="150dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/user"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:layout_marginHorizontal="5dp"
+                android:layout_marginBottom="10dp"
+                />
 
             <ImageView
                 android:id="@+id/imgPlay"
@@ -85,6 +93,7 @@
                 android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_marginBottom="5dp"
                 android:layout_toRightOf="@id/audioPlay"
                 android:visibility="visible" />
 
@@ -103,18 +112,20 @@
             android:id="@+id/txtTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/rlMessage"
-            android:layout_marginLeft="10dp"
+            android:layout_below="@id/rlMessage"
+            android:layout_marginLeft="-70dp"
+            android:layout_marginTop="-10dp"
             android:layout_toRightOf="@+id/rlMessage"
-            android:text="10:19 pm" />
+            android:text="10:19 pm"
+            android:textSize="12sp" />
 
         <View
             android:id="@+id/viewSeen"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_alignBottom="@+id/rlMessage"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_below="@+id/rlMessage"
             android:layout_marginLeft="5dp"
-            android:layout_marginBottom="3dp"
+            android:layout_marginTop="-4dp"
             android:layout_toRightOf="@id/txtTime"
             android:background="@drawable/bg_message_seen" />
 

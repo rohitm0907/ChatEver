@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -83,73 +83,59 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcChat"
-        app:layout_constraintTop_toBottomOf="@id/rlTopBar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_above="@id/rlBottomBar"
-        android:layout_below="@id/rlTopBar"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/edtMessage"
+        android:layout_below="@+id/rlTopBar"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/rlBottomBar"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/list_chat_left" />
 
-    <RelativeLayout
-        android:id="@+id/rlBottomBar"
-        android:layout_width="match_parent"
-        android:background="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_height="60dp"
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/rlBottomBar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:background="@color/white"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:elevation="2dp"-->
+<!--        android:padding="5dp">-->
+
+
+    <ImageView
+        android:id="@+id/imgCamera"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentBottom="true"
-        android:elevation="2dp"
-        android:padding="5dp">
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <EditText
+        android:id="@+id/edtMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="1dp"
+        android:layout_toLeftOf="@id/imgSend"
+        android:layout_toRightOf="@+id/imgCamera"
+        android:background="@drawable/bg_edt_message"
+        android:elevation="5dp"
+        android:hint="message..."
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imgSend"
+        app:layout_constraintStart_toEndOf="@+id/imgCamera" />
 
-        <ImageView
-            android:id="@+id/imgCamera"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_add"/>
-
-        <EditText
-            android:id="@+id/edtMessage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/imgSend"
-            android:layout_toRightOf="@+id/imgCamera"
-            android:elevation="5dp"
-            android:background="@drawable/bg_edt_message"
-            android:hint="message..."
-            android:padding="10dp" />
 
         <ImageView
             android:id="@+id/imgSend"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="50dp"
-            android:src="@drawable/ic_send" />
-
-
-        <com.devlomi.record_view.RecordView
-            android:id="@+id/recordView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/recordButton"
-            android:elevation="1dp"
-            app:counter_time_color="#ff0000"
-            app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
-            app:slide_to_cancel_arrow_color="#000000"
-            app:slide_to_cancel_bounds="8dp"
-            app:slide_to_cancel_margin_right="10dp"
-            app:slide_to_cancel_text="Slide To Cancel" />
-
-        <com.devlomi.record_view.RecordButton
-            android:id="@+id/recordButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -157,7 +143,44 @@
             android:layout_centerVertical="true"
             android:background="@drawable/recv_bg_mic"
             android:scaleType="centerInside"
-            app:mic_icon="@drawable/recv_ic_mic_white" />
-    </RelativeLayout>
+            android:visibility="invisible"
+            android:layout_margin="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_send" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.devlomi.record_view.RecordView
+        android:id="@+id/recordView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="1dp"
+        android:layout_marginBottom="5dp"
+        android:layout_toLeftOf="@id/recordButton"
+        android:elevation="1dp"
+        app:counter_time_color="#ff0000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
+        app:slide_to_cancel_arrow_color="#000000"
+        app:slide_to_cancel_bounds="8dp"
+        app:slide_to_cancel_margin_right="10dp"
+        app:slide_to_cancel_text="Slide To Cancel" />
+
+    <com.devlomi.record_view.RecordButton
+        android:id="@+id/recordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="5dp"
+        android:background="@drawable/recv_bg_mic"
+        android:scaleType="centerInside"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:mic_icon="@drawable/recv_ic_mic_white" />
+<!--    </RelativeLayout>-->
+
+</RelativeLayout>

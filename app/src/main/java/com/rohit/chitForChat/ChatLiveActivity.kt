@@ -63,11 +63,12 @@ class ChatLiveActivity : AppCompatActivity() {
     private var recordFile: File? = null
     private var senderId: String = ""
     private var receiverId: String = ""
-    private var currentPosition=-1
+    private var currentPosition = -1
     var sentImage: Bitmap? = null
     var binding: ActivityChatLiveBinding? = null
     var roomId: String? = null
     var onLiveChatScreen = true
+    var isSendMessage = false
     var firebaseChats =
         FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
@@ -111,7 +112,7 @@ class ChatLiveActivity : AppCompatActivity() {
 
     }
 
-    var lastDeleteTime:Long=0
+    var lastDeleteTime: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
@@ -120,13 +121,13 @@ class ChatLiveActivity : AppCompatActivity() {
         setContentView(binding!!.root)
 
         getSupportActionBar()!!.hide();
-        REQUEST_TAKE_GALLERY_VIDEO=1256
-        VIDEO_CAPTURE=2345
+        REQUEST_TAKE_GALLERY_VIDEO = 1256
+        VIDEO_CAPTURE = 2345
 
         binding!!.txtName.setText(intent.getStringExtra(MyConstants.OTHER_USER_NAME))
 
-        if (intent.getStringExtra(MyConstants.DELETE_TIME)!=null) {
-            lastDeleteTime= intent.getStringExtra(MyConstants.DELETE_TIME)!!.toLong()
+        if (intent.getStringExtra(MyConstants.DELETE_TIME) != null) {
+            lastDeleteTime = intent.getStringExtra(MyConstants.DELETE_TIME)!!.toLong()
         }
         audioRecording()
         if (!intent.getStringExtra(MyConstants.OTHER_USER_IMAGE).equals("")) {
@@ -165,7 +166,18 @@ class ChatLiveActivity : AppCompatActivity() {
         binding!!.edtMessage.addTextChangedListener(object : TextWatcher {
             var isTyping = false
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+                if (s.length != 0)
+                    binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+
+                if (s.length == 0) {
+                    binding!!.recordButton.visibility = View.VISIBLE
+                    binding!!.imgSend.visibility = View.INVISIBLE
+
+                } else {
+                    binding!!.recordButton.visibility = View.INVISIBLE
+                    binding!!.imgSend.visibility = View.VISIBLE
+                }
+
             }
 
             var timer = Timer();
@@ -222,26 +234,25 @@ class ChatLiveActivity : AppCompatActivity() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                     currentPosition = getCurrentItem()
+                    currentPosition = getCurrentItem()
                 }
             }
         })
 
         binding!!.imgLike.setOnClickListener {
-            if(isLikedProfile==false){
+            if (isLikedProfile == false) {
                 firebaseLikedUsers.child(receiverId).child(senderId).setValue("true")
                 binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-                    if (!token.equals("")) {
-                        MyNotification.sendNotification(
-                            MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
-                            "has liked your profile.",
-                            token,
-                            MyConstants.NOTI_REQUEST_TYPE
-                        )
-                    }
-                isLikedProfile=true
-            }
-          else {
+                if (!token.equals("")) {
+                    MyNotification.sendNotification(
+                        MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
+                        "has liked your profile.",
+                        token,
+                        MyConstants.NOTI_REQUEST_TYPE
+                    )
+                }
+                isLikedProfile = true
+            } else {
                 MyUtils.showToast(this, "Already liked")
             }
         }
@@ -268,18 +279,18 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
 
-    var isLikedProfile=false
+    var isLikedProfile = false
     private fun handleLikedStatus() {
         firebaseLikedUsers.child(receiverId).child(senderId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                   if(snapshot.exists()) {
-                       isLikedProfile=true
-                           binding!!.imgLike.setImageResource(R.drawable.ic__liked)
-                       } else {
-                           isLikedProfile=false
-                           binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
-                       }
+                    if (snapshot.exists()) {
+                        isLikedProfile = true
+                        binding!!.imgLike.setImageResource(R.drawable.ic__liked)
+                    } else {
+                        isLikedProfile = false
+                        binding!!.imgLike.setImageResource(R.drawable.ic__dislike)
+                    }
 
                 }
 
@@ -295,16 +306,18 @@ class ChatLiveActivity : AppCompatActivity() {
         return (binding!!.rcChat.getLayoutManager() as LinearLayoutManager)
             .findFirstCompletelyVisibleItemPosition()
     }
+
     private fun getAnotherUserToken() {
         firebaseUsers.child(receiverId).child("token")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         token = snapshot.getValue(String::class.java)!!
-                    }else{
-                        token=""
+                    } else {
+                        token = ""
                     }
                 }
+
                 override fun onCancelled(error: DatabaseError) {
 
                 }
@@ -390,7 +403,10 @@ class ChatLiveActivity : AppCompatActivity() {
 
                 }
 
-                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                override fun onDenied(
+                    context: Context?,
+                    deniedPermissions: java.util.ArrayList<String?>?
+                ) {
                     // permission denied, block the feature.
                 }
             })
@@ -399,7 +415,6 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun checkVideoPermissions() {
-
 
 
         var alertType = ""
@@ -428,13 +443,13 @@ class ChatLiveActivity : AppCompatActivity() {
                     selectVideo()
                 }
 
-                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                override fun onDenied(
+                    context: Context?,
+                    deniedPermissions: java.util.ArrayList<String?>?
+                ) {
                     // permission denied, block the feature.
                 }
             })
-
-
-
 
 
     }
@@ -481,7 +496,7 @@ class ChatLiveActivity : AppCompatActivity() {
             if (hasPerm == PackageManager.PERMISSION_GRANTED) {
                 val options = arrayOf<CharSequence>("Take Video", "Choose From Gallery", "Cancel")
                 val builder: AlertDialog.Builder =
-                  AlertDialog.Builder(this)
+                    AlertDialog.Builder(this)
                 builder.setTitle("Select Option")
                 builder.setItems(options, DialogInterface.OnClickListener { dialog, item ->
                     if (options[item] == "Take Video") {
@@ -502,8 +517,7 @@ class ChatLiveActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchvideoFromGallery()
-    {
+    private fun fetchvideoFromGallery() {
         val intent = Intent()
         intent.type = "video/*"
         intent.action = Intent.ACTION_GET_CONTENT
@@ -520,8 +534,8 @@ class ChatLiveActivity : AppCompatActivity() {
 
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 5)
-       // fileUri = Uri.fromFile(mediaFile)
-        fileUri= FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", image);
+        // fileUri = Uri.fromFile(mediaFile)
+        fileUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", image);
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
         startActivityForResult(intent, VIDEO_CAPTURE)
@@ -533,59 +547,61 @@ class ChatLiveActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             //Image Uri will not be null for RESULT_OK
 
-            if(requestCode==VIDEO_CAPTURE)
-            {
+            if (requestCode == VIDEO_CAPTURE) {
                 val selectedPhotoUrl: Uri = data!!.getData()!!
                 uploadVideoOnFirebase(selectedPhotoUrl)
-            }else
+            } else
 
-            if (requestCode == ImagePicker.REQUEST_CODE) {
-                val uri: Uri = data?.data!!
-                // Use Uri object instead of File to avoid storage permissions
+                if (requestCode == ImagePicker.REQUEST_CODE) {
+                    val uri: Uri = data?.data!!
+                    // Use Uri object instead of File to avoid storage permissions
 
-                MyUtils.showProgress(this@ChatLiveActivity)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    sentImage = ImageDecoder.decodeBitmap(
-                        ImageDecoder.createSource(
+                    MyUtils.showProgress(this@ChatLiveActivity)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        sentImage = ImageDecoder.decodeBitmap(
+                            ImageDecoder.createSource(
+                                this@ChatLiveActivity.contentResolver,
+                                uri
+                            )
+                        )
+                    } else {
+                        MediaStore.Images.Media.getBitmap(
                             this@ChatLiveActivity.contentResolver,
                             uri
                         )
-                    )
-                } else {
-                    MediaStore.Images.Media.getBitmap(this@ChatLiveActivity.contentResolver, uri)
-                }
+                    }
 
-                uploadImageOnFirebase(sentImage!!)
-            } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
-                var mPaths: List<String> =
-                    data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
+                    uploadImageOnFirebase(sentImage!!)
+                } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
+                    var mPaths: List<String> =
+                        data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
 //
-                mPaths.forEachIndexed { index, s ->
-                    Log.d("video url",mPaths.get(index).toUri().toString())
+                    mPaths.forEachIndexed { index, s ->
+                        Log.d("video url", mPaths.get(index).toUri().toString())
 
-                    uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
+                        uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
+                        //Your Code
+
+
+                    }
+                } else if (requestCode == 1) {
+                    var uri = data!!.data!!.path!!.toUri()
+                    uploadVideoOnFirebase(uri!!)
                     //Your Code
 
 
+                } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                    Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+                } else if (requestCode === REQUEST_TAKE_GALLERY_VIDEO) {
+                    val selectedImageUri: Uri = data!!.getData()!!
+
+                    // OI FILE Manager
+                    var filemanagerstring = selectedImageUri.path
+
+                    // MEDIA GALLERY
+                    var selectedImagePath = getPath(selectedImageUri)
+                    uploadVideoOnFirebase(selectedImageUri)
                 }
-            } else if (requestCode == 1) {
-                var uri = data!!.data!!.path!!.toUri()
-                uploadVideoOnFirebase(uri!!)
-                //Your Code
-
-
-            } else if (resultCode == ImagePicker.RESULT_ERROR) {
-                Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
-            } else if (requestCode === REQUEST_TAKE_GALLERY_VIDEO) {
-                val selectedImageUri: Uri = data!!.getData()!!
-
-                // OI FILE Manager
-               var filemanagerstring = selectedImageUri.path
-
-                // MEDIA GALLERY
-                var selectedImagePath = getPath(selectedImageUri)
-                uploadVideoOnFirebase(selectedImageUri)
-            }
         } else {
             Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()
 
@@ -593,7 +609,7 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun uploadVideoOnFirebase(videoUrl: Uri) {
-       Log.d("mylog",videoUrl.toString())
+        Log.d("mylog", videoUrl.toString())
         val storage: FirebaseStorage = FirebaseStorage.getInstance()
         val storageRef: StorageReference = storage.getReference()
 //        var file=File(videoUrl)
@@ -641,6 +657,7 @@ class ChatLiveActivity : AppCompatActivity() {
     }
 
     private fun sendMessageOnFirebase(message: String?, messageType: String) {
+        isSendMessage = true
         var message = message
         var notificationMessage = "has sent you a new message"
         var key = firebaseChats.push().key
@@ -697,7 +714,7 @@ class ChatLiveActivity : AppCompatActivity() {
                 var senderData: HashMap<String, String> = HashMap<String, String>()
                 senderData.put("userId", receiverId)
                 senderData.put(
-                    "name",intent.getStringExtra(MyConstants.OTHER_USER_NAME).toString()
+                    "name", intent.getStringExtra(MyConstants.OTHER_USER_NAME).toString()
                 )
                 senderData.put("lastMessage", "New Message")
                 senderData.put(
@@ -707,7 +724,8 @@ class ChatLiveActivity : AppCompatActivity() {
                 senderData.put("seenStatus", "1")
                 senderData.put("blockStatus", "0")
                 senderData.put("time", Calendar.getInstance().time.time.toString())
-                firebaseChatFriends.child(senderId).child(receiverId).updateChildren(senderData as Map<String, Any>)
+                firebaseChatFriends.child(senderId).child(receiverId)
+                    .updateChildren(senderData as Map<String, Any>)
 
 
                 var data: HashMap<String, String> = HashMap<String, String>()
@@ -735,7 +753,7 @@ class ChatLiveActivity : AppCompatActivity() {
                 ).addOnCompleteListener {
                     if (!token.equals("")) {
                         MyNotification.sendNotification(
-                            MyUtils.getStringValue(this,MyConstants.USER_NAME).toString(),
+                            MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
                             notificationMessage,
                             token,
                             MyConstants.NOTI_REQUEST_TYPE
@@ -744,9 +762,9 @@ class ChatLiveActivity : AppCompatActivity() {
                 }
                 binding!!.edtMessage.setText("")
 
-                if(chatsList.size==0 || chatsList.size==1){
-                    if(intent.getStringExtra(MyConstants.FROM) == null){
-                        if(!MyUtils.listFriends.contains(receiverId)) {
+                if (chatsList.size == 0 || chatsList.size == 1) {
+                    if (intent.getStringExtra(MyConstants.FROM) == null) {
+                        if (!MyUtils.listFriends.contains(receiverId)) {
                             MyUtils.listFriends.add(receiverId)
                         }
                     }
@@ -789,18 +807,22 @@ class ChatLiveActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         var onlineStatus = snapshot.getValue(String::class.java)
-                        if(!onlineStatus.equals("Online")){
-                            try{
-                                    binding!!.txtOnlineStatus.setText("Last Seen: "+getFormattedDate(onlineStatus!!.toLong())+"                                                ")
-                            }catch (e:Exception){
+                        if (!onlineStatus.equals("Online")) {
+                            try {
+                                binding!!.txtOnlineStatus.setText(
+                                    "Last Seen: " + getFormattedDate(
+                                        onlineStatus!!.toLong()
+                                    ) + "                                                "
+                                )
+                            } catch (e: Exception) {
                                 binding!!.txtOnlineStatus.setText("Offline")
                             }
-                        }else{
+                        } else {
                             binding!!.txtOnlineStatus.setText(onlineStatus)
                         }
                         Handler().postDelayed({
                             binding!!.txtOnlineStatus.isSelected = true
-                        },3000)
+                        }, 3000)
                     }
                 }
 
@@ -818,9 +840,9 @@ class ChatLiveActivity : AppCompatActivity() {
                     chatsList.clear()
                     for (postSnapshot in snapshot.children) {
                         val chat: LiveChatModel? = postSnapshot.getValue(LiveChatModel::class.java)
-                       if(chat!!.time!!.toLong()>lastDeleteTime){
-                           chatsList.add(chat!!)
-                       }
+                        if (chat!!.time!!.toLong() > lastDeleteTime) {
+                            chatsList.add(chat!!)
+                        }
 //                         here you can access to name property like university.name
 
                     }
@@ -833,30 +855,41 @@ class ChatLiveActivity : AppCompatActivity() {
 //                        isScrolling = false
 
                     try {
-                        if (currentPosition == -1) {
+                        if (isSendMessage) {
+                            isSendMessage = false
                             binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+
                         } else {
-                            binding!!.rcChat.scrollToPosition(currentPosition)
+                            if (currentPosition == -1) {
+                                binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+                            } else {
+                                binding!!.rcChat.scrollToPosition(currentPosition)
+                            }
+
                         }
-                    }catch (e:java.lang.Exception){}
-
-                    if(chatsList.size==1){
-                    if (onLiveChatScreen) {
-                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus").addListenerForSingleValueEvent(object :ValueEventListener{
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if(snapshot.exists()){
-                                    firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
-                                        .setValue("1")
-                                }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-
-                            }
-                        })
-
+                    } catch (e: java.lang.Exception) {
                     }
-                    }else{
+
+                    if (chatsList.size == 1) {
+                        if (onLiveChatScreen) {
+                            firebaseChatFriends.child(senderId).child(receiverId)
+                                .child("seenStatus")
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            firebaseChatFriends.child(senderId).child(receiverId)
+                                                .child("seenStatus")
+                                                .setValue("1")
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+
+                                    }
+                                })
+
+                        }
+                    } else {
                         firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
                             .setValue("1")
                     }
@@ -925,7 +958,7 @@ class ChatLiveActivity : AppCompatActivity() {
 
     private fun checkAudioPermission(): Boolean {
         val permission = Manifest.permission.RECORD_AUDIO
-        val res: Int =checkCallingOrSelfPermission(permission)
+        val res: Int = checkCallingOrSelfPermission(permission)
         return res == PackageManager.PERMISSION_GRANTED
     }
 
@@ -950,12 +983,12 @@ class ChatLiveActivity : AppCompatActivity() {
             }
             .request { allGranted, grantedList, deniedList ->
                 if (allGranted) {
-                    if(audioPermissionEnable){
+                    if (audioPermissionEnable) {
                         binding!!.imgCamera.visibility = View.GONE
                         binding!!.imgSend.visibility = View.GONE
                         binding!!.edtMessage.visibility = View.GONE
-                    }else{
-                        audioPermissionEnable=true
+                    } else {
+                        audioPermissionEnable = true
                     }
 
                     audioRecorder = AudioRecorder()
@@ -993,11 +1026,11 @@ class ChatLiveActivity : AppCompatActivity() {
 //        firebaseChats.removeEventListener(stateValueEventListner!!);
     }
 
-var audioPermissionEnable=false
+    var audioPermissionEnable = false
     override fun onResume() {
         super.onResume()
 
-        audioPermissionEnable=checkAudioPermission()
+        audioPermissionEnable = checkAudioPermission()
 
 
         if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE).equals(""))
@@ -1023,8 +1056,7 @@ var audioPermissionEnable=false
     }
 
 
-
-    fun getFormattedDate( smsTimeInMilis: Long): String? {
+    fun getFormattedDate(smsTimeInMilis: Long): String? {
         val smsTime: Calendar = Calendar.getInstance()
         smsTime.setTimeInMillis(smsTimeInMilis)
         val now: Calendar = Calendar.getInstance()
@@ -1032,13 +1064,15 @@ var audioPermissionEnable=false
         val HOURS = (60 * 60 * 60).toLong()
 
         return if (now.get(Calendar.DATE) === smsTime.get(Calendar.DATE)) {
-            "Today at "+DateFormat.format("hh:mm a", smsTime).toString()
+            "Today at " + DateFormat.format("hh:mm a", smsTime).toString()
         } else if (now.get(Calendar.DATE) - smsTime.get(Calendar.DATE) === 1) {
-            "Yesterday at "+DateFormat.format("hh:mm a", smsTime).toString()
+            "Yesterday at " + DateFormat.format("hh:mm a", smsTime).toString()
         } else if (now.get(Calendar.YEAR) === smsTime.get(Calendar.YEAR)) {
-            DateFormat.format(dateTimeFormatString, smsTime).toString()+" at "+DateFormat.format("hh:mm a", smsTime).toString()
+            DateFormat.format(dateTimeFormatString, smsTime)
+                .toString() + " at " + DateFormat.format("hh:mm a", smsTime).toString()
         } else {
-            DateFormat.format("dd/MM/yyyy", smsTime).toString()+" at "+DateFormat.format("hh:mm a", smsTime).toString()
+            DateFormat.format("dd/MM/yyyy", smsTime)
+                .toString() + " at " + DateFormat.format("hh:mm a", smsTime).toString()
         }
     }
 

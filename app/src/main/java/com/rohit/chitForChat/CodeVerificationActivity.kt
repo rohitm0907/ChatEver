@@ -33,13 +33,13 @@ class CodeVerificationActivity : AppCompatActivity() {
         var binding = ActivityCodeVerificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         auth = FirebaseAuth.getInstance()
-        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
-        binding.txtMobile.setText(intent.getStringExtra(MyConstants.COUNTRY_CODE)+intent.getStringExtra(MyConstants.PHONE_NUMBER))
+//        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
+        binding.txtMobile.setText("+"+intent.getStringExtra(MyConstants.PHONE_NUMBER))
         binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
             override fun onOtpCompleted(otp: String) {
                 // do Stuff
-                verifyOtp(otp)
-               // checkAlreadyRegister()
+//                verifyOtp(otp)
+                checkAlreadyRegister()
             }
         })
 
@@ -119,7 +119,7 @@ class CodeVerificationActivity : AppCompatActivity() {
         }
 
         val options = PhoneAuthOptions.newBuilder(auth!!)
-            .setPhoneNumber(intent.getStringExtra(MyConstants.COUNTRY_CODE) + phoneNumber)       // Phone number to verify
+            .setPhoneNumber( "+$phoneNumber")       // Phone number to verify
             .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
             .setActivity(this)                 // Activity (for callback binding)
             .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks

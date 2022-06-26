@@ -57,6 +57,7 @@ class NearbyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fetchNearbyList = false
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireActivity().applicationContext)
 
@@ -371,6 +372,7 @@ class NearbyFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
         checkLocationPermission()
     }
 
