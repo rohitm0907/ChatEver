@@ -38,11 +38,11 @@
             android:layout_alignParentRight="true"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:text="Invite"
-           android:textSize="12sp"
-            android:textAllCaps="false"
             android:background="@drawable/bg_invite"
-            android:textColor="@color/white" />
+            android:text="Invite"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
 
 
 

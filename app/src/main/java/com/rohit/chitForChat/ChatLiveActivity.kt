@@ -1020,7 +1020,6 @@ var audioPermissionEnable=false
                 )
             ).child(MyConstants.NODE_ONLINE_STATUS)
                 .setValue(Calendar.getInstance().timeInMillis.toString())
-
     }
 
 
@@ -1035,7 +1034,7 @@ var audioPermissionEnable=false
         return if (now.get(Calendar.DATE) === smsTime.get(Calendar.DATE)) {
             "Today at "+DateFormat.format("hh:mm a", smsTime).toString()
         } else if (now.get(Calendar.DATE) - smsTime.get(Calendar.DATE) === 1) {
-            "Yesterday at"+DateFormat.format("hh:mm a", smsTime).toString()
+            "Yesterday at "+DateFormat.format("hh:mm a", smsTime).toString()
         } else if (now.get(Calendar.YEAR) === smsTime.get(Calendar.YEAR)) {
             DateFormat.format(dateTimeFormatString, smsTime).toString()+" at "+DateFormat.format("hh:mm a", smsTime).toString()
         } else {

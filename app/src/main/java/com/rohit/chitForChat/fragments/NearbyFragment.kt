@@ -23,12 +23,14 @@ import com.rohit.chitForChat.MyConstants
 import com.rohit.chitForChat.MyUtils
 import com.rohit.chitForChat.MyUtils.applyFilterType
 import com.rohit.chitForChat.MyUtils.chatNearbyList
-import com.rohit.chitForChat.MyUtils.listFriends
 import com.rohit.chitForChat.R
 import com.rohit.chitForChat.adapters.NearbyChatAdapter
+import com.rohit.chitForChat.databinding.BottomSheetChangeDistanceBinding
 import com.rohit.chitForChat.databinding.FragmentNearbyBinding
 import kotlinx.android.synthetic.main.bottom_sheet_filter.*
-import java.util.ArrayList
+import java.util.*
+import kotlin.Comparator
+import kotlin.collections.ArrayList
 
 
 class NearbyFragment : Fragment() {
@@ -40,7 +42,7 @@ class NearbyFragment : Fragment() {
     var binding: FragmentNearbyBinding? = null
     var myLat: String = "0.0"
     var myLong: String = "0.0"
-
+    var searchDistance = 1
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
         .getReference(MyConstants.NODE_USERS)
     var locationRequest: LocationRequest? = null
@@ -65,7 +67,12 @@ class NearbyFragment : Fragment() {
         binding!!.imgFilter.setOnClickListener {
             showBottomSheetFilter()
         }
-        setAdapter()
+
+        binding!!.btnChangeDistance.setOnClickListener {
+            showBottomSheetDistanceChange()
+        }
+
+        setWithInText()
     }
 
     private fun showBottomSheetFilter() {
@@ -85,7 +92,7 @@ class NearbyFragment : Fragment() {
             bottomSheet.btnWomen.setCardBackgroundColor(resources.getColor(R.color.app_color))
             bottomSheet.txtWomen.setTextColor(resources.getColor(R.color.white))
 
-        }else if(applyFilterType.equals("No Filter")){
+        } else if (applyFilterType.equals("No Filter")) {
 
             bottomSheet.btnNoFilter.setCardBackgroundColor(resources.getColor(R.color.app_color))
             bottomSheet.txtNoFilter.setTextColor(resources.getColor(R.color.white))
@@ -108,9 +115,9 @@ class NearbyFragment : Fragment() {
 
             applyFilterType = "Men"
             filterList =
-                chatNearbyList.filter { users -> users.gender.equals("Male")  } as ArrayList<Users>
+                chatNearbyList.filter { users -> users.gender.equals("Male") } as ArrayList<Users>
             setAdapterFilterList()
-                    bottomSheet.cancel()
+            bottomSheet.cancel()
         }
 
         bottomSheet.btnWomen.setOnClickListener {
@@ -128,9 +135,9 @@ class NearbyFragment : Fragment() {
             bottomSheet.txtNoFilter.setTextColor(resources.getColor(R.color.black))
             applyFilterType = "Women"
             filterList =
-                chatNearbyList.filter { users -> users.gender.equals("Female")  } as ArrayList<Users>
+                chatNearbyList.filter { users -> users.gender.equals("Female") } as ArrayList<Users>
             setAdapterFilterList()
-                bottomSheet.cancel()
+            bottomSheet.cancel()
 
         }
 
@@ -151,9 +158,9 @@ class NearbyFragment : Fragment() {
 
             applyFilterType = "Others"
             filterList =
-                chatNearbyList.filter { users -> users.gender.equals("Others")  } as ArrayList<Users>
+                chatNearbyList.filter { users -> users.gender.equals("Others") } as ArrayList<Users>
             setAdapterFilterList()
-                bottomSheet.cancel()
+            bottomSheet.cancel()
 
         }
 
@@ -191,10 +198,10 @@ class NearbyFragment : Fragment() {
     private fun setAdapter() {
         var activity = getActivity();
         if (activity != null && isAdded()) {
-            if(chatNearbyList.size==0){
-                binding!!.txtNoOneFound.visibility=View.VISIBLE
-            }else{
-                binding!!.txtNoOneFound.visibility=View.GONE
+            if (chatNearbyList.size == 0) {
+                binding!!.txtNoOneFound.visibility = View.VISIBLE
+            } else {
+                binding!!.txtNoOneFound.visibility = View.GONE
             }
             binding!!.recyclerChatList.adapter =
                 NearbyChatAdapter(activity, chatNearbyList!!)
@@ -202,7 +209,7 @@ class NearbyFragment : Fragment() {
     }
 
     private fun searchNearby() {
-        binding!!.txtNoOneFound.visibility=View.GONE
+        binding!!.txtNoOneFound.visibility = View.GONE
         binding!!.rippleEffect.startRippleAnimation()
         binding!!.rippleEffect.visibility = View.VISIBLE
         binding!!.recyclerChatList.visibility = View.INVISIBLE
@@ -211,87 +218,96 @@ class NearbyFragment : Fragment() {
 //        MyUtils.showProgress(requireActivity())
         myLat = MyUtils.getStringValue(requireActivity(), MyConstants.USER_LATITUDE)
         myLong = MyUtils.getStringValue(requireActivity(), MyConstants.USER_LONGITUDE)
-if(!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
-    val queryRef: Query = firebaseUsers.orderByChild("ghostMode").equalTo("off")
-    queryRef.addListenerForSingleValueEvent(object : ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
+        if (!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
+            val queryRef: Query = firebaseUsers.orderByChild("ghostMode").equalTo("off")
+            queryRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
 //                MyUtils.stopProgress(requireActivity())
-            if (snapshot.exists()) {
-                chatNearbyList.clear()
-                for (postSnapshot in snapshot.children) {
-                    val user: Users? =
-                        postSnapshot.getValue(Users::class.java)
+                    if (snapshot.exists()) {
+                        chatNearbyList.clear()
+                        for (postSnapshot in snapshot.children) {
+                            val user: Users? =
+                                postSnapshot.getValue(Users::class.java)
 
-                    Log.d(
-                        "mylog DISTANCE", (getKmFromLatLong(
-                            myLat.toFloat(),
-                            myLong.toFloat(),
-                            user!!.lat!!.toFloat(),
-                            user!!.long!!.toFloat()
-                        )).toString()
-                    )
-                    if (!user!!.phone.equals(
-                            MyUtils.getStringValue(
-                                requireActivity(),
-                                MyConstants.USER_PHONE
+                            Log.d(
+                                "mylog DISTANCE", (getKmFromLatLong(
+                                    myLat.toFloat(),
+                                    myLong.toFloat(),
+                                    user!!.lat!!.toFloat(),
+                                    user!!.long!!.toFloat()
+                                )).toString()
                             )
-                        ) && !myLat.equals("") && (getKmFromLatLong(
-                            myLat.toFloat(),
-                            myLong.toFloat(),
-                            user!!.lat!!.toFloat(),
-                            user!!.long!!.toFloat()
-                        )) <= 1
-                    ) {
-                        chatNearbyList.add(user!!)
-                    }
+                            if (!user!!.phone.equals(
+                                    MyUtils.getStringValue(
+                                        requireActivity(),
+                                        MyConstants.USER_PHONE
+                                    )
+                                ) && !myLat.equals("") && (getKmFromLatLong(
+                                    myLat.toFloat(),
+                                    myLong.toFloat(),
+                                    user!!.lat!!.toFloat(),
+                                    user!!.long!!.toFloat()
+                                )) <= searchDistance
+                            ) {
+                                chatNearbyList.add(user!!)
+                            }
 
 
+                            // sort by distance
+                            chatNearbyList.sortBy {
+                                getKmFromLatLong(
+                                    myLat.toFloat(),
+                                    myLong.toFloat(),
+                                    it!!.lat!!.toFloat(),
+                                    it!!.long!!.toFloat()
+                                )
+                            }
+                           /** check filter **/
+                            Handler().postDelayed({
+                                binding!!.rippleEffect.stopRippleAnimation()
+                                binding!!.rippleEffect.visibility = View.INVISIBLE
+                                binding!!.recyclerChatList.visibility = View.VISIBLE
+                                binding!!.imgSearch.visibility = View.VISIBLE
+                                binding!!.imgFilter.visibility = View.VISIBLE
+                                if (applyFilterType.equals("No Filter")) {
+                                    setAdapter()
+                                } else if (applyFilterType.equals("Men")) {
+                                    filterList =
+                                        chatNearbyList.filter { users -> users.gender.equals("Male") } as ArrayList<Users>
+                                    setAdapterFilterList()
+                                } else if (applyFilterType.equals("Women")) {
+                                    filterList =
+                                        chatNearbyList.filter { users -> users.gender.equals("Female") } as ArrayList<Users>
+                                    setAdapterFilterList()
+                                } else if (applyFilterType.equals("Others")) {
+                                    filterList =
+                                        chatNearbyList.filter { users -> users.gender.equals("Others") } as ArrayList<Users>
+                                    setAdapterFilterList()
+                                }
 
-                    Handler().postDelayed({
-                        binding!!.rippleEffect.stopRippleAnimation()
-                        binding!!.rippleEffect.visibility = View.INVISIBLE
-                        binding!!.recyclerChatList.visibility = View.VISIBLE
-                        binding!!.imgSearch.visibility = View.VISIBLE
-                        binding!!.imgFilter.visibility = View.VISIBLE
-                        if (applyFilterType.equals("No Filter")) {
-                            setAdapter()
-                        } else if (applyFilterType.equals("Men")) {
-                            filterList =
-                                chatNearbyList.filter { users -> users.gender.equals("Male") } as ArrayList<Users>
-                            setAdapterFilterList()
-                        } else if (applyFilterType.equals("Women")) {
-                            filterList =
-                                chatNearbyList.filter { users -> users.gender.equals("Female") } as ArrayList<Users>
-                            setAdapterFilterList()
-                        } else if (applyFilterType.equals("Others")) {
-                            filterList =
-                                chatNearbyList.filter { users -> users.gender.equals("Others") } as ArrayList<Users>
-                            setAdapterFilterList()
-                        }
-
-                    }, 3000)
+                            }, 3000)
 
 //                        binding!!.rippleEffect.stopRippleAnimation()
 //                        binding!!.rippleEffect.visibility = View.INVISIBLE
-                    // here you can access to name property like university.name
+                            // here you can access to name property like university.name
+                        }
+
+
+                    } else {
+                        binding!!.rippleEffect.visibility = View.INVISIBLE
+                        binding!!.recyclerChatList.visibility = View.VISIBLE
+                        binding!!.imgSearch.visibility = View.VISIBLE
+                    }
                 }
 
+                override fun onCancelled(error: DatabaseError) {
+                    binding!!.rippleEffect.visibility = View.INVISIBLE
+                    binding!!.recyclerChatList.visibility = View.VISIBLE
+                    binding!!.imgSearch.visibility = View.VISIBLE
+                }
 
-            } else {
-                binding!!.rippleEffect.visibility = View.INVISIBLE
-                binding!!.recyclerChatList.visibility = View.VISIBLE
-                binding!!.imgSearch.visibility = View.VISIBLE
-            }
+            })
         }
-
-        override fun onCancelled(error: DatabaseError) {
-            binding!!.rippleEffect.visibility = View.INVISIBLE
-            binding!!.recyclerChatList.visibility = View.VISIBLE
-            binding!!.imgSearch.visibility = View.VISIBLE
-        }
-
-    })
-}
     }
 
     fun getKmFromLatLong(lat1: Float, lng1: Float, lat2: Float, lng2: Float): Float {
@@ -329,9 +345,9 @@ if(!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
                 override fun onGranted() {
                     when {
                         MyUtils.isLocationEnabled(requireContext()) -> {
-                            try{
+                            try {
                                 setUpLocationListener()
-                            }catch (e:Exception){
+                            } catch (e: Exception) {
 
                             }
                         }
@@ -341,14 +357,16 @@ if(!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
                     }
                 }
 
-                override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String?>?) {
+                override fun onDenied(
+                    context: Context?,
+                    deniedPermissions: java.util.ArrayList<String?>?
+                ) {
                     checkLocationPermission()
                 }
             })
 
 
     }
-
 
 
     override fun onResume() {
@@ -432,19 +450,65 @@ if(!myLat.isNullOrEmpty() && !myLong.isNullOrEmpty()) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        if(fusedLocationProviderClient!=null && locationCallback!=null)
-        fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+        if (fusedLocationProviderClient != null && locationCallback != null)
+            fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if(fusedLocationProviderClient!=null && locationCallback!=null)
-        fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+        if (fusedLocationProviderClient != null && locationCallback != null)
+            fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
     override fun onDetach() {
         super.onDetach()
-        if(fusedLocationProviderClient!=null && locationCallback!=null)
-        fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+        if (fusedLocationProviderClient != null && locationCallback != null)
+            fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+    }
+
+    fun showBottomSheetDistanceChange() {
+        var bottomDistance =
+            BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        var mBottomSheetBinding =
+            BottomSheetChangeDistanceBinding.inflate(layoutInflater, null, false)
+
+        bottomDistance.setContentView(mBottomSheetBinding!!.root)
+        bottomDistance.window!!.setBackgroundDrawableResource(android.R.color.transparent)
+        mBottomSheetBinding.sliderDistance.value = searchDistance.toFloat()
+//        mBottomSheetBinding.sliderDistance.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+//            override fun onStartTrackingTouch(slider: Slider) {
+//
+//            }
+//
+//            override fun onStopTrackingTouch(slider: Slider) {
+//            }
+//
+//        })
+
+//        mBottomSheetBinding.sliderDistance.addOnChangeListener { slider, value, fromUser ->
+//           bottomDistance.cancel()
+//
+//        }
+
+
+        mBottomSheetBinding.btnChange.setOnClickListener {
+            searchDistance = mBottomSheetBinding.sliderDistance.value.toInt()
+            MyUtils.saveStringValue(
+                requireContext(),
+                MyConstants.SEARCH_DISTANCE,
+                searchDistance.toString()
+            )
+            setWithInText()
+            searchNearby()
+            bottomDistance.cancel()
+        }
+        bottomDistance.show()
+    }
+
+    private fun setWithInText() {
+        searchDistance =
+            if (MyUtils.getStringValue(requireContext(), MyConstants.SEARCH_DISTANCE).equals("")) 1
+            else MyUtils.getStringValue(requireContext(), MyConstants.SEARCH_DISTANCE).toInt()
+        binding!!.txtWithIn.text = "Within $searchDistance KM"
     }
 }

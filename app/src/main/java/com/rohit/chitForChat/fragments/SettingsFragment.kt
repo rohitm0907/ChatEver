@@ -52,19 +52,21 @@ class Settings : Fragment() {
             )
         }
 
-        if( MyUtils.getStringValue(
+        if (MyUtils.getStringValue(
                 requireContext(),
                 MyConstants.GHOST_MODE
-            ).equals(MyConstants.ON)){
-            binding!!.sbGhost.isChecked=true
+            ).equals(MyConstants.ON)
+        ) {
+            binding!!.sbGhost.isChecked = true
         }
 
         binding!!.btnLogout.setOnClickListener {
-showDialog("Are you sure you wants to logout ?");        }
+            showDialog(resources.getString(R.string.logout));
+        }
 
         binding!!.sbGhost.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
 
-            if(isChecked) {
+            if (isChecked) {
                 firebaseUsers.child(
                     MyUtils.getStringValue(
                         requireContext(),
@@ -78,7 +80,7 @@ showDialog("Are you sure you wants to logout ?");        }
                     )
 
                 }
-            }else{
+            } else {
                 firebaseUsers.child(
                     MyUtils.getStringValue(
                         requireContext(),
@@ -116,27 +118,31 @@ showDialog("Are you sure you wants to logout ?");        }
     }
 
 
-    fun showDialog(message:String){
-        var dialog:Dialog=Dialog(requireContext())
+    fun showDialog(message: String) {
+        var dialog: Dialog = Dialog(requireContext())
         dialog.setContentView(R.layout.dialog_yes_no)
-        dialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window!!.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
         dialog.window!!.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
-        var txtTitle=dialog.findViewById<TextView>(R.id.txtTitle)
-        var btnYes=dialog.findViewById<AppCompatButton>(R.id.btnYes)
-        var btnNo=dialog.findViewById<AppCompatButton>(R.id.btnNo)
+        var txtTitle = dialog.findViewById<TextView>(R.id.txtTitle)
+        var btnYes = dialog.findViewById<AppCompatButton>(R.id.btnYes)
+        var btnNo = dialog.findViewById<AppCompatButton>(R.id.btnNo)
 
-        txtTitle.text=message
+        txtTitle.text = message
 
         btnYes.setOnClickListener {
             dialog.dismiss()
-            if(!MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE).equals("")) {
+            if (!MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE).equals("")) {
                 firebaseOnlineStatus.child(
                     MyUtils.getStringValue(
                         requireContext(),
                         MyConstants.USER_PHONE
                     )
-                ).child(MyConstants.NODE_ONLINE_STATUS).setValue(Calendar.getInstance().timeInMillis.toString())
+                ).child(MyConstants.NODE_ONLINE_STATUS)
+                    .setValue(Calendar.getInstance().timeInMillis.toString())
             }
 
             firebaseUsers.child(
@@ -147,15 +153,14 @@ showDialog("Are you sure you wants to logout ?");        }
             ).child("token").setValue("")
 
             MyUtils.clearAllData(requireActivity())
-            MyUtils.applyFilterType="No Filter"
+            MyUtils.applyFilterType = "No Filter"
             MyUtils.chatNearbyList.clear()
-            startActivity(Intent(requireContext(),LoginActivity::class.java))
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
             requireActivity()!!.finishAffinity()
         }
         btnNo.setOnClickListener {
             dialog.dismiss()
         }
-
 
 
     }

@@ -92,12 +92,11 @@
 
 
             <SeekBar
+                android:id="@+id/audioSeekbar"
                 android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:id="@+id/audioSeekbar"
-                android:layout_toRightOf="@id/audioPlay"
-                />
+                android:layout_toRightOf="@id/audioPlay" />
 
 
         </RelativeLayout>

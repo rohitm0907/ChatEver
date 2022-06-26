@@ -1,22 +1,29 @@
 package com.rohit.chitForChat
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import com.google.android.gms.location.*
-import com.google.firebase.database.FirebaseDatabase
-import com.rohit.chitForChat.adapters.HomeTabAdapter
-import com.rohit.chitForChat.databinding.ActivityHomeBinding
-import java.util.*
-
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Typeface
-
+import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.rohit.chitForChat.adapters.HomeTabAdapter
+import com.rohit.chitForChat.databinding.ActivityHomeBinding
+import java.util.*
 
 
 class HomeActivity : AppCompatActivity() {
@@ -120,4 +127,41 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
     }
+
+
+    var doubleBackToExitPressedOnce = false
+
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            finishAffinity()
+            System.exit(0)
+        }
+        doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
+        Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val m = menuInflater
+        m.inflate(R.menu.home_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.txtShare -> {
+                val intent = Intent()
+                intent.action = Intent.ACTION_SEND
+                intent.type = "text/plain"
+                intent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Let's chat with your nearbies and friends \n https://play.google.com/store/apps/details?id=$packageName"
+                )
+                startActivity(Intent.createChooser(intent, "Share via"))
+            }
+        }
+        return true
+    }
+
 }

@@ -33,15 +33,13 @@ class CodeVerificationActivity : AppCompatActivity() {
         var binding = ActivityCodeVerificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         auth = FirebaseAuth.getInstance()
-//        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
+        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
         binding.txtMobile.setText(intent.getStringExtra(MyConstants.COUNTRY_CODE)+intent.getStringExtra(MyConstants.PHONE_NUMBER))
-
         binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
             override fun onOtpCompleted(otp: String) {
                 // do Stuff
-//                verifyOtp(otp)
-                checkAlreadyRegister()
-
+                verifyOtp(otp)
+               // checkAlreadyRegister()
             }
         })
 
@@ -65,7 +63,6 @@ class CodeVerificationActivity : AppCompatActivity() {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
                     checkAlreadyRegister()
-
                 } else {
                     // Sign in failed, display a message and update the UI
                     MyUtils.stopProgress(this@CodeVerificationActivity)

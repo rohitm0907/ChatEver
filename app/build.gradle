@@ -93,4 +93,5 @@ dependencies {
 
     implementation "com.github.skydoves:powerspinner:1.1.9"
     implementation 'com.nabinbhandari.android:permissions:3.8'
+    implementation 'com.google.android.play:app-update-ktx:2.0.0'
 }
