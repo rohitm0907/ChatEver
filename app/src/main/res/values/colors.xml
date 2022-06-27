@@ -10,4 +10,5 @@
     <color name="app_color">#009688</color>
     <color name="yellow">#FFDA00</color>
     <color name="green">#35EC0B</color>
+    <color name="gray">#C0C1C0</color>
 </resources>

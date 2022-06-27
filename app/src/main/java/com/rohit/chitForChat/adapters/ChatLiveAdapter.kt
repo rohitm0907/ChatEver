@@ -160,7 +160,7 @@ class ChatLiveAdapter(
 Log.d("position",position.toString())
         if(position==0){
             holder.txtDate.visibility = View.VISIBLE
-            holder.txtDate.setText(MyUtils.convertIntoDate(chatsList.get(position).time.toString()))
+            holder.txtDate.setText(getFormattedDate(chatsList.get(position).time.toString().toLong()))
         }else if (!MyUtils.convertIntoDate(chatsList.get(position).time.toString()).equals(MyUtils.convertIntoDate(chatsList.get(position-1).time.toString()))) {
             holder.txtDate.visibility = View.VISIBLE
             holder.txtDate.setText(getFormattedDate(chatsList.get(position).time.toString().toLong()))

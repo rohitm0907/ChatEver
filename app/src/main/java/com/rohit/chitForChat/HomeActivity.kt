@@ -1,9 +1,7 @@
 package com.rohit.chitForChat
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Typeface
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -19,7 +17,10 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.rohit.chitForChat.adapters.HomeTabAdapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
@@ -39,6 +40,10 @@ class HomeActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_ONLINE_STATUS)
 
+    var firebasePurchase =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_PURCHASES)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -50,15 +55,63 @@ class HomeActivity : AppCompatActivity() {
             LocationServices.getFusedLocationProviderClient(this@HomeActivity)
         tokenGenerateAndUpdate()
         handleTab()
+        checkForAnyPurchase()
+    }
+
+    private fun checkForAnyPurchase() {
+        firebasePurchase.child(MyUtils.getStringValue(this, MyConstants.USER_PHONE))
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        var subscriptionType =
+                            snapshot.child("purchaseType").getValue(String::class.java)
+                        var endTime = snapshot.child("endTime").getValue(String::class.java)
+                        if (Calendar.getInstance().timeInMillis>endTime!!.toLong()) {
+                            MyUtils.saveStringValue(
+                                this@HomeActivity,
+                                MyConstants.CURRENT_SUBSCRIPTION,
+                                ""
+                            )
+                            MyUtils.saveStringValue(
+                                this@HomeActivity,
+                                MyConstants.SEARCH_DISTANCE,
+                                "3"
+                            )
+                            firebasePurchase.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).removeValue()
+                        } else {
+                            MyUtils.saveStringValue(
+                                this@HomeActivity,
+                                MyConstants.CURRENT_SUBSCRIPTION,
+                                subscriptionType.toString()
+                            )
+                        }
+
+                    } else {
+                        MyUtils.saveStringValue(
+                            this@HomeActivity,
+                            MyConstants.CURRENT_SUBSCRIPTION,
+                            ""
+                        )
+                        MyUtils.saveStringValue(
+                            this@HomeActivity,
+                            MyConstants.SEARCH_DISTANCE,
+                            "3"
+                        )
+                    }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
 
     }
 
     private fun handleTab() {
         binding.myTablayout
-            .addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-
+            .addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
-                    val tabLayout = ( binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
+                    val tabLayout = (binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
                         tab!!.position
                     ) as LinearLayout
                     val tabTextView = tabLayout.getChildAt(1) as TextView
@@ -67,12 +120,12 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 override fun onTabUnselected(tab: TabLayout.Tab?) {
-                    val tabLayout = ( binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
+                    val tabLayout = (binding.myTablayout.getChildAt(0) as ViewGroup).getChildAt(
                         tab!!.position
                     ) as LinearLayout
                     val tabTextView = tabLayout.getChildAt(1) as TextView
                     tabTextView.setTypeface(null, Typeface.NORMAL)
-                    tabTextView.textSize=14F
+                    tabTextView.textSize = 14F
                 }
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -106,7 +159,8 @@ class HomeActivity : AppCompatActivity() {
                     this@HomeActivity,
                     MyConstants.USER_PHONE
                 )
-            ).child(MyConstants.NODE_ONLINE_STATUS).setValue(Calendar.getInstance().timeInMillis.toString())
+            ).child(MyConstants.NODE_ONLINE_STATUS)
+                .setValue(Calendar.getInstance().timeInMillis.toString())
 
     }
 
@@ -121,8 +175,13 @@ class HomeActivity : AppCompatActivity() {
                     //Got FirebaseMessagingToken
                     val firebaseMessagingToken = Objects.requireNonNull(task.result)!!
 
-                    firebaseUsers.child(MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)).child("token").setValue(firebaseMessagingToken)
-                    MyUtils.saveStringValue(this, MyConstants.TOKEN,firebaseMessagingToken)
+                    firebaseUsers.child(
+                        MyUtils.getStringValue(
+                            this@HomeActivity,
+                            MyConstants.USER_PHONE
+                        )
+                    ).child("token").setValue(firebaseMessagingToken)
+                    MyUtils.saveStringValue(this, MyConstants.TOKEN, firebaseMessagingToken)
                     //Use firebaseMessagingToken further
                 }
             }
