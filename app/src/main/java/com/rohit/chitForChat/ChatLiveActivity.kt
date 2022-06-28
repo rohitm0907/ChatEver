@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -533,7 +534,7 @@ class ChatLiveActivity : AppCompatActivity() {
         val image = File.createTempFile(imageFileName, ".jpg", storageDir)
 
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 5)
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 60)
         // fileUri = Uri.fromFile(mediaFile)
         fileUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", image);
 
@@ -549,7 +550,21 @@ class ChatLiveActivity : AppCompatActivity() {
 
             if (requestCode == VIDEO_CAPTURE) {
                 val selectedPhotoUrl: Uri = data!!.getData()!!
-                uploadVideoOnFirebase(selectedPhotoUrl)
+
+
+                var durationTime: Long
+                MediaPlayer.create(this, selectedPhotoUrl).also {
+                    durationTime = (it.duration / 1000).toLong()
+                    it.reset()
+                    it.release()
+                }
+
+                Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+                if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
+                }else{
+                    uploadVideoOnFirebase(selectedPhotoUrl)
+
+                }
             } else
 
                 if (requestCode == ImagePicker.REQUEST_CODE) {
@@ -578,8 +593,19 @@ class ChatLiveActivity : AppCompatActivity() {
 //
                     mPaths.forEachIndexed { index, s ->
                         Log.d("video url", mPaths.get(index).toUri().toString())
+                        var durationTime: Long
+                        MediaPlayer.create(this, Uri.parse(mPaths.get(index))).also {
+                            durationTime = (it.duration / 1000).toLong()
+                            it.reset()
+                            it.release()
+                        }
 
-                        uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
+                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+                        if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
+                        }else{
+                            uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
+
+                        }
                         //Your Code
 
 
@@ -600,7 +626,20 @@ class ChatLiveActivity : AppCompatActivity() {
 
                     // MEDIA GALLERY
                     var selectedImagePath = getPath(selectedImageUri)
-                    uploadVideoOnFirebase(selectedImageUri)
+
+                        var durationTime: Long
+                        MediaPlayer.create(this, selectedImageUri).also {
+                            durationTime = (it.duration / 1000).toLong()
+                            it.reset()
+                            it.release()
+                        }
+
+                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+                        if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
+                        }else{
+                            uploadVideoOnFirebase(selectedImageUri)
+
+                        }
                 }
         } else {
             Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()

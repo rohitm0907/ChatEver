@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.rohit.chitForChat.adapters.HomeTabAdapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -66,7 +67,10 @@ class HomeActivity : AppCompatActivity() {
                         var subscriptionType =
                             snapshot.child("purchaseType").getValue(String::class.java)
                         var endTime = snapshot.child("endTime").getValue(String::class.java)
-                        if (Calendar.getInstance().timeInMillis>endTime!!.toLong()) {
+                        var startTime = snapshot.child("startTime").getValue(String::class.java)
+                        var calender:Calendar=Calendar.getInstance()
+                        calender.setTimeZone(TimeZone.getTimeZone("GMT"))
+                        if (calender.timeInMillis>endTime!!.toLong() || calender.timeInMillis<startTime!!.toLong()) {
                             MyUtils.saveStringValue(
                                 this@HomeActivity,
                                 MyConstants.CURRENT_SUBSCRIPTION,

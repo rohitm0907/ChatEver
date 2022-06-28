@@ -68,7 +68,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     var myLat: String = "0.0"
     var myLong: String = "0.0"
 var currentPurchase=""
-    var searchDistance = 1
+    var searchDistance = 5
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
         .getReference(MyConstants.NODE_USERS)
     var firebasePurchases = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
@@ -100,11 +100,7 @@ var currentPurchase=""
         binding!!.btnChangeDistance.setOnClickListener {
 //            showBottomSheetDistanceChange()
             currentPurchase=MyUtils.getStringValue(requireActivity(),MyConstants.CURRENT_SUBSCRIPTION)
-            if(currentPurchase.equals("")){
-                showPurchasingBottomsheet()
-            }else{
                 showBottomSheetDistanceChange(currentPurchase)
-            }
 
         }
 
@@ -593,8 +589,8 @@ var currentPurchase=""
       var selectedDistance= MyUtils.getStringValue(
             requireContext(),
             MyConstants.SEARCH_DISTANCE
-
         )
+        mBottomSheetBinding.sliderDistance.valueFrom=1F
         if(currentPurchase.equals(PUR_99_10)){
             mBottomSheetBinding.sliderDistance.valueTo=10F
             if(selectedDistance.toInt()>10){
@@ -619,7 +615,6 @@ var currentPurchase=""
             mBottomSheetBinding.sliderDistance.valueTo=30F
             if(selectedDistance.toInt()>30){
                 mBottomSheetBinding.sliderDistance.value=30F
-
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
@@ -644,6 +639,16 @@ var currentPurchase=""
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "50"
+                )
+            }
+        }else{
+            mBottomSheetBinding.sliderDistance.valueTo=5F
+            if(selectedDistance.toInt()>5){
+                mBottomSheetBinding.sliderDistance.value=5F
+                MyUtils.saveStringValue(
+                    requireContext(),
+                    MyConstants.SEARCH_DISTANCE,
+                    "5"
                 )
             }
         }
@@ -686,7 +691,7 @@ var currentPurchase=""
 
     private fun setWithInText() {
         searchDistance =
-            if (MyUtils.getStringValue(requireContext(), MyConstants.SEARCH_DISTANCE).equals("")) 1
+            if (MyUtils.getStringValue(requireContext(), MyConstants.SEARCH_DISTANCE).equals("")) 5
             else MyUtils.getStringValue(requireContext(), MyConstants.SEARCH_DISTANCE).toInt()
         binding!!.txtWithIn.text = "Within $searchDistance KM"
     }

@@ -35,6 +35,7 @@ object MyUtils {
     var applyFilterType = "No Filter"
     var dialog: Dialog? = null;
     var listAllUsersNumbers: ArrayList<String> = ArrayList()
+    var listAllUsersNumbersWithoutCode: ArrayList<String> = ArrayList()
     var listAllUsers: ArrayList<Users> = ArrayList()
     var chatNearbyList: ArrayList<Users> = ArrayList()
     var listFriends: ArrayList<String> = ArrayList()
