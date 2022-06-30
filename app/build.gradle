@@ -10,7 +10,7 @@ android {
     buildToolsVersion "31.0.0"
 
     defaultConfig {
-        applicationId "com.rohit.chitForChat"
+        applicationId "com.rohit.chitchat"
         minSdkVersion 23
         targetSdkVersion 31
         versionCode 1
