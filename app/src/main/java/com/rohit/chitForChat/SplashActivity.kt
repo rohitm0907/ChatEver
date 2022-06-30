@@ -43,7 +43,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkForUpdate()
-
+//        showDialog(resources.getString(R.string.new_update_Available))
     }
 
     private fun checkForUpdate() {
@@ -98,6 +98,7 @@ class SplashActivity : AppCompatActivity() {
         }
         btnNo.setOnClickListener {
             dialog.dismiss()
+            timerStart()
         }
 
 

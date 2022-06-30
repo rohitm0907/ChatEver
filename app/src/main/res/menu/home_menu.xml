@@ -7,5 +7,11 @@
         app:showAsAction="never">
     </item>
 
+    <item
+        android:id="@+id/txtContactUs"
+        android:title="Contact us"
+        app:showAsAction="never">
+    </item>
+
 
 </menu>

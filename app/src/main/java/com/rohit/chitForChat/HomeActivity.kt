@@ -24,7 +24,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.rohit.chitForChat.adapters.HomeTabAdapter
 import com.rohit.chitForChat.databinding.ActivityHomeBinding
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -222,6 +221,31 @@ class HomeActivity : AppCompatActivity() {
                     "Let's chat with your nearbies and friends \n https://play.google.com/store/apps/details?id=$packageName"
                 )
                 startActivity(Intent.createChooser(intent, "Share via"))
+            }
+
+
+            R.id.txtContactUs->{
+                val intent = Intent(Intent.ACTION_SEND)
+                val recipients = arrayOf("rohit.m0907@gmail.com")
+                intent.putExtra(Intent.EXTRA_EMAIL, recipients)
+                intent.putExtra(Intent.EXTRA_SUBJECT, "ChitChat Review")
+                intent.type = "text/html"
+                intent.setPackage("com.google.android.gm")
+                startActivity(Intent.createChooser(intent, "Send mail"))
+            //                try {
+//                    val email = "rohit.m0907@gmail.com"
+//                    val subject = "ChitChat Feedback"
+//
+//                    ShareCompat.IntentBuilder.from(this@HomeActivity)
+//                        .setType("message/rfc822")
+//                        .addEmailTo(email)
+//                        .setSubject(subject)
+//                        .setText("")
+//                        .setChooserTitle("Select App")
+//                        .startChooser()
+//                } catch (e: Exception) {
+//                }
+
             }
         }
         return true
