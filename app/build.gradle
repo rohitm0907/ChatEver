@@ -13,6 +13,7 @@ android {
         applicationId "com.rohit.chitchat"
         minSdkVersion 23
         targetSdkVersion 31
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
 
@@ -35,6 +36,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 

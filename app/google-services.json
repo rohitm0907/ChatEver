@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "812366800335-an5u2f2jc5hiitfgnjbvhtaev9cpvvts.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chitchat",
+            "certificate_hash": "f730b506205c8b08d28f48cefb444f4d158bb8b5"
+          }
+        },
+        {
           "client_id": "812366800335-s7dbq6gt7oa45ehuo4cs6meidnl8m83o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -45,12 +45,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class NearbyFragment : Fragment(), PurchasesUpdatedListener {
-    var selectedPosition=-1
+    var selectedPosition = -1
 
-    private var firstTime:Boolean=true
+    private var firstTime: Boolean = true
     private var purchaseToken: String? = null
     private var productId: String? = null
     private var time: String? = null
@@ -67,7 +68,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     var binding: FragmentNearbyBinding? = null
     var myLat: String = "0.0"
     var myLong: String = "0.0"
-var currentPurchase=""
+    var currentPurchase = ""
     var searchDistance = 5
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
         .getReference(MyConstants.NODE_USERS)
@@ -99,13 +100,16 @@ var currentPurchase=""
 
         binding!!.btnChangeDistance.setOnClickListener {
 //            showBottomSheetDistanceChange()
-            currentPurchase=MyUtils.getStringValue(requireActivity(),MyConstants.CURRENT_SUBSCRIPTION)
-                showBottomSheetDistanceChange(currentPurchase)
+            currentPurchase =
+                MyUtils.getStringValue(requireActivity(), MyConstants.CURRENT_SUBSCRIPTION)
+            showBottomSheetDistanceChange(currentPurchase)
 
         }
 
         setWithInText()
         setUpBillingAccount()
+        setUpPrices()
+
     }
 
     private fun showBottomSheetFilter() {
@@ -504,60 +508,54 @@ var currentPurchase=""
             fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
-
-
+    var list: ArrayList<PurchasingModel>?=null
+var purchaseBottomsheet:BottomSheetDialog?=null
     fun showPurchasingBottomsheet() {
-
-        var purchaseBottomsheet =
+         purchaseBottomsheet =
             BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
         var mPurchasingBinding =
             BottomSheetProductPurchasingBinding.inflate(layoutInflater, null, false)
 
 
-        purchaseBottomsheet.setContentView(mPurchasingBinding!!.root)
-        purchaseBottomsheet.window!!.setBackgroundDrawableResource(android.R.color.transparent)
+        purchaseBottomsheet!!.setContentView(mPurchasingBinding!!.root)
+        purchaseBottomsheet!!.window!!.setBackgroundDrawableResource(android.R.color.transparent)
 
-        var list: ArrayList<PurchasingModel> = ArrayList()
-        list.add(PurchasingModel(MyConstants.PUR_99_10,"10KM", "RS. 99", "1 Month"))
-        list.add(PurchasingModel(PUR_199_20,"20KM", "RS. 199", "1 Month"))
-        list.add(PurchasingModel(PUR_299_30,"30KM", "RS. 299", "1 Month"))
-        list.add(PurchasingModel(PUR_399_40,"40KM", "RS. 399", "1 Month"))
-        list.add(PurchasingModel(PUR_499_50,"50KM", "RS. 499", "1 Month"))
+         list = ArrayList()
+        list!!.add(PurchasingModel(MyConstants.PUR_99_10, "10KM", "RS. 99", "1 Month"))
+        list!!.add(PurchasingModel(PUR_199_20, "20KM", "RS. 199", "1 Month"))
+        list!!.add(PurchasingModel(PUR_299_30, "30KM", "RS. 299", "1 Month"))
+        list!!.add(PurchasingModel(PUR_399_40, "40KM", "RS. 399", "1 Month"))
+        list!!.add(PurchasingModel(PUR_499_50, "50KM", "RS. 499", "1 Month"))
 
 
-
-        var adapter = PurchasingAdapter(requireContext(), list,object :PurchasingAdapter.Click{
+        var adapter = PurchasingAdapter(requireContext(), list!!, object : PurchasingAdapter.Click {
             override fun onClickItem(position: Int) {
-                selectedPosition=position
+                selectedPosition = position
             }
         })
         mPurchasingBinding.rcPurchaseItems.adapter = adapter
-        purchaseBottomsheet.show()
+        purchaseBottomsheet!!.show()
 
         mPurchasingBinding.btnPurchase.setOnClickListener {
-            if(selectedPosition==-1){
-                MyUtils.showToast(requireContext(),"Please select a plan")
-            }else{
-                val calendar = Calendar.getInstance()
-                calendar.add(Calendar.HOUR, 1)
-                var purchaseData=FirebasePurchase(list.get(selectedPosition).PurchaseType.toString(),list.get(selectedPosition).itemPrice.toString(),Calendar.getInstance().timeInMillis.toString(),
-                    calendar.timeInMillis.toString())
-                firebasePurchases.child(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)).setValue(purchaseData).addOnSuccessListener {
-                    purchaseBottomsheet.dismiss()
-                    MyUtils.saveStringValue(
-                        requireContext(),
-                        MyConstants.CURRENT_SUBSCRIPTION,
-                        list.get(selectedPosition).PurchaseType.toString()
-                    )
-                    showBottomSheetDistanceChange(list.get(selectedPosition).PurchaseType.toString())
+            firstTime = true
+            if (selectedPosition == -1) {
+                MyUtils.showToast(requireContext(), "Please select a plan")
+            } else {
+                if (productList != null && productList!!.size > 0) {
+                    if (PRODUCT_ID.equals(MyConstants.PUR_99_10)) {
+                        flowParams = BillingFlowParams.newBuilder()
+                            .setSkuDetails(productList!![0])
+                            .build()
+                        billingClient!!.launchBillingFlow(requireActivity(), flowParams!!)
+                    }
+                } else {
+                    MyUtils.showToast(requireContext(), "In App purchase is not ready yet, Try again later")
                 }
             }
         }
 
 
-
-
-//            firstTime = true
+//
 //            if (productList != null && productList!!.size > 0) {
 //                if (PRODUCT_ID.equals(MyConstants.PUR_99_10)) {
 //                    flowParams = BillingFlowParams.newBuilder()
@@ -577,7 +575,7 @@ var currentPurchase=""
 
     }
 
-    fun showBottomSheetDistanceChange(currentPurchase:String) {
+    fun showBottomSheetDistanceChange(currentPurchase: String) {
         var bottomDistance =
             BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
         var mBottomSheetBinding =
@@ -586,65 +584,65 @@ var currentPurchase=""
         bottomDistance.setContentView(mBottomSheetBinding!!.root)
         bottomDistance.window!!.setBackgroundDrawableResource(android.R.color.transparent)
         mBottomSheetBinding.sliderDistance.value = searchDistance.toFloat()
-      var selectedDistance= MyUtils.getStringValue(
+        var selectedDistance = MyUtils.getStringValue(
             requireContext(),
             MyConstants.SEARCH_DISTANCE
         )
-        mBottomSheetBinding.sliderDistance.valueFrom=1F
-        if(currentPurchase.equals(PUR_99_10)){
-            mBottomSheetBinding.sliderDistance.valueTo=10F
-            if(selectedDistance.toInt()>10){
-                mBottomSheetBinding.sliderDistance.value=10F
+        mBottomSheetBinding.sliderDistance.valueFrom = 1F
+        if (currentPurchase.equals(PUR_99_10)) {
+            mBottomSheetBinding.sliderDistance.valueTo = 10F
+            if (selectedDistance.toInt() > 10) {
+                mBottomSheetBinding.sliderDistance.value = 10F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "10"
                 )
             }
-        }else if(currentPurchase.equals(PUR_199_20)){
-            mBottomSheetBinding.sliderDistance.valueTo=20F
-            if(selectedDistance.toInt()>20){
-                mBottomSheetBinding.sliderDistance.value=20F
+        } else if (currentPurchase.equals(PUR_199_20)) {
+            mBottomSheetBinding.sliderDistance.valueTo = 20F
+            if (selectedDistance.toInt() > 20) {
+                mBottomSheetBinding.sliderDistance.value = 20F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "20"
                 )
             }
-        }else if(currentPurchase.equals(PUR_299_30)){
-            mBottomSheetBinding.sliderDistance.valueTo=30F
-            if(selectedDistance.toInt()>30){
-                mBottomSheetBinding.sliderDistance.value=30F
+        } else if (currentPurchase.equals(PUR_299_30)) {
+            mBottomSheetBinding.sliderDistance.valueTo = 30F
+            if (selectedDistance.toInt() > 30) {
+                mBottomSheetBinding.sliderDistance.value = 30F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "30"
                 )
             }
-        }else if(currentPurchase.equals(PUR_399_40)){
-            mBottomSheetBinding.sliderDistance.valueTo=40F
-            if(selectedDistance.toInt()>40){
-                mBottomSheetBinding.sliderDistance.value=40F
+        } else if (currentPurchase.equals(PUR_399_40)) {
+            mBottomSheetBinding.sliderDistance.valueTo = 40F
+            if (selectedDistance.toInt() > 40) {
+                mBottomSheetBinding.sliderDistance.value = 40F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "40"
                 )
             }
-        }else if(currentPurchase.equals(PUR_499_50)){
-            mBottomSheetBinding.sliderDistance.valueTo=50F
-            if(selectedDistance.toInt()>50){
-                mBottomSheetBinding.sliderDistance.value=50F
+        } else if (currentPurchase.equals(PUR_499_50)) {
+            mBottomSheetBinding.sliderDistance.valueTo = 50F
+            if (selectedDistance.toInt() > 50) {
+                mBottomSheetBinding.sliderDistance.value = 50F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
                     "50"
                 )
             }
-        }else{
-            mBottomSheetBinding.sliderDistance.valueTo=5F
-            if(selectedDistance.toInt()>5){
-                mBottomSheetBinding.sliderDistance.value=5F
+        } else {
+            mBottomSheetBinding.sliderDistance.valueTo = 5F
+            if (selectedDistance.toInt() > 5) {
+                mBottomSheetBinding.sliderDistance.value = 5F
                 MyUtils.saveStringValue(
                     requireContext(),
                     MyConstants.SEARCH_DISTANCE,
@@ -696,8 +694,6 @@ var currentPurchase=""
         binding!!.txtWithIn.text = "Within $searchDistance KM"
     }
 
-    override fun onPurchasesUpdated(p0: BillingResult, p1: MutableList<Purchase>?) {
-    }
 
     private fun setUpPrices() {
         if (billingClient!!.isReady()) {
@@ -776,9 +772,9 @@ var currentPurchase=""
                 purchaseToken = purchase.purchaseToken
                 Log.d("mylog purchaseToken", purchaseToken.toString())
                 time = purchase.purchaseTime.toString()
-                if(productId.equals(MyConstants.PUR_99_10)) {
+                if (productId.equals(MyConstants.PUR_99_10)) {
 //                    amount = binding!!.txtMonthlyPrice.text.toString()
-                }else{
+                } else {
 //                    amount = binding!!.txtAnuallyPrice.text.toString()
                 }
 
@@ -793,7 +789,19 @@ var currentPurchase=""
                 CoroutineScope(Dispatchers.Main).launch {
                     if (firstTime) {
                         firstTime = false
-
+                        val calendar = Calendar.getInstance()
+                        calendar.add(Calendar.HOUR, 1)
+                        var purchaseData= FirebasePurchase(list!!.get(0).PurchaseType.toString(),list!!.get(0).itemPrice.toString(),Calendar.getInstance().timeInMillis.toString(),
+                            calendar.timeInMillis.toString())
+                        firebasePurchases.child(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)).setValue(purchaseData).addOnSuccessListener {
+                            purchaseBottomsheet!!.dismiss()
+                            MyUtils.saveStringValue(
+                                requireContext(),
+                                MyConstants.CURRENT_SUBSCRIPTION,
+                                list!!.get(0).PurchaseType.toString()
+                            )
+                            showBottomSheetDistanceChange(list!!.get(0).PurchaseType.toString())
+                        }
                         /// PURCHASING CALL HERE
                     }
                 }
@@ -826,7 +834,7 @@ var currentPurchase=""
 
     private fun initiatePurchase() {
         val skuList: MutableList<String> = ArrayList()
-        skuList.add(MyConstants.PUR_199_20)
+        skuList.add(MyConstants.PUR_99_10)
         skuList.add(MyConstants.PUR_199_20)
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(BillingClient.SkuType.SUBS)
@@ -864,5 +872,17 @@ var currentPurchase=""
         }
 
     }
+
+
+    override fun onPurchasesUpdated(p0: BillingResult, p1: MutableList<Purchase>?) {
+        if (p0.responseCode == BillingClient.BillingResponseCode.OK) {
+            if (p1 != null && p1.size > 0) {
+                    handlePurchases(p1)
+            } else {
+//                        savePurchaseValueToPref(false)
+            }
+        }
+    }
+
 
 }

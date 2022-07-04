@@ -6,13 +6,11 @@ object MyConstants {
     val NODE_PURCHASES: String = "purchases"
     val CURRENT_SUBSCRIPTION: String = "currentSubscription"
     val BASE_64_KEY: String? = "base64here"
-    val PUR_99_10 = "PUR_99_10"
-    val PUR_199_20 = "PUR_199_20"
-    val PUR_299_30 = "PUR_299_30"
-    val PUR_399_40 = "PUR_399_40"
-    val PUR_499_50 = "PUR_499_50"
-
-
+    val PUR_99_10 = "10_PUR"
+    val PUR_199_20 = "20_PUR"
+    val PUR_299_30 = "30_PUR"
+    val PUR_399_40 = "40_PUR"
+    val PUR_499_50 = "50_PUR"
     val SEARCH_DISTANCE: String = "searchDistance"
     val NODE_LIKED_USERS: String = "likedUsers"
     val USER_GENDER: String = "userGender"
