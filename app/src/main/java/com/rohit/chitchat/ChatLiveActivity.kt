@@ -59,7 +59,6 @@ class ChatLiveActivity : AppCompatActivity() {
     private var fileUri: Uri? = null
     private var REQUEST_TAKE_GALLERY_VIDEO: Int = 0
     private var VIDEO_CAPTURE: Int = 0
-    private var stateValueEventListner: ValueEventListener? = null
     private var audioRecorder: AudioRecorder? = null
     private var recordFile: File? = null
     private var senderId: String = ""
@@ -70,8 +69,7 @@ class ChatLiveActivity : AppCompatActivity() {
     var roomId: String? = null
     var onLiveChatScreen = true
     var isSendMessage = false
-    var firebaseChats =
-        FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
+    var firebaseChats = FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
     var isScrolling = true
     var database: ValueEventListener? = null

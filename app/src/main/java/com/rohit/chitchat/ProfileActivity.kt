@@ -43,13 +43,11 @@ class ProfileActivity : AppCompatActivity() {
     var firebaseUsers = FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
         .getReference(NODE_USERS)
     lateinit var binding: ActivityProfileBinding
-
     var date: String = ""
     var selectedGender = ""
     var firebaseChatFriends =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)

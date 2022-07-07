@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.android.billingclient.api.*
-import com.foojan.app.utils.Security
 import com.google.android.gms.location.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.database.*
@@ -34,6 +33,7 @@ import com.rohit.chitchat.MyUtils
 import com.rohit.chitchat.MyUtils.applyFilterType
 import com.rohit.chitchat.MyUtils.chatNearbyList
 import com.rohit.chitchat.R
+import com.rohit.chitchat.Security
 import com.rohit.chitchat.adapters.NearbyChatAdapter
 import com.rohit.chitchat.adapters.PurchasingAdapter
 import com.rohit.chitchat.databinding.BottomSheetChangeDistanceBinding
@@ -45,7 +45,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class NearbyFragment : Fragment(), PurchasesUpdatedListener {
@@ -105,11 +104,20 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
             showBottomSheetDistanceChange(currentPurchase)
 
         }
-
+        addItems()
         setWithInText()
         setUpBillingAccount()
         setUpPrices()
 
+    }
+
+    private fun addItems() {
+        list = ArrayList()
+        list!!.add(PurchasingModel(MyConstants.PUR_99_10, "10KM", "RS. 99", "1 Month"))
+        list!!.add(PurchasingModel(PUR_199_20, "20KM", "RS. 199", "1 Month"))
+        list!!.add(PurchasingModel(PUR_299_30, "30KM", "RS. 299", "1 Month"))
+        list!!.add(PurchasingModel(PUR_399_40, "40KM", "RS. 399", "1 Month"))
+        list!!.add(PurchasingModel(PUR_499_50, "50KM", "RS. 499", "1 Month"))
     }
 
     private fun showBottomSheetFilter() {
@@ -508,10 +516,10 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
             fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
-    var list: ArrayList<PurchasingModel>?=null
-var purchaseBottomsheet:BottomSheetDialog?=null
+    var list: ArrayList<PurchasingModel>? = null
+    var purchaseBottomsheet: BottomSheetDialog? = null
     fun showPurchasingBottomsheet() {
-         purchaseBottomsheet =
+        purchaseBottomsheet =
             BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
         var mPurchasingBinding =
             BottomSheetProductPurchasingBinding.inflate(layoutInflater, null, false)
@@ -519,13 +527,6 @@ var purchaseBottomsheet:BottomSheetDialog?=null
 
         purchaseBottomsheet!!.setContentView(mPurchasingBinding!!.root)
         purchaseBottomsheet!!.window!!.setBackgroundDrawableResource(android.R.color.transparent)
-
-         list = ArrayList()
-        list!!.add(PurchasingModel(MyConstants.PUR_99_10, "10KM", "RS. 99", "1 Month"))
-        list!!.add(PurchasingModel(PUR_199_20, "20KM", "RS. 199", "1 Month"))
-        list!!.add(PurchasingModel(PUR_299_30, "30KM", "RS. 299", "1 Month"))
-        list!!.add(PurchasingModel(PUR_399_40, "40KM", "RS. 399", "1 Month"))
-        list!!.add(PurchasingModel(PUR_499_50, "50KM", "RS. 499", "1 Month"))
 
 
         var adapter = PurchasingAdapter(requireContext(), list!!, object : PurchasingAdapter.Click {
@@ -549,7 +550,10 @@ var purchaseBottomsheet:BottomSheetDialog?=null
                         billingClient!!.launchBillingFlow(requireActivity(), flowParams!!)
                     }
                 } else {
-                    MyUtils.showToast(requireContext(), "In App purchase is not ready yet, Try again later")
+                    MyUtils.showToast(
+                        requireContext(),
+                        "In App purchase is not ready yet, Try again later"
+                    )
                 }
             }
         }
@@ -731,7 +735,7 @@ var purchaseBottomsheet:BottomSheetDialog?=null
         billingClient!!.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val queryPurchase = billingClient!!.queryPurchases(BillingClient.SkuType.SUBS)
+                    val queryPurchase = billingClient!!.queryPurchases(BillingClient.SkuType.INAPP)
                     val queryPurchases = queryPurchase.purchasesList
                 }
             }
@@ -790,16 +794,26 @@ var purchaseBottomsheet:BottomSheetDialog?=null
                     if (firstTime) {
                         firstTime = false
                         val calendar = Calendar.getInstance()
-                        calendar.add(Calendar.HOUR, 1)
-                        var purchaseData= FirebasePurchase(list!!.get(0).PurchaseType.toString(),list!!.get(0).itemPrice.toString(),Calendar.getInstance().timeInMillis.toString(),
-                            calendar.timeInMillis.toString())
-                        firebasePurchases.child(MyUtils.getStringValue(requireActivity(),MyConstants.USER_PHONE)).setValue(purchaseData).addOnSuccessListener {
+                        calendar.add(Calendar.MONTH, 1)
+                        var purchaseData = FirebasePurchase(
+                            list!!.get(selectedPosition).PurchaseType.toString(),
+                            list!!.get(selectedPosition).itemPrice.toString(),
+                            Calendar.getInstance().timeInMillis.toString(),
+                            calendar.timeInMillis.toString()
+                        )
+                        firebasePurchases.child(
+                            MyUtils.getStringValue(
+                                requireActivity(),
+                                MyConstants.USER_PHONE
+                            )
+                        ).setValue(purchaseData).addOnSuccessListener {
                             purchaseBottomsheet!!.dismiss()
                             MyUtils.saveStringValue(
                                 requireContext(),
                                 MyConstants.CURRENT_SUBSCRIPTION,
-                                list!!.get(0).PurchaseType.toString()
+                                list!!.get(selectedPosition).PurchaseType.toString()
                             )
+                            MyUtils.showToast(requireContext(),"Successfully purchase, Enjoy")
                             showBottomSheetDistanceChange(list!!.get(0).PurchaseType.toString())
                         }
                         /// PURCHASING CALL HERE
@@ -836,15 +850,20 @@ var purchaseBottomsheet:BottomSheetDialog?=null
         val skuList: MutableList<String> = ArrayList()
         skuList.add(MyConstants.PUR_99_10)
         skuList.add(MyConstants.PUR_199_20)
+        skuList.add(MyConstants.PUR_299_30)
+        skuList.add(MyConstants.PUR_399_40)
+        skuList.add(MyConstants.PUR_499_50)
         val params = SkuDetailsParams.newBuilder()
-        params.setSkusList(skuList).setType(BillingClient.SkuType.SUBS)
+        params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
         billingClient!!.querySkuDetailsAsync(
             params.build()
         ) { billingResult, skuDetailsList ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 if (skuDetailsList != null && skuDetailsList.size > 0) {
                     productList = skuDetailsList
-                    setData(skuDetailsList)
+                    list!!.forEachIndexed { index, purchasingModel ->
+                        list!!.get(index).itemPrice = productList!!.get(index).originalPrice
+                    }
                 } else {
                     //try to add item/product id "purchase" inside managed product in google play console
                     Toast.makeText(
@@ -877,7 +896,7 @@ var purchaseBottomsheet:BottomSheetDialog?=null
     override fun onPurchasesUpdated(p0: BillingResult, p1: MutableList<Purchase>?) {
         if (p0.responseCode == BillingClient.BillingResponseCode.OK) {
             if (p1 != null && p1.size > 0) {
-                    handlePurchases(p1)
+                handlePurchases(p1)
             } else {
 //                        savePurchaseValueToPref(false)
             }
