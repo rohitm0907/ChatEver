@@ -137,7 +137,7 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
                 smsIntent.putExtra("address", "${listContacts.get(position).mobileNumber}")
                 smsIntent.putExtra(
                     "sms_body",
-                    "Let's Start chat with your nearbies \nhttps://drive.google.com/file/d/1k3GKwszKvpiVBpbMVQIvNY93wIf2H0vT/view?usp=sharing"
+                    "Let's chat with your nearbies and friends \\n https://play.google.com/store/apps/details?id=${context.packageName}"
                 )
                 context.startActivity(smsIntent)
             }
@@ -152,7 +152,7 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
                 smsIntent.putExtra("address", "${listContacts.get(position).mobileNumber}")
                 smsIntent.putExtra(
                     "sms_body",
-                    "Let's Start chat with your nearbies \nhttps://drive.google.com/file/d/1k3GKwszKvpiVBpbMVQIvNY93wIf2H0vT/view?usp=sharing"
+                    "Let's chat with your nearbies and friends \\n https://play.google.com/store/apps/details?id=${context.packageName}"
                 )
                 context.startActivity(smsIntent)
             }

@@ -49,7 +49,6 @@ import java.util.*
 
 class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     var selectedPosition = -1
-
     private var firstTime: Boolean = true
     private var purchaseToken: String? = null
     private var productId: String? = null
@@ -58,7 +57,6 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     private var productList: MutableList<SkuDetails>? = null
     private var flowParams: BillingFlowParams? = null
     var PRODUCT_ID = MyConstants.PUR_199_20
-
     var fetchNearbyList = false
     var filterList = ArrayList<Users>()
     private var locationCallback: LocationCallback? = null
