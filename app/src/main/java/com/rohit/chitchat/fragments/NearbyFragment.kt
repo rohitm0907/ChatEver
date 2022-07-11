@@ -414,7 +414,6 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
 
     override fun onResume() {
         super.onResume()
-
         checkLocationPermission()
     }
 
@@ -543,12 +542,11 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                 MyUtils.showToast(requireContext(), "Please select a plan")
             } else {
                 if (productList != null && productList!!.size > 0) {
-                    if (PRODUCT_ID.equals(MyConstants.PUR_99_10)) {
+                    PRODUCT_ID= list!![selectedPosition].PurchaseType!!
                         flowParams = BillingFlowParams.newBuilder()
-                            .setSkuDetails(productList!![0])
+                            .setSkuDetails(productList!![selectedPosition])
                             .build()
                         billingClient!!.launchBillingFlow(requireActivity(), flowParams!!)
-                    }
                 } else {
                     MyUtils.showToast(
                         requireContext(),
@@ -588,10 +586,15 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
         bottomDistance.setContentView(mBottomSheetBinding!!.root)
         bottomDistance.window!!.setBackgroundDrawableResource(android.R.color.transparent)
         mBottomSheetBinding.sliderDistance.value = searchDistance.toFloat()
-        var selectedDistance = MyUtils.getStringValue(
+        var selectedDistance = if(MyUtils.getStringValue(
             requireContext(),
             MyConstants.SEARCH_DISTANCE
-        )
+        ).equals("") ) 5 else MyUtils.getStringValue(
+                requireContext(),
+                MyConstants.SEARCH_DISTANCE
+            ).toInt()
+
+
         mBottomSheetBinding.sliderDistance.valueFrom = 1F
         if (currentPurchase.equals(PUR_99_10)) {
             mBottomSheetBinding.sliderDistance.valueTo = 10F
@@ -736,7 +739,6 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     val queryPurchase = billingClient!!.queryPurchases(BillingClient.SkuType.INAPP)
-                    val queryPurchases = queryPurchase.purchasesList
                 }
             }
 
@@ -751,8 +753,6 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
             if (PRODUCT_ID == purchase.skus.get(0) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                 if (!verifyValidSignature(purchase.originalJson, purchase.signature)) {
                     Log.d("mySubscription", "billing response 4")
-                    // Invalid purchase
-                    // show error to user
                     Toast.makeText(
                         requireContext(),
                         "Error : Invalid Purchase",
@@ -760,35 +760,10 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                     ).show()
                     return
                 }
-                // else purchase is valid
-                //if item is purchased and not acknowledged
-//                if (!purchase.isAcknowledged) {
-//                    Log.d("mySubscription", "billing response 3")
-//                    val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-//                        .setPurchaseToken(purchase.purchaseToken)
-//                        .build()
-//                    billingClient!!.acknowledgePurchase(acknowledgePurchaseParams, ackPurchase)
-//                } else {
-                // Grant entitlement to the user on item purchase
-                // restart activity
-
                 productId = PRODUCT_ID
                 purchaseToken = purchase.purchaseToken
                 Log.d("mylog purchaseToken", purchaseToken.toString())
                 time = purchase.purchaseTime.toString()
-                if (productId.equals(MyConstants.PUR_99_10)) {
-//                    amount = binding!!.txtMonthlyPrice.text.toString()
-                } else {
-//                    amount = binding!!.txtAnuallyPrice.text.toString()
-                }
-
-                var subscriptionName = "1"
-                if (productId == MyConstants.PUR_99_10) {
-                    subscriptionName = "1"
-                } else {
-                    subscriptionName = "2"
-                }
-
 
                 CoroutineScope(Dispatchers.Main).launch {
                     if (firstTime) {
@@ -801,12 +776,14 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                             Calendar.getInstance().timeInMillis.toString(),
                             calendar.timeInMillis.toString()
                         )
+                        MyUtils.showProgress(requireContext())
                         firebasePurchases.child(
                             MyUtils.getStringValue(
                                 requireActivity(),
                                 MyConstants.USER_PHONE
                             )
                         ).setValue(purchaseData).addOnSuccessListener {
+                            MyUtils.stopProgress(requireContext())
                             purchaseBottomsheet!!.dismiss()
                             MyUtils.saveStringValue(
                                 requireContext(),
@@ -814,7 +791,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                                 list!!.get(selectedPosition).PurchaseType.toString()
                             )
                             MyUtils.showToast(requireContext(),"Successfully purchase, Enjoy")
-                            showBottomSheetDistanceChange(list!!.get(0).PurchaseType.toString())
+                            showBottomSheetDistanceChange(list!!.get(selectedPosition).PurchaseType.toString())
                         }
                         /// PURCHASING CALL HERE
                     }
