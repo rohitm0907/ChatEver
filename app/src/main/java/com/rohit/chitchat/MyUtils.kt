@@ -24,6 +24,7 @@ import java.util.*
 
 
 object MyUtils {
+    var referenceMobile=""
     var applyFilterType = "No Filter"
     var dialog: Dialog? = null;
     var listAllUsersNumbers: ArrayList<String> = ArrayList()

@@ -2,16 +2,22 @@ package com.rohit.chitchat
 
 import android.app.Dialog
 import android.content.ActivityNotFoundException
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import com.rohit.chitchat.MyUtils.referenceMobile
+
 
 class SplashActivity : AppCompatActivity() {
 
@@ -19,6 +25,34 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         getSupportActionBar()!!.hide()
+        checkReference()
+    }
+
+    private fun checkReference() {
+        FirebaseDynamicLinks.getInstance()
+            .getDynamicLink(intent)
+            .addOnSuccessListener(
+                this
+            ) { pendingDynamicLinkData ->
+                // Get deep link from result (may be null if no link is found)
+                var deepLink: Uri? = null
+                if (pendingDynamicLinkData != null) {
+                    deepLink = pendingDynamicLinkData.link
+                    referenceMobile=deepLink!!.getQueryParameter("phone").toString()
+//                    Toast.makeText(this@SplashActivity, referenceMobile.toString(),Toast.LENGTH_SHORT).show()
+                }
+
+
+
+                // Handle the deep link. For example, open the linked content,
+                // or apply promotional credit to the user's account.
+                // ...
+
+                // ...
+            }
+            .addOnFailureListener(
+                this
+            ) { e -> Log.w(TAG, "getDynamicLink:onFailure", e) }
     }
 
 

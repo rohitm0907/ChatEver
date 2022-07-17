@@ -75,7 +75,7 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         }
 
         if (!chatFriendList.get(position).image.equals("")) {
-            Glide.with(context).load(chatFriendList.get(position).image).into(holder.imgUser)
+            Glide.with(context).load(chatFriendList.get(position).image).placeholder(R.drawable.user).into(holder.imgUser)
         }
 
         holder.itemView.setOnClickListener {

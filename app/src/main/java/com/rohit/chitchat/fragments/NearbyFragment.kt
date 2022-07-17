@@ -745,6 +745,8 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     }
 
 
+
+
     fun handlePurchases(purchases: List<Purchase>) {
         for (purchase in purchases) {
             //if item is purchased

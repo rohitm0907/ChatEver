@@ -2,6 +2,7 @@ package com.rohit.chitchat
 
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -21,9 +22,12 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.dynamiclinks.ktx.*
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.rohit.chitchat.adapters.HomeTabAdapter
 import com.rohit.chitchat.databinding.ActivityHomeBinding
+import kotlinx.android.synthetic.main.activity_login.*
 import java.util.*
 
 
@@ -213,14 +217,42 @@ class HomeActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.txtShare -> {
-                val intent = Intent()
-                intent.action = Intent.ACTION_SEND
-                intent.type = "text/plain"
-                intent.putExtra(
-                    Intent.EXTRA_TEXT,
-                    "Let's chat with your nearbies and friends \n https://play.google.com/store/apps/details?id=$packageName"
-                )
-                startActivity(Intent.createChooser(intent, "Share via"))
+                val dynamicLink = Firebase.dynamicLinks.dynamicLink {
+                    link = Uri.parse("https://chitforchat.com/?phone=${MyUtils.getStringValue(this@HomeActivity, MyConstants.USER_PHONE)}")
+                    domainUriPrefix = "https://chitforchat.page.link/"
+                    // Open links with this app on Android
+                    androidParameters("$packageName") {
+//                        phone ="919815187258"
+                    }
+                    socialMetaTagParameters {  }
+
+                }
+
+                val dynamicLinkUri = dynamicLink.uri
+                val shortLinkTask = Firebase.dynamicLinks.shortLinkAsync {
+                    longLink = Uri.parse(dynamicLinkUri.toString())
+                }.addOnSuccessListener { (shortLink, flowChartLink) ->
+                    // You'll need to import com.google.firebase.dynamiclinks.ktx.component1 and
+                    // com.google.firebase.dynamiclinks.ktx.component2
+
+                    // Short link created
+                    val intent = Intent()
+                    intent.action = Intent.ACTION_SEND
+                    intent.type = "text/plain"
+                    intent.putExtra(
+                        Intent.EXTRA_TEXT,
+                        "Let's chat with your nearby friends.\n\n" +
+                                "Please share and install app via link.\nAfter register user via link, each will get - \n" +
+                                "ONE LIKE" +
+                                "\n\n$shortLink"
+                    )
+                    startActivity(Intent.createChooser(intent, "Share via"))
+                }.addOnFailureListener {
+                    // Error
+                    // ...
+                }
+
+
             }
 
 

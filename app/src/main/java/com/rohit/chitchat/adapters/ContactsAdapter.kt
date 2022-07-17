@@ -2,6 +2,7 @@ package com.rohit.chitchat.adapters
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.dynamiclinks.ktx.*
+import com.google.firebase.ktx.Firebase
 import com.rohit.chitchat.ChatLiveActivity
 import com.rohit.chitchat.Models.ContactModel
 import com.rohit.chitchat.MyConstants
@@ -132,14 +135,19 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
 //                    .putExtra(MyConstants.OTHER_USER_IMAGE,listContacts.get(position).image)
 
             } else {
-                val smsIntent = Intent(Intent.ACTION_VIEW)
-                smsIntent.type = "vnd.android-dir/mms-sms"
-                smsIntent.putExtra("address", "${listContacts.get(position).mobileNumber}")
-                smsIntent.putExtra(
-                    "sms_body",
-                    "Let's chat with your nearbies and friends \\n https://play.google.com/store/apps/details?id=${context.packageName}"
-                )
-                context.startActivity(smsIntent)
+
+
+                shareLink()
+
+
+
+
+//                smsIntent.putExtra(
+//                    "sms_body",
+//                    "Let's chat with your nearbies and friends \\n Download Link: \nhttps://play.google.com/store/apps/details?id=${context.packageName} " +
+//                            "\n Reference Link:https://www.chitchat.com/reference/+919815187258"
+//                )
+//                context.startActivity(smsIntent)
             }
         }
 
@@ -147,14 +155,7 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
 
         holder.btnInvite.apply {
             setOnClickListener {
-                val smsIntent = Intent(Intent.ACTION_VIEW)
-                smsIntent.type = "vnd.android-dir/mms-sms"
-                smsIntent.putExtra("address", "${listContacts.get(position).mobileNumber}")
-                smsIntent.putExtra(
-                    "sms_body",
-                    "Let's chat with your nearbies and friends \\n https://play.google.com/store/apps/details?id=${context.packageName}"
-                )
-                context.startActivity(smsIntent)
+                shareLink()
             }
 
 
@@ -208,6 +209,43 @@ class ContactsAdapter(var context: Context, var listContacts: ArrayList<ContactM
                     override fun onCancelled(error: DatabaseError) {
                     }
                 })
+        }
+    }
+
+    private fun shareLink() {
+        val dynamicLink = Firebase.dynamicLinks.dynamicLink {
+            link = Uri.parse("https://chitforchat.com/?phone=${MyUtils.getStringValue(context, MyConstants.USER_PHONE)}")
+            domainUriPrefix = "https://chitforchat.page.link/"
+            // Open links with this app on Android
+            androidParameters("${context.packageName}") {
+//                        phone ="919815187258"
+            }
+            socialMetaTagParameters {  }
+
+        }
+
+        val dynamicLinkUri = dynamicLink.uri
+        Firebase.dynamicLinks.shortLinkAsync {
+            longLink = Uri.parse(dynamicLinkUri.toString())
+        }.addOnSuccessListener { (shortLink, flowChartLink) ->
+            // You'll need to import com.google.firebase.dynamiclinks.ktx.component1 and
+            // com.google.firebase.dynamiclinks.ktx.component2
+
+            // Short link created
+            val intent = Intent()
+            intent.action = Intent.ACTION_SEND
+            intent.type = "text/plain"
+            intent.putExtra(
+                Intent.EXTRA_TEXT,
+                "Let's chat with your nearby friends.\n\n" +
+                        "Please share and install app via link.\nAfter register user via link, each will get - \n" +
+                        "ONE LIKE" +
+                        "\n\n$shortLink"
+            )
+            context.startActivity(Intent.createChooser(intent, "Share via"))
+        }.addOnFailureListener {
+            // Error
+            // ...
         }
     }
 

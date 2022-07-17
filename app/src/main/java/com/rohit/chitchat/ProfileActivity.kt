@@ -48,6 +48,9 @@ class ProfileActivity : AppCompatActivity() {
     var firebaseChatFriends =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHAT_FIRENDS)
+    var firebaseLikedUsers =
+        FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
+            .getReference(MyConstants.NODE_LIKED_USERS)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
@@ -77,6 +80,10 @@ class ProfileActivity : AppCompatActivity() {
             Glide.with(this@ProfileActivity)
                 .load(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE))
                 .placeholder(R.drawable.user).into(binding.imgUser)
+        }
+
+        if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
+            setUserTotalLikes()
         }
 
 
@@ -113,8 +120,24 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.spGender.setOnSpinnerItemSelectedListener(
             OnSpinnerItemSelectedListener<String?> { oldIndex, oldItem, newIndex, newItem ->
-
                 selectedGender = newItem!!
+            })
+    }
+
+    private fun setUserTotalLikes() {
+        llLike.visibility=View.VISIBLE
+        firebaseLikedUsers.child(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_PHONE))
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        txtLikes.text=    snapshot.childrenCount.toString()
+                    } else {
+                        txtLikes.text=   "0"
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
 
             })
     }
@@ -252,6 +275,25 @@ class ProfileActivity : AppCompatActivity() {
 //            query.addListenerForSingleValueEvent(valueEventListener)
         }
 
+        if(!MyUtils.referenceMobile.equals("")) {
+            firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (!snapshot.exists()) {
+                            firebaseLikedUsers.child(phone).child(MyUtils.referenceMobile + "r")
+                                .setValue("reference")
+                            firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
+                                .setValue("reference").addOnCompleteListener {
+                                    MyUtils.referenceMobile=""
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+
+                })
+        }
 
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
             MyUtils.stopProgress(this@ProfileActivity)
@@ -288,8 +330,6 @@ class ProfileActivity : AppCompatActivity() {
             if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
                 userImage = null
                 updateImage(name,imageUri,captions)
-
-
             } else {
                 userImage = null
                 finishAffinity()
