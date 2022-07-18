@@ -51,6 +51,7 @@ class ProfileActivity : AppCompatActivity() {
     var firebaseLikedUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_LIKED_USERS)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
@@ -107,13 +108,18 @@ class ProfileActivity : AppCompatActivity() {
             if (userImage != null) {
                 uploadFile(userImage!!)
             } else {
-                uploadData(
-                    intent.getStringExtra(MyConstants.PHONE_NUMBER).toString(),
-                    binding.edtName.text.toString(),
-                    binding.edtCaptions.text.toString(),
-                    MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE),
-                    selectedGender
-                )
+                if(!binding.edtName.text.toString().trim().equals("")) {
+                    uploadData(
+                        intent.getStringExtra(MyConstants.PHONE_NUMBER).toString(),
+                        binding.edtName.text.toString(),
+                        binding.edtCaptions.text.toString(),
+                        MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_IMAGE),
+                        selectedGender
+                    )
+                }else{
+                    MyUtils.stopProgress(this@ProfileActivity)
+                    Toast.makeText(this@ProfileActivity,"Please enter your name",Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -125,14 +131,19 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setUserTotalLikes() {
-        llLike.visibility=View.VISIBLE
-        firebaseLikedUsers.child(MyUtils.getStringValue(this@ProfileActivity, MyConstants.USER_PHONE))
+        llLike.visibility = View.VISIBLE
+        firebaseLikedUsers.child(
+            MyUtils.getStringValue(
+                this@ProfileActivity,
+                MyConstants.USER_PHONE
+            )
+        )
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        txtLikes.text=    snapshot.childrenCount.toString()
+                        txtLikes.text = snapshot.childrenCount.toString()
                     } else {
-                        txtLikes.text=   "0"
+                        txtLikes.text = "0"
                     }
                 }
 
@@ -257,43 +268,28 @@ class ProfileActivity : AppCompatActivity() {
         }
 
 
-        if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
-
-
-//            val query: Query = firebaseChatFriends.chil.orderByChild("image").equalTo("")
-//            val valueEventListener: ValueEventListener = object : ValueEventListener {
-//                override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                    for (ds in dataSnapshot.children) {
-//                        ds.child("image").ref.setValue("fdjsnsjbgfs")
-//
-//                    }
-//                }
-//
-//                override fun onCancelled(databaseError: DatabaseError) {
-//                }
-//            }
-//            query.addListenerForSingleValueEvent(valueEventListener)
-        }
-
-        if(!MyUtils.referenceMobile.equals("")) {
-            firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        if (!snapshot.exists()) {
-                            firebaseLikedUsers.child(phone).child(MyUtils.referenceMobile + "r")
-                                .setValue("reference")
-                            firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
-                                .setValue("reference").addOnCompleteListener {
-                                    MyUtils.referenceMobile=""
-                                }
+        if (!MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
+            if (!MyUtils.referenceMobile.equals("")) {
+                firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (!snapshot.exists()) {
+                                firebaseLikedUsers.child(phone).child(MyUtils.referenceMobile + "r")
+                                    .setValue("reference")
+                                firebaseLikedUsers.child(MyUtils.referenceMobile).child(phone + "r")
+                                    .setValue("reference").addOnCompleteListener {
+                                        MyUtils.referenceMobile = ""
+                                    }
+                            }
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {
-                    }
+                        override fun onCancelled(error: DatabaseError) {
+                        }
 
-                })
+                    })
+            }
         }
+
 
         firebaseUsers.child(phone).setValue(users!!).addOnCompleteListener {
             MyUtils.stopProgress(this@ProfileActivity)
@@ -329,7 +325,7 @@ class ProfileActivity : AppCompatActivity() {
 
             if (MyUtils.getBooleanValue(this@ProfileActivity, MyConstants.IS_LOGIN)) {
                 userImage = null
-                updateImage(name,imageUri,captions)
+                updateImage(name, imageUri, captions)
             } else {
                 userImage = null
                 finishAffinity()
@@ -344,7 +340,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateImage(name:String,image:String,caption:String) {
+    private fun updateImage(name: String, image: String, caption: String) {
         firebaseChatFriends.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 

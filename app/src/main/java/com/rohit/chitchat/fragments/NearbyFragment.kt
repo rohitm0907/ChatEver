@@ -765,37 +765,51 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                 Log.d("mylog purchaseToken", purchaseToken.toString())
                 time = purchase.purchaseTime.toString()
 
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (firstTime) {
-                        firstTime = false
-                        val calendar = Calendar.getInstance()
-                        calendar.add(Calendar.MONTH, 1)
-                        var purchaseData = FirebasePurchase(
-                            list!!.get(selectedPosition).PurchaseType.toString(),
-                            list!!.get(selectedPosition).itemPrice.toString(),
-                            Calendar.getInstance().timeInMillis.toString(),
-                            calendar.timeInMillis.toString()
-                        )
-                        MyUtils.showProgress(requireContext())
-                        firebasePurchases.child(
-                            MyUtils.getStringValue(
-                                requireActivity(),
-                                MyConstants.USER_PHONE
-                            )
-                        ).setValue(purchaseData).addOnSuccessListener {
-                            MyUtils.stopProgress(requireContext())
-                            purchaseBottomsheet!!.dismiss()
-                            MyUtils.saveStringValue(
-                                requireContext(),
-                                MyConstants.CURRENT_SUBSCRIPTION,
-                                list!!.get(selectedPosition).PurchaseType.toString()
-                            )
-                            MyUtils.showToast(requireContext(),"Successfully purchase, Enjoy")
-                            showBottomSheetDistanceChange(list!!.get(selectedPosition).PurchaseType.toString())
+
+                val consumeParams = ConsumeParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                billingClient?.consumeAsync(consumeParams) { billingResult, purchaseToken ->
+                    when (billingResult.responseCode) {
+                        BillingClient.BillingResponseCode.OK -> {
+                            // Update the appropriate tables/databases to grant user the items
+                                val calendar = Calendar.getInstance()
+                                calendar.add(Calendar.MONTH, 1)
+                                var purchaseData = FirebasePurchase(
+                                    list!!.get(selectedPosition).PurchaseType.toString(),
+                                    list!!.get(selectedPosition).itemPrice.toString(),
+                                    Calendar.getInstance().timeInMillis.toString(),
+                                    calendar.timeInMillis.toString(),
+                                    purchaseToken.toString()
+                                )
+                                MyUtils.showProgress(requireContext())
+                                firebasePurchases.child(
+                                    MyUtils.getStringValue(
+                                        requireActivity(),
+                                        MyConstants.USER_PHONE
+                                    )
+                                ).setValue(purchaseData).addOnSuccessListener {
+                                    MyUtils.stopProgress(requireContext())
+                                    purchaseBottomsheet!!.dismiss()
+                                    MyUtils.saveStringValue(
+                                        requireContext(),
+                                        MyConstants.CURRENT_SUBSCRIPTION,
+                                        list!!.get(selectedPosition).PurchaseType.toString()
+                                    )
+                                    MyUtils.showToast(requireContext(), "Successfully purchase, Enjoy")
+                                    showBottomSheetDistanceChange(list!!.get(selectedPosition).PurchaseType.toString())
+
+                                    /// PURCHASING CALL HERE
+                                }
                         }
-                        /// PURCHASING CALL HERE
+                        else -> {
+                            Log.w("TAG_INAPP", billingResult.debugMessage)
+                        }
                     }
                 }
+
+
+
 //                }
             } else if (PRODUCT_ID == purchase.skus.get(0) && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
                 Toast.makeText(

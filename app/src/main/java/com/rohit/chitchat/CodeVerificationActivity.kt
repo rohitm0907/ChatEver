@@ -38,12 +38,12 @@ class CodeVerificationActivity : AppCompatActivity() {
         binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
             override fun onOtpCompleted(otp: String) {
                 // do Stuff
-//                verifyOtp(otp)
-                checkAlreadyRegister()
+                verifyOtp(otp)
+//                checkAlreadyRegister()
             }
         })
 
-//        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
+        sentOtp(intent!!.getStringExtra(MyConstants.PHONE_NUMBER).toString());
 
     }
 
