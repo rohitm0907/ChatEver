@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_color"
+    android:background="@drawable/bg_app"
     android:orientation="vertical"
     tools:context=".ProfileActivity">
 
@@ -68,10 +68,11 @@
         android:layout_marginTop="30dp"
         android:background="@drawable/bg_edittext"
         android:hint="@string/name"
-        android:padding="15dp"
+        android:paddingVertical="15dp"
+        android:paddingHorizontal="20dp"
         android:singleLine="true"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white" />
+        android:textColor="@color/color_text"
+        android:textColorHint="@color/color_hint" />
 
     <com.skydoves.powerspinner.PowerSpinnerView
         android:id="@+id/spGender"
@@ -82,9 +83,10 @@
         android:background="@drawable/bg_edittext"
         android:gravity="center_vertical"
         android:hint="Select your Gender"
-        android:padding="10dp"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="20dp"
+        android:textColor="@color/color_text"
+        android:textColorHint="@color/color_hint"
         android:textSize="18sp"
         app:spinner_arrow_gravity="end"
         app:spinner_arrow_padding="8dp"
@@ -108,12 +110,11 @@
         android:hint="@string/Captions"
         android:lines="5"
         android:maxHeight="200dp"
-
         android:maxLength="200"
         android:minHeight="100dp"
         android:padding="15dp"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white" />
+        android:textColor="@color/color_text"
+        android:textColorHint="@color/color_hint" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnSave"
@@ -123,8 +124,8 @@
         android:layout_marginTop="30dp"
         android:background="@drawable/bg_chat_left"
         android:backgroundTint="@color/black"
-        android:paddingHorizontal="50dp"
-        android:paddingVertical="10dp"
+        android:paddingHorizontal="70dp"
+        android:paddingVertical="20dp"
         android:text="@string/save"
         android:textColor="@color/white" />
 

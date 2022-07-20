@@ -22,6 +22,7 @@
     <string name="no_filter">No Filter</string>
     <string name="new_update_Available">App new update avaliable. Please update your app.</string>
     <string name="logout">Are you sure you wants to logout ?</string>
+    <string name="login">Login</string>
 
     <string-array name="list_gender">
         <item>Male</item>

@@ -108,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rlMessage"
-            android:layout_marginStart="-55dp"
+            android:layout_marginStart="-65dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="-10dp"
             android:layout_toRightOf="@+id/rlMessage"
