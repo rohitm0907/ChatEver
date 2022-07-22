@@ -53,8 +53,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:inputType="number"
-        app:itemRadius="20dp"
-        android:itemBackground="@color/white"
+        app:itemRadius="40dp"
+        android:itemBackground="@drawable/bg_otp"
         android:textColor="@android:color/black"
         app:itemCount="6" />
 </LinearLayout>

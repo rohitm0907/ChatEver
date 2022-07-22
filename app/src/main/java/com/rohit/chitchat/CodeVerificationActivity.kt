@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
@@ -17,6 +18,7 @@ import com.google.firebase.database.ValueEventListener
 import com.rohit.chitchat.databinding.ActivityCodeVerificationBinding
 import com.mukesh.OnOtpCompletionListener
 import com.rohit.chitchat.Models.Users
+import kotlinx.android.synthetic.main.activity_code_verification.*
 import java.util.concurrent.TimeUnit
 
 
@@ -26,6 +28,7 @@ class CodeVerificationActivity : AppCompatActivity() {
     var firebaseUsers =
         FirebaseDatabase.getInstance(MyConstants.FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_USERS)
+    var isOtpEnter=false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +41,7 @@ class CodeVerificationActivity : AppCompatActivity() {
         binding.otpView.setOtpCompletionListener(object : OnOtpCompletionListener {
             override fun onOtpCompleted(otp: String) {
                 // do Stuff
+                isOtpEnter=true
                 verifyOtp(otp)
 //                checkAlreadyRegister()
             }
@@ -58,9 +62,17 @@ class CodeVerificationActivity : AppCompatActivity() {
         auth!!.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
+                    if(!isOtpEnter) {
+                        otp_view.setText(credential.smsCode.toString())
+                        Handler().postDelayed({
+                            checkAlreadyRegister()
+
+                        }, 2000)
+                    }else{
+                        checkAlreadyRegister()
+
+                    }// Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
-                    checkAlreadyRegister()
                 } else {
                     // Sign in failed, display a message and update the UI
                     MyUtils.stopProgress(this@CodeVerificationActivity)
@@ -143,6 +155,11 @@ class CodeVerificationActivity : AppCompatActivity() {
                             this@CodeVerificationActivity,
                             MyConstants.USER_IMAGE,
                             data!!.image.toString()
+                        )
+                        MyUtils.saveStringValue(
+                            this@CodeVerificationActivity,
+                            MyConstants.USER_CAPTIONS,
+                            data!!.captions.toString()
                         )
                         MyUtils.saveStringValue(
                             this@CodeVerificationActivity,

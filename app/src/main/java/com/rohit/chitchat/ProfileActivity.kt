@@ -312,7 +312,7 @@ class ProfileActivity : AppCompatActivity() {
             MyUtils.saveStringValue(
                 this@ProfileActivity,
                 MyConstants.USER_CAPTIONS,
-                users.captions.toString()
+               captions.toString()
             )
 
             MyUtils.saveStringValue(
