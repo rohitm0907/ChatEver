@@ -1,5 +1,8 @@
 package com.rohit.chitchat.Firebase.FirebaseNotification;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -12,11 +15,12 @@ public class MyNotification {
         apiService.sendNotifcation(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
-//                if(response.body().success==1){
-//                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
-//                }else{
-//                    Toast.makeText(context, "Fail", Toast.LENGTH_SHORT).show();
-//                }
+                if(response.body().success==1){
+                    Log.d("notifica....","yes");
+                }else{
+                    Log.d("notifica....","no");
+
+                }
             }
 
             @Override

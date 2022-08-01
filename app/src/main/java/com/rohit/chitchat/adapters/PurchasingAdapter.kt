@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.rohit.chitchat.Models.PurchasingModel
+import com.rohit.chitchat.MyConstants
+import com.rohit.chitchat.MyUtils
 import com.rohit.chitchat.R
 import com.rohit.chitchat.databinding.ListItemPurchaseBinding
 
@@ -28,8 +30,14 @@ class PurchasingAdapter(var context: Context, var listItems: ArrayList<Purchasin
         return viewHolder(view);
 
     }
+    init {
 
+    }
     override fun onBindViewHolder(holder: PurchasingAdapter.viewHolder, position: Int) {
+        if(listItems.get(position).PurchaseType.equals(MyUtils.getStringValue(context, MyConstants.CURRENT_SUBSCRIPTION))){
+            if(selectedItem==-1)
+            selectedItem=position
+        }
         if(position==selectedItem){
             holder.itemView.setBackgroundResource(R.drawable.bg_selected_purchase)
         }else{

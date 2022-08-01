@@ -3,6 +3,7 @@ package com.rohit.chitchat
 object MyConstants {
 
 
+    val NODE_MESSAGES: String="messages"
     val NODE_PURCHASES: String = "purchases"
     val CURRENT_SUBSCRIPTION: String = "currentSubscription"
     val BASE_64_KEY: String? = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg9Sl3NbeRwdYBAjHZdwStWTG2I25NjQz13lVb4BbUcOh6yv0zuTKVcfx4CkxKMZaVrveVHcV75srZv8uVNxq7aGz62tWgFN6ogca2c0QU2W/ckxD7XowuYCLEnm9azqUZUo9En3NTwszzwInSbrLniOOldh7dSqtpp/IBgWFoAOlwI9V9RK8Avy6Z9DfIX5tDUvaEqgmnNb7tMz0F04tLUNX9CVFkLhJ/ttqZxTABubsSqoLWmJ6h46T6cTEJS/mgdZkjx6Svi2HGP1PlLvxKXdjEhMLMs2sbdPS9PohvJlErIkC0RZjYTfl/r8yUe33Bqt1Q/vGNNt1H1B2meWU3wIDAQAB"

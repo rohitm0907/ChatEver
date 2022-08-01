@@ -67,8 +67,9 @@ class ChatLiveActivity : AppCompatActivity() {
     var sentImage: Bitmap? = null
     var binding: ActivityChatLiveBinding? = null
     var roomId: String? = null
-    var onLiveChatScreen = true
+    var onLiveChatScreen = false
     var isSendMessage = false
+    var isFirstTimeOnScreen = true
     var firebaseChats = FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
             .getReference(MyConstants.NODE_CHATS)
     var isScrolling = true
@@ -107,14 +108,13 @@ class ChatLiveActivity : AppCompatActivity() {
         if (intent.getStringExtra(MyConstants.OTHER_USER_NAME).equals(name)) {
             finish()
         }
-
-
     }
 
     var lastDeleteTime: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_live)
+        onLiveChatScreen=true
         instance = this@ChatLiveActivity;
         binding = ActivityChatLiveBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
@@ -135,9 +135,6 @@ class ChatLiveActivity : AppCompatActivity() {
                 .placeholder(R.drawable.user)
                 .into(binding!!.imgUser)
         }
-
-
-
         clicks()
         senderId = MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
         receiverId = intent.getStringExtra(MyConstants.OTHER_USER_PHONE).toString()
@@ -191,13 +188,14 @@ class ChatLiveActivity : AppCompatActivity() {
                 if (!isTyping) {
                     if (!MyUtils.getStringValue(this@ChatLiveActivity, MyConstants.USER_PHONE)
                             .equals("")
-                    )
+                    ) {
                         firebaseOnlineStatus.child(
                             MyUtils.getStringValue(
                                 this@ChatLiveActivity,
                                 MyConstants.USER_PHONE
                             )
-                        ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Typing...")
+                        ).child(MyConstants.NODE_ONLINE_STATUS).setValue("Typing..."+receiverId)
+                    }
 
                     // Send notification for start typing event
                     isTyping = true
@@ -222,7 +220,7 @@ class ChatLiveActivity : AppCompatActivity() {
                             //send notification for stopped typing event
                         }
                     },
-                    1000
+                    3000
                 )
             }
         })
@@ -466,20 +464,18 @@ class ChatLiveActivity : AppCompatActivity() {
             cursor.getString(column_index)
         } else null
     }
-
+    var lastPosition = 0
     fun RecyclerView.addScrollListener(onScroll: (position: Int) -> Unit) {
-        var lastPosition = 0
+
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (layoutManager is LinearLayoutManager) {
-                    val currentVisibleItemPosition =
-                        (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-
-                    if (lastPosition != currentVisibleItemPosition && currentVisibleItemPosition != RecyclerView.NO_POSITION) {
-                        onScroll.invoke(currentVisibleItemPosition)
-                        lastPosition = currentVisibleItemPosition
-                    }
+                     lastPosition =
+                        (layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+if(lastPosition==chatsList.size-1){
+    binding!!.btnDown.visibility=View.GONE
+}
                 }
             }
         })
@@ -557,7 +553,7 @@ class ChatLiveActivity : AppCompatActivity() {
                     it.release()
                 }
 
-                Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this,durationTime.toString()+" seconds",Toast.LENGTH_SHORT).show()
                 if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
                 }else{
                     uploadVideoOnFirebase(selectedPhotoUrl)
@@ -789,6 +785,7 @@ class ChatLiveActivity : AppCompatActivity() {
                     data as Map<String, Any>
                 ).addOnCompleteListener {
                     if (!token.equals("")) {
+                        Toast.makeText(this@ChatLiveActivity,"send",Toast.LENGTH_SHORT).show()
                         MyNotification.sendNotification(
                             MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
                             notificationMessage,
@@ -836,6 +833,10 @@ class ChatLiveActivity : AppCompatActivity() {
 
     private fun clicks() {
         binding!!.imgBack.setOnClickListener { finish() }
+        binding!!.btnDown.setOnClickListener {
+            binding!!.rcChat.smoothScrollToPosition(chatsList.size - 1)
+binding!!.btnDown.visibility=View.GONE
+        }
     }
 
     private fun getOnlineStatus(receiverId: String) {
@@ -844,15 +845,23 @@ class ChatLiveActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         var onlineStatus = snapshot.getValue(String::class.java)
-                        if (!onlineStatus.equals("Online")) {
-                            try {
-                                binding!!.txtOnlineStatus.setText(
-                                    "Last Seen: " + getFormattedDate(
-                                        onlineStatus!!.toLong()
-                                    ) + "                                                "
-                                )
-                            } catch (e: Exception) {
-                                binding!!.txtOnlineStatus.setText("Offline")
+                        Log.d("mylog",onlineStatus.toString())
+                        if (!onlineStatus.equals("Online")  ) {
+                            if(onlineStatus!!.contains(senderId)){
+                                binding!!.txtOnlineStatus.setText("Typing...")
+                            }else if(onlineStatus!!.contains("Typing")){
+                                binding!!.txtOnlineStatus.setText("Online")
+                            }
+                            else {
+                                try {
+                                    binding!!.txtOnlineStatus.setText(
+                                        "Last Seen: " + getFormattedDate(
+                                            onlineStatus!!.toLong()
+                                        ) + "                                                "
+                                    )
+                                } catch (e: Exception) {
+                                    binding!!.txtOnlineStatus.setText("Offline")
+                                }
                             }
                         } else {
                             binding!!.txtOnlineStatus.setText(onlineStatus)
@@ -884,25 +893,27 @@ class ChatLiveActivity : AppCompatActivity() {
 
                     }
 
-                    binding!!.rcChat.adapter =
-                        ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
-
+                    if(binding!!.rcChat.adapter==null) {
+                        binding!!.rcChat.adapter =
+                            ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
+                    }else{
+                        binding!!.rcChat.adapter!!.notifyDataSetChanged()
+                    }
                     binding!!.rcChat.setItemViewCacheSize(chatsList.size)
 //                    if (isScrolling) {
 //                        isScrolling = false
-
                     try {
                         if (isSendMessage) {
                             isSendMessage = false
                             binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+                        }else if(isFirstTimeOnScreen){
+                            isFirstTimeOnScreen=false
+                            binding!!.rcChat.scrollToPosition(chatsList.size - 1)
 
-                        } else {
-                            if (currentPosition == -1) {
-                                binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-                            } else {
-                                binding!!.rcChat.scrollToPosition(currentPosition)
-                            }
-
+                        }else if(lastPosition>=chatsList.size - 4){
+                            binding!!.rcChat.scrollToPosition(chatsList.size - 1)
+                        }else{
+                            binding!!.btnDown.visibility=View.VISIBLE
                         }
                     } catch (e: java.lang.Exception) {
                     }
@@ -927,8 +938,11 @@ class ChatLiveActivity : AppCompatActivity() {
 
                         }
                     } else {
-                        firebaseChatFriends.child(senderId).child(receiverId).child("seenStatus")
-                            .setValue("1")
+                        if (onLiveChatScreen) {
+                            firebaseChatFriends.child(senderId).child(receiverId)
+                                .child("seenStatus")
+                                .setValue("1")
+                        }
                     }
 //                    }
                 }

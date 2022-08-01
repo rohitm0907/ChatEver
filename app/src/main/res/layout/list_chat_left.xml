@@ -54,10 +54,13 @@
                 android:id="@+id/imgMessage"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
+                android:adjustViewBounds="false"
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginBottom="10dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/user"
+                android:background="@drawable/img_background"
+android:clipToOutline="true"
                 android:visibility="gone" />
 
 
@@ -98,6 +101,8 @@
                 android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:thumbTint="@color/white"
+                android:progressTint="@color/white"
                 android:layout_toRightOf="@id/audioPlay" />
 
 

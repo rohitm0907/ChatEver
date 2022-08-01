@@ -15,6 +15,7 @@ import com.rohit.chitchat.MyUtils
 import com.rohit.chitchat.adapters.ChatListAdapter
 import com.rohit.chitchat.databinding.FragmentChatsBinding
 import android.app.Activity
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
@@ -78,26 +79,33 @@ class ChatsFragment : Fragment() {
                             chatFriendsModel.time!!.toDouble()
                         }
 
-
+Log.d("mylog",chatFriendList.toString())
                         if (activity != null) {
-                            binding!!.recyclerChatList.adapter =
-                                ChatListAdapter(requireActivity(), chatFriendList!!)
-                            setUnreadMessages()
-                        }
-                        try {
-                            if (currentPosition != -1) {
-                                binding!!.recyclerChatList.scrollToPosition(currentPosition)
+                            if(binding!!.recyclerChatList.adapter==null){
+                                binding!!.recyclerChatList.adapter =
+                                    ChatListAdapter(requireActivity(), chatFriendList!!)
+                                setUnreadMessages()
+
+                            }else{
+                                binding!!.recyclerChatList.adapter!!.notifyDataSetChanged()
+                                setUnreadMessages()
+
                             }
-
-                        } catch (e: Exception) {
-
-                        }
+                                                    }
+//                        try {
+//                            if (currentPosition != -1) {
+//                                binding!!.recyclerChatList.scrollToPosition(currentPosition)
+//                            }
+//
+//                        } catch (e: Exception) {
+//
+//                        }
                     } else {
-                        chatFriendList.clear()
-                        val activity: Activity? = activity
-                        if (activity != null) {
-                            binding!!.recyclerChatList.adapter =
-                                ChatListAdapter(requireActivity(), chatFriendList!!)
+                            chatFriendList.clear()
+                            val activity: Activity? = activity
+                            if (activity != null) {
+                                binding!!.recyclerChatList.adapter =
+                                    ChatListAdapter(requireActivity(), chatFriendList!!)
 
                         }
                     }

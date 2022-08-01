@@ -58,6 +58,8 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/user"
                 android:visibility="gone"
+                android:background="@drawable/img_background"
+                android:clipToOutline="true"
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginBottom="10dp"
                 />

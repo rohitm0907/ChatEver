@@ -74,6 +74,7 @@
         android:textColor="@color/color_text"
         android:textColorHint="@color/color_hint" />
 
+
     <com.skydoves.powerspinner.PowerSpinnerView
         android:id="@+id/spGender"
         android:layout_width="match_parent"
@@ -90,14 +91,13 @@
         android:textSize="18sp"
         app:spinner_arrow_gravity="end"
         app:spinner_arrow_padding="8dp"
-        app:spinner_divider_color="@color/white"
+        app:spinner_divider_color="@color/app_blue"
         app:spinner_divider_show="true"
-        app:spinner_divider_size="0.4dp"
+        app:spinner_divider_size="0.2dp"
         app:spinner_item_array="@array/list_gender"
         app:spinner_popup_animation="dropdown"
-        app:spinner_popup_background="@color/app_color"
+        app:spinner_popup_background="@color/white"
         app:spinner_popup_elevation="14dp" />
-
 
     <EditText
         android:id="@+id/edtCaptions"

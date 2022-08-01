@@ -56,7 +56,7 @@ class MyFireBaseMessagingService : FirebaseMessagingService() {
 
         val contentIntent = PendingIntent.getActivity(
             this, 0,
-            Intent(this, HomeActivity::class.java), PendingIntent.FLAG_MUTABLE
+            Intent(this, HomeActivity::class.java), PendingIntent.FLAG_IMMUTABLE
         )
         val id= Random(System.currentTimeMillis()).nextInt(1000)
         notification.setContentIntent(contentIntent)

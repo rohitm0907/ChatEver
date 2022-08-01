@@ -540,7 +540,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
             firstTime = true
             if (selectedPosition == -1) {
                 MyUtils.showToast(requireContext(), "Please select a plan")
-            } else {
+            }else {
                 if (productList != null && productList!!.size > 0) {
                     PRODUCT_ID = list!![selectedPosition].PurchaseType!!
                     flowParams = BillingFlowParams.newBuilder()
@@ -806,12 +806,14 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                     val consumeParams = ConsumeParams.newBuilder()
                         .setPurchaseToken(purchase.purchaseToken)
                         .build()
+
                     billingClient?.consumeAsync(consumeParams) { billingResult, purchaseToken ->
                         when (billingResult.responseCode) {
                             BillingClient.BillingResponseCode.OK -> {
                                 Log.w("TAG_INAPP", "OK Purchase")
                                 // Update the appropriate tables/databases to grant user the items
                                 CoroutineScope(Dispatchers.Main).launch {
+                                    MyUtils.showProgress(requireContext())
                                     val calendar = Calendar.getInstance()
                                     calendar.add(Calendar.MONTH, 1)
                                     var purchaseData = FirebasePurchase(
@@ -822,7 +824,6 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                                         purchaseToken.toString()
 
                                     )
-                                    MyUtils.showProgress(requireContext())
                                     firebasePurchases.child(
                                         MyUtils.getStringValue(
                                             requireActivity(),

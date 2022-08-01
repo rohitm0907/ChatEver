@@ -93,6 +93,7 @@ class ChatLiveAdapter(
 
         }
 
+        holder.imgMessage.clipToOutline=true
         if (chatsList.get(position).messageType.equals("text")) {
             holder.imgPlay.visibility = View.GONE
             holder.imgMessage.visibility = View.GONE
@@ -139,6 +140,8 @@ class ChatLiveAdapter(
                 .load(chatsList.get(position).message)
                 .into(holder.imgMessage)
         } else if (chatsList.get(position).messageType.equals("audio")) {
+            holder.audioSeekbar.visibility=View.VISIBLE
+
             if(position==currentPlay){
                 holder.audioPause.visibility = View.VISIBLE
                 holder.audioPlay.visibility = View.INVISIBLE

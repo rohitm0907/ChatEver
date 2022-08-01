@@ -74,12 +74,12 @@ object MyUtils {
     }
 
     fun showProgress(context: Context) {
+
         dialog = Dialog(context);
         dialog!!.setContentView(R.layout.dialog_progress)
         dialog!!.getWindow()!!.setBackgroundDrawableResource(android.R.color.transparent);
         dialog!!.show()
     }
-
     fun stopProgress(context: Context) {
         if(dialog!=null)
         dialog!!.cancel()
