@@ -3,6 +3,7 @@ package com.rohit.chitchat
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -39,8 +40,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.OnProgressListener
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.hmomeni.progresscircula.ProgressCircula
 import com.nabinbhandari.android.permissions.PermissionHandler
 import com.nabinbhandari.android.permissions.Permissions
 import com.permissionx.guolindev.PermissionX
@@ -49,6 +52,7 @@ import com.rohit.chitchat.Models.LiveChatModel
 import com.rohit.chitchat.MyConstants.FIREBASE_BASE_URL
 import com.rohit.chitchat.adapters.ChatLiveAdapter
 import com.rohit.chitchat.databinding.ActivityChatLiveBinding
+import kotlinx.android.synthetic.main.dialog_custom_progress.*
 import net.alhazmy13.mediapicker.Video.VideoPicker
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -150,6 +154,7 @@ class ChatLiveActivity : AppCompatActivity() {
         } else {
             roomId = receiverId + senderId
         }
+        MyUtils.currentChatId=roomId!!
         binding!!.imgSend.setOnClickListener {
             if (binding!!.edtMessage.text.toString().equals("")) {
                 MyUtils.showToast(this@ChatLiveActivity, "Please Enter Message")
@@ -245,7 +250,8 @@ class ChatLiveActivity : AppCompatActivity() {
                         MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
                         "has liked your profile.",
                         token,
-                        MyConstants.NOTI_REQUEST_TYPE
+                        MyConstants.NOTI_REQUEST_TYPE,
+                        roomId
                     )
                 }
                 isLikedProfile = true
@@ -565,7 +571,6 @@ if(lastPosition==chatsList.size-1){
                     val uri: Uri = data?.data!!
                     // Use Uri object instead of File to avoid storage permissions
 
-                    MyUtils.showProgress(this@ChatLiveActivity)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         sentImage = ImageDecoder.decodeBitmap(
                             ImageDecoder.createSource(
@@ -594,7 +599,7 @@ if(lastPosition==chatsList.size-1){
                             it.release()
                         }
 
-                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
                         if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
                         }else{
                             uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
@@ -628,8 +633,8 @@ if(lastPosition==chatsList.size-1){
                             it.release()
                         }
 
-                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
-                        if(durationTime>60){ MyUtils.showToast(this,"You can't be share this video")
+//                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
+                        if(durationTime>60){ MyUtils.showToast(this,"You can't be share     `this video")
                         }else{
                             uploadVideoOnFirebase(selectedImageUri)
 
@@ -650,17 +655,27 @@ if(lastPosition==chatsList.size-1){
             storageRef.child("videos/" + "rohit" + Calendar.getInstance().time)
 
         val uploadTask: UploadTask = mountainvideosRef.putFile(videoUrl)
-        MyUtils.showProgress(this@ChatLiveActivity)
+       showPercentageDialog()
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
-            MyUtils.stopProgress(this@ChatLiveActivity)
+        percentageDialog!!.cancel()
             MyUtils.showToast(this@ChatLiveActivity, it.message.toString())
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
                     val videoUri: String = uri.toString()
-                    sendMessageOnFirebase(videoUri, "video")
+                    percentageProgress!!.progress=100;
+                    Handler().postDelayed({
+                        percentageDialog!!.cancel()
+                        sendMessageOnFirebase(videoUri, "video")
+                    },1000)
+                                    }
+            })
+            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+                override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
+                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress=progress.toInt()
                 }
             })
     }
@@ -674,17 +689,28 @@ if(lastPosition==chatsList.size-1){
             storageRef.child("audios/" + "rohit" + Calendar.getInstance().time + ".3gp")
         var uri: Uri = Uri.fromFile(File(recordFile!!.path))
         val uploadTask: UploadTask = mountainvideosRef.putFile(uri)
-        MyUtils.showProgress(this@ChatLiveActivity)
+        showPercentageDialog()
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
-            MyUtils.stopProgress(this@ChatLiveActivity)
-            MyUtils.showToast(this@ChatLiveActivity, it.message.toString())
+            percentageDialog!!.cancel()
+
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
-                    val uri: String = uri.toString()
-                    sendMessageOnFirebase(uri, "audio")
+                    percentageProgress!!.progress=100;
+                    Handler().postDelayed({
+                        percentageDialog!!.cancel()
+                        val imageUri: String = uri.toString()
+                        sendMessageOnFirebase(imageUri, "audio")
+                    },1000)
+                }
+            })
+
+            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+                override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
+                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress=progress.toInt()
                 }
             })
     }
@@ -785,12 +811,13 @@ if(lastPosition==chatsList.size-1){
                     data as Map<String, Any>
                 ).addOnCompleteListener {
                     if (!token.equals("")) {
-                        Toast.makeText(this@ChatLiveActivity,"send",Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(this@ChatLiveActivity,"send",Toast.LENGTH_SHORT).show()
                         MyNotification.sendNotification(
                             MyUtils.getStringValue(this, MyConstants.USER_NAME).toString(),
                             notificationMessage,
                             token,
-                            MyConstants.NOTI_REQUEST_TYPE
+                            MyConstants.NOTI_REQUEST_TYPE,
+                            roomId
                         )
                     }
                 }
@@ -818,15 +845,28 @@ if(lastPosition==chatsList.size-1){
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
         val data = baos.toByteArray()
         val uploadTask: UploadTask = mountainImagesRef.putBytes(data)
+        showPercentageDialog()
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
-            MyUtils.stopProgress(this@ChatLiveActivity)
+            percentageDialog!!.cancel()
+
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
-                    val imageUri: String = uri.toString()
-                    sendMessageOnFirebase(imageUri, "image")
+                    percentageProgress!!.progress=100;
+                    Handler().postDelayed({
+                        percentageDialog!!.cancel()
+                        val imageUri: String = uri.toString()
+                        sendMessageOnFirebase(imageUri, "image")
+                    },1000)
+                }
+            })
+
+            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+                override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
+                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress=progress.toInt()
                 }
             })
     }
@@ -839,6 +879,17 @@ binding!!.btnDown.visibility=View.GONE
         }
     }
 
+var percentageProgress:ProgressCircula?=null
+    var percentageDialog:Dialog?=null
+    private fun showPercentageDialog(){
+         percentageDialog=Dialog(this@ChatLiveActivity)
+        percentageDialog!!.setContentView(R.layout.dialog_custom_progress)
+        percentageDialog!!.window!!.setBackgroundDrawableResource(android.R.color.transparent)
+        percentageDialog!!.show()
+        percentageProgress=percentageDialog!!.findViewById(R.id.myProgressBar)
+        percentageProgress!!.progress=0
+
+    }
     private fun getOnlineStatus(receiverId: String) {
         firebaseOnlineStatus.child(receiverId).child(MyConstants.NODE_ONLINE_STATUS)
             .addValueEventListener(object : ValueEventListener {
@@ -1067,6 +1118,7 @@ binding!!.btnDown.visibility=View.GONE
 
     override fun onDestroy() {
         super.onDestroy()
+        MyUtils.currentChatId=""
         onLiveChatScreen = false
 //        firebaseChats.removeEventListener(stateValueEventListner!!);
     }
@@ -1169,5 +1221,8 @@ binding!!.btnDown.visibility=View.GONE
         }
         return null
     }
+
+
+
 }
     

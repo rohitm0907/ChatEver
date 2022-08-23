@@ -32,6 +32,7 @@ class ChatsFragment : Fragment() {
     var countUnreadMessages = 0
     lateinit var binding: FragmentChatsBinding;
     var chatFriendList: ArrayList<ChatFriendsModel> = ArrayList()
+    var adapterFriendList:ChatListAdapter?=null
 
 
     var currentPosition = -1
@@ -81,12 +82,15 @@ class ChatsFragment : Fragment() {
 
 Log.d("mylog",chatFriendList.toString())
                         if (activity != null) {
-                            if(binding!!.recyclerChatList.adapter==null){
-                                binding!!.recyclerChatList.adapter =
+                            if(adapterFriendList==null || binding!!.recyclerChatList.adapter==null){
+                                    adapterFriendList=
                                     ChatListAdapter(requireActivity(), chatFriendList!!)
+                                binding!!.recyclerChatList.adapter =adapterFriendList
+                                binding!!.recyclerChatList.setItemViewCacheSize(chatFriendList.size)
                                 setUnreadMessages()
 
                             }else{
+
                                 binding!!.recyclerChatList.adapter!!.notifyDataSetChanged()
                                 setUnreadMessages()
 

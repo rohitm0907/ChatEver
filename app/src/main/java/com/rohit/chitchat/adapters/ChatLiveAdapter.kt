@@ -112,7 +112,7 @@ class ChatLiveAdapter(
             holder.imgLocation.visibility = View.GONE
             holder.imgMessage.visibility = View.VISIBLE
             Glide.with(context)
-                .load(chatsList.get(position).message)
+                .load(chatsList.get(position).message).placeholder(R.color.gray)
                 .into(holder.imgMessage)
             holder.imgPlay.visibility = View.GONE
         }else if (chatsList.get(position).messageType.equals("location")) {
@@ -137,7 +137,8 @@ class ChatLiveAdapter(
             holder.imgMessage.visibility = View.VISIBLE
             holder.imgLocation.visibility = View.GONE
             Glide.with(context)
-                .load(chatsList.get(position).message)
+
+                .load(chatsList.get(position).message).placeholder(R.color.gray)
                 .into(holder.imgMessage)
         } else if (chatsList.get(position).messageType.equals("audio")) {
             holder.audioSeekbar.visibility=View.VISIBLE
@@ -423,8 +424,6 @@ Log.d("position",position.toString())
                 Glide.with(context).load(url).placeholder(R.drawable.user).into(imgUser)
             }
         }
-
-
 
 
         dialog.setOnCancelListener {

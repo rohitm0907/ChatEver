@@ -234,6 +234,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
     }
 
     private fun setAdapterFilterList() {
+        binding!!.recyclerChatList.setItemViewCacheSize(filterList.size)
         binding!!.recyclerChatList.adapter =
             NearbyChatAdapter(requireActivity(), filterList!!)
     }
@@ -282,7 +283,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
                             )
                             if (!user!!.phone.equals(
                                     MyUtils.getStringValue(
-                                        requireActivity(),
+                                        activity!!.applicationContext,
                                         MyConstants.USER_PHONE
                                     )
                                 ) && !myLat.equals("") && (getKmFromLatLong(
@@ -453,7 +454,7 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
 
                 var users: Users = Users();
 //                users.name = MyUtils.getStringValue(requireContext(), MyConstants.USER_NAME)
-                users.phone = MyUtils.getStringValue(requireActivity(), MyConstants.USER_PHONE)
+                users.phone = MyUtils.getStringValue(activity!!.applicationContext, MyConstants.USER_PHONE)
 //                users.image = MyUtils.getStringValue(requireContext(), MyConstants.USER_IMAGE)
 //                users.captions = MyUtils.getStringValue(requireContext(), MyConstants.USER_CAPTIONS)
 //                users.ghostMode=MyUtils.getStringValue(requireContext(),MyConstants.GHOST_MODE)
@@ -587,11 +588,11 @@ class NearbyFragment : Fragment(), PurchasesUpdatedListener {
         bottomDistance.window!!.setBackgroundDrawableResource(android.R.color.transparent)
         mBottomSheetBinding.sliderDistance.value = searchDistance.toFloat()
         var selectedDistance = if (MyUtils.getStringValue(
-                requireContext(),
+                requireActivity()!!.applicationContext,
                 MyConstants.SEARCH_DISTANCE
             ).equals("")
         ) 5 else MyUtils.getStringValue(
-            requireContext(),
+            requireActivity()!!.applicationContext,
             MyConstants.SEARCH_DISTANCE
         ).toInt()
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:gravity="center"
+    android:background="@android:color/transparent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.hmomeni.progresscircula.ProgressCircula
+        android:id="@+id/myProgressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="5dp"
+        app:pgc_progress="40"
+        app:pgc_rimColor="@color/app_blue"
+        app:pgc_rimWidth="3dp"
+        app:pgc_showProgress="true"
+        app:pgc_speed="2"
+        app:pgc_textColor="@color/white" />
+</RelativeLayout>

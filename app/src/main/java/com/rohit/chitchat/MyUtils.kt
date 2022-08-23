@@ -24,7 +24,9 @@ import java.util.*
 
 
 object MyUtils {
+    var oppositeUserName=""
     var referenceMobile=""
+    var currentChatId=""
     var applyFilterType = "No Filter"
     var dialog: Dialog? = null;
     var listAllUsersNumbers: ArrayList<String> = ArrayList()

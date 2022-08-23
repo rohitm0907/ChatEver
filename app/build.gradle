@@ -9,14 +9,13 @@ plugins {
 android {
     compileSdkVersion 32
     buildToolsVersion "31.0.0"
-
     defaultConfig {
         applicationId "com.rohit.chitchat"
         minSdkVersion 23
         targetSdkVersion 32
         multiDexEnabled true
-        versionCode 5
-        versionName "1000.04"
+        versionCode 6
+        versionName "1000.05"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,5 +102,7 @@ dependencies {
     implementation 'com.nabinbhandari.android:permissions:3.8'
     implementation 'com.google.android.play:app-update-ktx:2.0.0'
     implementation 'com.android.billingclient:billing:4.1.0'
+    implementation 'com.ramijemli.percentagechartview:percentagechartview:0.3.1'
+    implementation 'com.hmomeni.progresscircula:progresscircula:0.2.1'
 
 }

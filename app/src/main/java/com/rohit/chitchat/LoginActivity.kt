@@ -13,7 +13,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnNext.setOnClickListener {
-            if (!binding.edtPhoneNumber.text.equals("")) {
+            if (!binding.edtPhoneNumber.text.trim().isNullOrEmpty()) {
                 startActivity(
                     Intent(this@LoginActivity, CodeVerificationActivity::class.java)
                         .putExtra(MyConstants.PHONE_NUMBER,binding.ccp.selectedCountryCode.toString()+ binding.edtPhoneNumber.text.toString())

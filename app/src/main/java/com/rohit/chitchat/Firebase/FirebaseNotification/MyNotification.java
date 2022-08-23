@@ -8,8 +8,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MyNotification {
-    public static void sendNotification(String userName,String message,String token,String type){
-        Data data = new Data(userName, message,type);
+    public static void sendNotification(String userName,String message,String token,String type,String chatId){
+        Data data = new Data(userName, message,type,chatId);
         NotificationSender sender = new NotificationSender(data, token);
         APIService apiService = Client.getClient().create(APIService.class);
         apiService.sendNotifcation(sender).enqueue(new Callback<MyResponse>() {

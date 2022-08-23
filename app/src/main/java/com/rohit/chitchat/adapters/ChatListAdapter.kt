@@ -64,6 +64,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 //        holder.txtTime.setText("2:00 pm")
         if (chatFriendList.get(position).blockStatus == "0") {
             holder.itemView.setBackgroundColor(context.getColor(android.R.color.white))
+            holder.txtName.setTextColor(context.resources.getColor(R.color.black))
+            holder.txtLastMessage.setTextColor(context.resources.getColor(R.color.black))
         } else if (chatFriendList.get(position).blockStatus == "1") {
             holder.txtName.setTextColor(context.resources.getColor(R.color.white))
             holder.txtLastMessage.setTextColor(context.resources.getColor(R.color.white))
@@ -75,6 +77,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
         }
 
         if (!chatFriendList.get(position).image.equals("")) {
+            Glide.with(context).load(chatFriendList.get(position).image).placeholder(R.drawable.user).into(holder.imgUser)
+        }else{
             Glide.with(context).load(chatFriendList.get(position).image).placeholder(R.drawable.user).into(holder.imgUser)
         }
 
@@ -183,7 +187,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                                             .toString(),
                                         "You have been block",
                                         token,
-                                        MyConstants.NOTI_REQUEST_TYPE
+                                        MyConstants.NOTI_REQUEST_TYPE,
+                                        ""
                                     )
                                 }
                             }
@@ -236,8 +241,8 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
                                             .toString(),
                                         "You have been Unblock",
                                         token,
-                                        MyConstants.NOTI_REQUEST_TYPE
-                                    )
+                                        MyConstants.NOTI_REQUEST_TYPE,
+                                    "")
                                 }
                             }
 
