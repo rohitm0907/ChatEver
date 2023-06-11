@@ -45,6 +45,8 @@
                 android:padding="10dp"
                 android:text="Message"
                 android:textSize="14sp"
+                android:clickable="false"
+
                 android:textColor="@color/white"
                 android:textIsSelectable="true"
                 android:visibility="gone" />

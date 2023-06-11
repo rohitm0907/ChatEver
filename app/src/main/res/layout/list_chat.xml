@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    android:paddingVertical="10dp"
     android:elevation="4dp"
     android:background="@drawable/bg_edittext"
     >
@@ -14,8 +15,9 @@
         android:padding="10dp">
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imgUser"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
         android:src="@drawable/user" />
 
         <TextView
@@ -23,11 +25,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
             android:layout_marginRight="30dp"
             android:layout_toRightOf="@id/imgUser"
             android:singleLine="true"
             android:text="Name"
+            android:layout_marginTop="5dp"
             android:textColor="@color/black"
             android:textStyle="bold" />
 
@@ -37,7 +39,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:layout_alignParentRight="true"
-            android:src="@drawable/ic_dots"></ImageView>
+            android:src="@drawable/ic_dots"/>
 
 <!--    <TextView-->
 <!--        android:id="@+id/txtTime"-->
@@ -55,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtName"
             android:layout_marginLeft="10dp"
+            android:layout_toLeftOf="@+id/imgDots"
             android:layout_toRightOf="@id/imgUser"
             android:maxLines="2"
             android:textColor="@color/black" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:elevation="4dp"
     android:background="@drawable/bg_edittext"
@@ -15,8 +15,9 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imgUser"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
             android:src="@drawable/user" />
 
         <TextView
@@ -25,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="80dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="3dp"
             android:layout_toRightOf="@id/imgUser"
             android:text="Name"
             android:textColor="@color/black"
@@ -37,7 +38,7 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_centerVertical="true"
             android:background="@drawable/bg_invite"
             android:text="Invite"
             android:textAllCaps="false"

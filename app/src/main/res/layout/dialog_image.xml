@@ -11,7 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/imgUser"
+        android:minHeight="500dp"
         android:src="@color/black"
+        android:scaleType="centerCrop"
         android:layout_centerVertical="true"
 
         />
