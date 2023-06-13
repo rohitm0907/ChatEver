@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "710124504906",
+    "firebase_url": "https://chatever-ee975-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "chatever-ee975",
     "storage_bucket": "chatever-ee975.appspot.com"
   },
@@ -9,16 +10,56 @@
       "client_info": {
         "mobilesdk_app_id": "1:710124504906:android:01e0d680827880a2e563b3",
         "android_client_info": {
-          "package_name": "com.android.chatever"
+          "package_name": "com.rohit.chatever"
         }
       },
       "oauth_client": [
         {
+          "client_id": "710124504906-402j7tb9d9vu76lrbi06odqj1a7nkeg9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "3336ecc9c2a9aa133f10d5f22f3a9c7ae8695f1d"
+          }
+        },
+        {
+          "client_id": "710124504906-5gqdgjj41ueij4ne694d8k2k5m0j23a7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "2a5813ea763c306f51a8b3d8def1d15faf8727e0"
+          }
+        },
+        {
+          "client_id": "710124504906-8vr84cqoorkk62ticj4973nr4nc9t4rd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "0d248cdb183ed10c878180204e454814e20c92fc"
+          }
+        },
+        {
+          "client_id": "710124504906-egt9p8t1o18ggm93756hk8m5ilpj8tl0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "90b187b95cb63dc1fc0f02cdce688b82b52e9e88"
+          }
+        },
+        {
           "client_id": "710124504906-lt4b6ovd09prs7r7q4lvbq148d7cnpij.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.android.chatever",
+            "package_name": "com.rohit.chatever",
             "certificate_hash": "bbd2b4617bd4f230651a91c8ae5decb8a142d717"
+          }
+        },
+        {
+          "client_id": "710124504906-uihuqmeg8uq95dg1d1dpmtunutce4squ.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "462f239d0c68d6474d61cc8da9bc82713d16c20e"
           }
         },
         {
@@ -44,12 +85,60 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:710124504906:android:c93c73cfbf4892e7e563b3",
+        "mobilesdk_app_id": "1:710124504906:android:2b8b6173dfa4a99be563b3",
         "android_client_info": {
           "package_name": "com.rohit.chatever"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "710124504906-2uh7mpphr1ibt8u61gsja6ccuppq5tnu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "2a5813ea763c306f51a8b3d8def1d15faf8727e0"
+          }
+        },
+        {
+          "client_id": "710124504906-73bdh7c33ae6da7960eg8546dssq3f27.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "bbd2b4617bd4f230651a91c8ae5decb8a142d717"
+          }
+        },
+        {
+          "client_id": "710124504906-b56rt7v3h4hob9mraphbgm3vrn2aln5e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "90b187b95cb63dc1fc0f02cdce688b82b52e9e88"
+          }
+        },
+        {
+          "client_id": "710124504906-njfdlh2hqu4gnm5qktk05lofg0feoin4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "3336ecc9c2a9aa133f10d5f22f3a9c7ae8695f1d"
+          }
+        },
+        {
+          "client_id": "710124504906-u3fnqk49nv2d93es8jfias99qrli88a4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "0d248cdb183ed10c878180204e454814e20c92fc"
+          }
+        },
+        {
+          "client_id": "710124504906-vfdu3uqqjup27dn3vnlggo487onnfu6p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.chatever",
+            "certificate_hash": "462f239d0c68d6474d61cc8da9bc82713d16c20e"
+          }
+        },
         {
           "client_id": "710124504906-nfe8mvdccc6rp5rbc7aul2t8b1561qj6.apps.googleusercontent.com",
           "client_type": 3

@@ -3,6 +3,26 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/My Live App/ChatEver/app/src/main/res/layout/activity_splash.xml" value="0.1" />
+        <entry key="..\:/My Live App/ChatEver/app/src/main/res/layout/dialog_custom_progress.xml" value="0.22826086956521738" />
+        <entry key="..\:/My Live App/ChatEver/app/src/main/res/layout/dialog_image.xml" value="0.22826086956521738" />
+        <entry key="..\:/My Live App/ChatEver/app/src/main/res/layout/dialog_progress.xml" value="0.22826086956521738" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/bg_app.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/bg_chat_left.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/bg_edittext.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/bg_otp.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/ic_user.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/img_background.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/drawable/logo.xml" value="0.203" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/activity_chat_live.xml" value="0.2" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/activity_code_verification.xml" value="0.16304347826086957" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/activity_login.xml" value="0.22826086956521738" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/activity_profile.xml" value="0.25" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/bottom_sheet_change_distance.xml" value="0.22826086956521738" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/bottom_sheet_product_purchasing.xml" value="0.16304347826086957" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/dialog_custom_progress.xml" value="0.136" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/list_chat_left.xml" value="0.25" />
+        <entry key="..\:/My Live App/chit4chat( Live )/app/src/main/res/layout/list_chat_right.xml" value="0.16304347826086957" />
         <entry key="..\:/Rohit LIVE PROJECTS/chit4chat/app/src/main/res/drawable-v24/bg_selected_purchase.xml" value="0.139" />
         <entry key="..\:/Rohit LIVE PROJECTS/chit4chat/app/src/main/res/drawable/bg_chat_right.xml" value="0.14" />
         <entry key="..\:/Rohit LIVE PROJECTS/chit4chat/app/src/main/res/drawable/bg_edt_message.xml" value="0.14" />
