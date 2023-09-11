@@ -6,15 +6,14 @@
     >
 
 
-
     <com.jsibbold.zoomage.ZoomageView
+        android:id="@+id/imgUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/imgUser"
-        android:minHeight="500dp"
-        android:src="@color/black"
-        android:scaleType="centerCrop"
         android:layout_centerVertical="true"
+        android:minHeight="500dp"
+        android:scaleType="centerCrop"
+        android:src="@color/black"
 
         />
 
@@ -22,14 +21,50 @@
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/idExoPlayerVIew"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <ImageView
+        android:id="@+id/imgBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_back"
-        android:id="@+id/imgBack"
         android:layout_margin="10dp"
-
+        android:src="@drawable/ic_back"
         />
+
+    <RelativeLayout
+        android:id="@+id/rlAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:background="@color/gray"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/audioPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_play"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/audioPause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_pause"
+            android:visibility="invisible" />
+
+
+        <SeekBar
+            android:id="@+id/audioSeekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="5dp"
+            android:layout_toRightOf="@id/audioPlay"
+            android:visibility="visible" />
+    </RelativeLayout>
 </RelativeLayout>

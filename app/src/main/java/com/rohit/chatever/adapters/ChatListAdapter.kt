@@ -148,8 +148,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
 
                                 })
-
-
                         }
                     }
 
@@ -183,7 +181,6 @@ class ChatListAdapter(var context: Context, var chatFriendList: ArrayList<ChatFr
 
 
         popup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener {
-
             when (it.itemId) {
                 R.id.txtBlock -> {
                     firebaseUsers.child(chatFriendList.get(position).userId.toString())

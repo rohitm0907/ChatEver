@@ -25,6 +25,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -73,7 +75,7 @@ class ChatLiveActivity : AppCompatActivity() {
     var isSendMessage = false
     var isFirstTimeOnScreen = true
     var firebaseChats = FirebaseDatabase.getInstance(FIREBASE_BASE_URL)
-            .getReference(com.rohit.chatever.MyConstants.NODE_CHATS)
+        .getReference(com.rohit.chatever.MyConstants.NODE_CHATS)
     var database: ValueEventListener? = null
 
     var firebaseUsers =
@@ -115,7 +117,7 @@ class ChatLiveActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.rohit.chatever.R.layout.activity_chat_live)
-        onLiveChatScreen=true
+        onLiveChatScreen = true
         com.rohit.chatever.ChatLiveActivity.Companion.instance = this@ChatLiveActivity;
         binding = ActivityChatLiveBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
@@ -127,7 +129,8 @@ class ChatLiveActivity : AppCompatActivity() {
         binding!!.txtName.setText(intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_NAME))
 
         if (intent.getStringExtra(com.rohit.chatever.MyConstants.DELETE_TIME) != null) {
-            lastDeleteTime = intent.getStringExtra(com.rohit.chatever.MyConstants.DELETE_TIME)!!.toLong()
+            lastDeleteTime =
+                intent.getStringExtra(com.rohit.chatever.MyConstants.DELETE_TIME)!!.toLong()
         }
         audioRecording()
         if (!intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_IMAGE).equals("")) {
@@ -141,7 +144,8 @@ class ChatLiveActivity : AppCompatActivity() {
             this@ChatLiveActivity,
             com.rohit.chatever.MyConstants.USER_PHONE
         )
-        receiverId = intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_PHONE).toString()
+        receiverId =
+            intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_PHONE).toString()
         getAnotherUserToken()
         if (intent.getStringExtra(com.rohit.chatever.MyConstants.FROM) != null) {
             handleLikedStatus()
@@ -154,7 +158,7 @@ class ChatLiveActivity : AppCompatActivity() {
         } else {
             roomId = receiverId + senderId
         }
-        com.rohit.chatever.MyUtils.currentChatId =roomId!!
+        com.rohit.chatever.MyUtils.currentChatId = roomId!!
         binding!!.imgSend.setOnClickListener {
             if (binding!!.edtMessage.text.toString().equals("")) {
                 com.rohit.chatever.MyUtils.showToast(this@ChatLiveActivity, "Please Enter Message")
@@ -189,7 +193,7 @@ class ChatLiveActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable) {
-                if (!isTyping && !s.toString().equals("") ) {
+                if (!isTyping && !s.toString().equals("")) {
                     if (!com.rohit.chatever.MyUtils.getStringValue(
                             this@ChatLiveActivity,
                             com.rohit.chatever.MyConstants.USER_PHONE
@@ -201,7 +205,8 @@ class ChatLiveActivity : AppCompatActivity() {
                                 this@ChatLiveActivity,
                                 com.rohit.chatever.MyConstants.USER_PHONE
                             )
-                        ).child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS).setValue("Typing..."+receiverId)
+                        ).child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS)
+                            .setValue("Typing..." + receiverId)
                     }
 
                     // Send notification for start typing event
@@ -212,22 +217,23 @@ class ChatLiveActivity : AppCompatActivity() {
                 timer.schedule(
                     object : TimerTask() {
                         override fun run() {
-                            if(isTyping){
-                            isTyping = false
-                            if (!com.rohit.chatever.MyUtils.getStringValue(
-                                    this@ChatLiveActivity,
-                                    com.rohit.chatever.MyConstants.USER_PHONE
-                                ).equals("")
-                            )
-                                firebaseOnlineStatus.child(
-                                    com.rohit.chatever.MyUtils.getStringValue(
+                            if (isTyping) {
+                                isTyping = false
+                                if (!com.rohit.chatever.MyUtils.getStringValue(
                                         this@ChatLiveActivity,
                                         com.rohit.chatever.MyConstants.USER_PHONE
-                                    )
-                                ).child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS).setValue("Online")
-                            //send notification for stopped typing event
-                        }
+                                    ).equals("")
+                                )
+                                    firebaseOnlineStatus.child(
+                                        com.rohit.chatever.MyUtils.getStringValue(
+                                            this@ChatLiveActivity,
+                                            com.rohit.chatever.MyConstants.USER_PHONE
+                                        )
+                                    ).child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS)
+                                        .setValue("Online")
+                                //send notification for stopped typing event
                             }
+                        }
                     },
                     3000
                 )
@@ -265,8 +271,8 @@ class ChatLiveActivity : AppCompatActivity() {
             showOptionsDialog()
         }
 
-//        getChatsFromFirebase();
-        applyPagination()
+        getChatsFromFirebase();
+//        applyPagination()
         binding!!.rcChat.addScrollListener { position: Int ->
             if (chatsList.size > 0 && chatsList.get(position).seenStatus.equals("0") && chatsList.get(
                     position
@@ -342,9 +348,11 @@ class ChatLiveActivity : AppCompatActivity() {
                     0 -> {
                         checkImagePermissions()
                     }
+
                     1 -> {
                         checkVideoPermissions()
                     }
+
                     2 -> {
                         var location = com.rohit.chatever.MyUtils.getStringValue(
                             this@ChatLiveActivity,
@@ -355,6 +363,7 @@ class ChatLiveActivity : AppCompatActivity() {
                         )
                         sendMessageOnFirebase(location, "location")
                     }
+
                     3 -> {
                         builder.setCancelable(true)
                     }
@@ -376,12 +385,19 @@ class ChatLiveActivity : AppCompatActivity() {
         lateinit var perms: Array<String>
 
         alertType = "This app needs access to your camera and storage"
+
         perms = arrayOf<String>(
             Manifest.permission.CAMERA,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
+        if (Build.VERSION.SDK_INT >= 33) {
+            perms = arrayOf<String>(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
+        }
 
         val rationale = alertType
         val options: Permissions.Options = Permissions.Options()
@@ -429,7 +445,12 @@ class ChatLiveActivity : AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-
+        if (Build.VERSION.SDK_INT >= 33) {
+            perms = arrayOf<String>(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+        }
 
         val rationale = alertType
         val options: Permissions.Options = Permissions.Options()
@@ -470,18 +491,18 @@ class ChatLiveActivity : AppCompatActivity() {
             cursor.getString(column_index)
         } else null
     }
+
     var lastPosition = 0
     fun RecyclerView.addScrollListener(onScroll: (position: Int) -> Unit) {
-
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (layoutManager is LinearLayoutManager) {
-                     lastPosition =
+                    lastPosition =
                         (layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-if(lastPosition==chatsList.size-1){
-    binding!!.btnDown.visibility=View.GONE
-}
+                    if (lastPosition == chatsList.size - 1) {
+                        binding!!.btnDown.visibility = View.GONE
+                    }
                 }
             }
         })
@@ -532,11 +553,14 @@ if(lastPosition==chatsList.size-1){
         val imageFileName = "IMG_" + System.currentTimeMillis().toString() + "_"
         val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val image = File.createTempFile(imageFileName, ".jpg", storageDir)
-
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 60)
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 120)
         // fileUri = Uri.fromFile(mediaFile)
-        fileUri = FileProvider.getUriForFile(this, com.rohit.chatever.BuildConfig.APPLICATION_ID + ".provider", image);
+        fileUri = FileProvider.getUriForFile(
+            this,
+            com.rohit.chatever.BuildConfig.APPLICATION_ID + ".provider",
+            image
+        );
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
         startActivityForResult(intent, VIDEO_CAPTURE)
@@ -550,28 +574,23 @@ if(lastPosition==chatsList.size-1){
 
             if (requestCode == VIDEO_CAPTURE) {
                 val selectedPhotoUrl: Uri = data!!.getData()!!
-
-
                 var durationTime: Long
                 MediaPlayer.create(this, selectedPhotoUrl).also {
                     durationTime = (it.duration / 1000).toLong()
                     it.reset()
                     it.release()
                 }
-
 //                Toast.makeText(this,durationTime.toString()+" seconds",Toast.LENGTH_SHORT).show()
-                if(durationTime>60){
-                    com.rohit.chatever.MyUtils.showToast(this, "You can't be share this video")
-                }else{
+                if (durationTime > 120) {
+                    com.rohit.chatever.MyUtils.showToast(this, "You can't be share this video. Video should not be greater than 2 minutes.")
+                } else {
                     uploadVideoOnFirebase(selectedPhotoUrl)
-
                 }
             } else
 
                 if (requestCode == ImagePicker.REQUEST_CODE) {
                     val uri: Uri = data?.data!!
                     // Use Uri object instead of File to avoid storage permissions
-
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         sentImage = ImageDecoder.decodeBitmap(
                             ImageDecoder.createSource(
@@ -590,7 +609,7 @@ if(lastPosition==chatsList.size-1){
                 } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE) {
                     var mPaths: List<String> =
                         data!!.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH)!!;
-//
+
                     mPaths.forEachIndexed { index, s ->
                         Log.d("video url", mPaths.get(index).toUri().toString())
                         var durationTime: Long
@@ -601,25 +620,18 @@ if(lastPosition==chatsList.size-1){
                         }
 
 //                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
-                        if(durationTime>60){
-                            com.rohit.chatever.MyUtils.showToast(
-                                this,
-                                "You can't be share this video"
-                            )
-                        }else{
+                        if (durationTime > 120) {
+                            com.rohit.chatever.MyUtils.showToast(this, "You can't be share this video. Video should not be greater than 2 minutes.")
+                        } else {
                             uploadVideoOnFirebase(Uri.parse(mPaths.get(index)))
 
                         }
                         //Your Code
-
-
                     }
                 } else if (requestCode == 1) {
                     var uri = data!!.data!!.path!!.toUri()
                     uploadVideoOnFirebase(uri!!)
                     //Your Code
-
-
                 } else if (resultCode == ImagePicker.RESULT_ERROR) {
                     Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
                 } else if (requestCode === REQUEST_TAKE_GALLERY_VIDEO) {
@@ -631,23 +643,20 @@ if(lastPosition==chatsList.size-1){
                     // MEDIA GALLERY
                     var selectedImagePath = getPath(selectedImageUri)
 
-                        var durationTime: Long
-                        MediaPlayer.create(this, selectedImageUri).also {
-                            durationTime = (it.duration / 1000).toLong()
-                            it.reset()
-                            it.release()
-                        }
+                    var durationTime: Long
+                    MediaPlayer.create(this, selectedImageUri).also {
+                        durationTime = (it.duration / 1000).toLong()
+                        it.reset()
+                        it.release()
+                    }
 
 //                        Toast.makeText(this,durationTime.toString(),Toast.LENGTH_SHORT).show()
-                        if(durationTime>60){
-                            com.rohit.chatever.MyUtils.showToast(
-                                this,
-                                "You can't be share     `this video"
-                            )
-                        }else{
-                            uploadVideoOnFirebase(selectedImageUri)
+                    if (durationTime > 120) {
+                        com.rohit.chatever.MyUtils.showToast(this, "You can't be share this video. Video should not be greater than 2 minutes.")
+                    } else {
+                        uploadVideoOnFirebase(selectedImageUri)
 
-                        }
+                    }
                 }
         } else {
             Toast.makeText(this, "Something Went Wrong", Toast.LENGTH_SHORT).show()
@@ -664,27 +673,27 @@ if(lastPosition==chatsList.size-1){
             storageRef.child("videos/" + "android" + Calendar.getInstance().time)
 
         val uploadTask: UploadTask = mountainvideosRef.putFile(videoUrl)
-       showPercentageDialog()
+        showPercentageDialog()
         uploadTask.addOnFailureListener(OnFailureListener {
             // Handle unsuccessful uploads
-        percentageDialog!!.cancel()
+            percentageDialog!!.cancel()
             com.rohit.chatever.MyUtils.showToast(this@ChatLiveActivity, it.message.toString())
         })
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
                     val videoUri: String = uri.toString()
-                    percentageProgress!!.progress=100;
+                    percentageProgress!!.progress = 100;
                     Handler().postDelayed({
                         percentageDialog!!.cancel()
                         sendMessageOnFirebase(videoUri, "video")
-                    },1000)
-                                    }
+                    }, 1000)
+                }
             })
-            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+            ?.addOnProgressListener(object : OnProgressListener<UploadTask.TaskSnapshot> {
                 override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
-                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
-                    percentageProgress!!.progress=progress.toInt()
+                    val progress = (100.0 * snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress = progress.toInt()
                 }
             })
     }
@@ -707,19 +716,19 @@ if(lastPosition==chatsList.size-1){
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
-                    percentageProgress!!.progress=100;
+                    percentageProgress!!.progress = 100;
                     Handler().postDelayed({
                         percentageDialog!!.cancel()
                         val imageUri: String = uri.toString()
                         sendMessageOnFirebase(imageUri, "audio")
-                    },1000)
+                    }, 1000)
                 }
             })
 
-            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+            ?.addOnProgressListener(object : OnProgressListener<UploadTask.TaskSnapshot> {
                 override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
-                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
-                    percentageProgress!!.progress=progress.toInt()
+                    val progress = (100.0 * snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress = progress.toInt()
                 }
             })
     }
@@ -798,11 +807,14 @@ if(lastPosition==chatsList.size-1){
                 var senderData: HashMap<String, String> = HashMap<String, String>()
                 senderData.put("userId", receiverId)
                 senderData.put(
-                    "name", intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_NAME).toString()
+                    "name",
+                    intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_NAME).toString()
                 )
                 senderData.put("lastMessage", "New Message")
                 senderData.put(
-                    "image", intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_IMAGE).toString()
+                    "image",
+                    intent.getStringExtra(com.rohit.chatever.MyConstants.OTHER_USER_IMAGE)
+                        .toString()
                 )
                 senderData.put("origonalMessage", message.toString())
                 senderData.put("seenStatus", "1")
@@ -882,19 +894,19 @@ if(lastPosition==chatsList.size-1){
             .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { it -> // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 val result: Task<Uri> = it.getStorage().getDownloadUrl()
                 result.addOnSuccessListener { uri ->
-                    percentageProgress!!.progress=100;
+                    percentageProgress!!.progress = 100;
                     Handler().postDelayed({
                         percentageDialog!!.cancel()
                         val imageUri: String = uri.toString()
                         sendMessageOnFirebase(imageUri, "image")
-                    },1000)
+                    }, 1000)
                 }
             })
 
-            ?.addOnProgressListener(object: OnProgressListener<UploadTask.TaskSnapshot> {
+            ?.addOnProgressListener(object : OnProgressListener<UploadTask.TaskSnapshot> {
                 override fun onProgress(snapshot: UploadTask.TaskSnapshot) {
-                    val progress=(100.0*snapshot.bytesTransferred / snapshot.totalByteCount)
-                    percentageProgress!!.progress=progress.toInt()
+                    val progress = (100.0 * snapshot.bytesTransferred / snapshot.totalByteCount)
+                    percentageProgress!!.progress = progress.toInt()
                 }
             })
     }
@@ -903,35 +915,36 @@ if(lastPosition==chatsList.size-1){
         binding!!.imgBack.setOnClickListener { finish() }
         binding!!.btnDown.setOnClickListener {
             binding!!.rcChat.smoothScrollToPosition(chatsList.size - 1)
-binding!!.btnDown.visibility=View.GONE
+            binding!!.btnDown.visibility = View.GONE
         }
     }
 
-var percentageProgress:ProgressCircula?=null
-    var percentageDialog:Dialog?=null
-    private fun showPercentageDialog(){
-         percentageDialog=Dialog(this@ChatLiveActivity)
+    var percentageProgress: ProgressCircula? = null
+    var percentageDialog: Dialog? = null
+    private fun showPercentageDialog() {
+        percentageDialog = Dialog(this@ChatLiveActivity)
         percentageDialog!!.setContentView(com.rohit.chatever.R.layout.dialog_custom_progress)
         percentageDialog!!.window!!.setBackgroundDrawableResource(android.R.color.transparent)
         percentageDialog!!.show()
-        percentageProgress=percentageDialog!!.findViewById(com.rohit.chatever.R.id.myProgressBar)
-        percentageProgress!!.progress=0
+        percentageProgress = percentageDialog!!.findViewById(com.rohit.chatever.R.id.myProgressBar)
+        percentageProgress!!.progress = 0
 
     }
+
     private fun getOnlineStatus(receiverId: String) {
-        firebaseOnlineStatus.child(receiverId).child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS)
+        firebaseOnlineStatus.child(receiverId)
+            .child(com.rohit.chatever.MyConstants.NODE_ONLINE_STATUS)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         var onlineStatus = snapshot.getValue(String::class.java)
-                        Log.d("mylog",onlineStatus.toString())
-                        if (!onlineStatus.equals("Online")  ) {
-                            if(onlineStatus!!.contains(senderId)){
+                        Log.d("mylog", onlineStatus.toString())
+                        if (!onlineStatus.equals("Online")) {
+                            if (onlineStatus!!.contains(senderId)) {
                                 binding!!.txtOnlineStatus.setText("Typing...")
-                            }else if(onlineStatus!!.contains("Typing")){
+                            } else if (onlineStatus!!.contains("Typing")) {
                                 binding!!.txtOnlineStatus.setText("Online")
-                            }
-                            else {
+                            } else {
                                 try {
                                     binding!!.txtOnlineStatus.setText(
                                         "Last Seen: " + getFormattedDate(
@@ -959,7 +972,7 @@ var percentageProgress:ProgressCircula?=null
     }
 
 
-    private fun applyPagination(){
+    private fun applyPagination() {
         getChatsFromFirebase()
         rcChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -970,11 +983,12 @@ var percentageProgress:ProgressCircula?=null
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
 
-                val top = (binding!!.rcChat.getLayoutManager() as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                if(top == 0 && newState==0 && !isFetch) {
-                    if(chatsList.size<limit){
+                val top =
+                    (binding!!.rcChat.getLayoutManager() as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                if (top == 0 && newState == 0 && !isFetch) {
+                    if (chatsList.size < limit) {
 
-                    }else{
+                    } else {
                         getChatsFromFirebase();
                     }
                     //item reached top end
@@ -983,34 +997,62 @@ var percentageProgress:ProgressCircula?=null
         })
     }
 
-    var limit=0;
-    var isFetch=false;
-    var chatAdapter:ChatLiveAdapter?=null;
-    var stateValueEventListner:ValueEventListener?=null
+    var limit = 0;
+    var isFetch = false;
+    var chatAdapter: ChatLiveAdapter? = null;
+    var stateValueEventListner: ValueEventListener? = null
     private fun getChatsFromFirebase() {
-        isFetch=true;
+        val storage: FirebaseStorage = FirebaseStorage.getInstance()
+        isFetch = true;
         MyUtils.showProgress(this)
-       if(stateValueEventListner!=null) {
-         firebaseChats.child(roomId!!).limitToLast(limit).removeEventListener(stateValueEventListner!!)
-       }
-        limit=limit+20
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        val lastDayTime = calendar.time.time
+        if (stateValueEventListner != null) {
+//         firebaseChats.child(roomId!!).limitToLast(limit).removeEventListener(stateValueEventListner!!)
+            firebaseChats.child(roomId!!).removeEventListener(stateValueEventListner!!)
+        }
+//        limit=limit+20
 
-                   stateValueEventListner= object : ValueEventListener {
+        stateValueEventListner = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     chatsList.clear()
+//                    for (postSnapshot in snapshot.children) {
+//                        val chat: LiveChatModel? = postSnapshot.getValue(LiveChatModel::class.java)
+//                        if (chat!!.time!!.toLong() > lastDeleteTime) {
+//                            chatsList.add(chat!!)
+//                        }
+//                    }
                     for (postSnapshot in snapshot.children) {
                         val chat: LiveChatModel? = postSnapshot.getValue(LiveChatModel::class.java)
-                        if (chat!!.time!!.toLong() > lastDeleteTime) {
+//                        if (chat!!.time!!.toLong() > lastDeleteTime) {
+                        if (chat!!.time!!.toLong() < lastDayTime && chat!!.seenStatus.equals("1")) {
+                            if (chat!!.messageType.equals("Image") || chat!!.messageType.equals("Video")
+                                || chat!!.messageType.equals("Audio")
+                            ) {
+                                var photoRef =
+                                    storage.getReferenceFromUrl(chat!!.message.toString())
+                                photoRef.delete();
+                                firebaseChats.child(chat.key!!).setValue(null)
+                            } else {
+                                firebaseChats.child(chat.key!!).setValue(null)
+                            }
+//                        }
+//                         here you can access to name property like university.name
+                        } else {
                             chatsList.add(chat!!)
                         }
                     }
+
+
                     Log.d("mylistsize", chatsList!!.size.toString())
                     binding!!.rcChat.setItemViewCacheSize(chatsList.size)
-                    if(chatAdapter==null) {
-                        chatAdapter= ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
-                        binding!!.rcChat.adapter =chatAdapter
-                    }else{
+                    if (chatAdapter == null) {
+                        chatAdapter =
+                            ChatLiveAdapter(this@ChatLiveActivity, chatsList, roomId.toString())
+                        binding!!.rcChat.adapter = chatAdapter
+                    } else {
                         chatAdapter!!.updateChatList(chatsList);
                     }
 //                    if (isScrolling) {
@@ -1019,13 +1061,13 @@ var percentageProgress:ProgressCircula?=null
                         if (isSendMessage) {
                             isSendMessage = false
                             binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-                        }else if(isFirstTimeOnScreen){
-                            isFirstTimeOnScreen=false
+                        } else if (isFirstTimeOnScreen) {
+                            isFirstTimeOnScreen = false
                             binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-                        }else if(lastPosition>=chatsList.size - 4){
+                        } else if (lastPosition >= chatsList.size - 4) {
                             binding!!.rcChat.scrollToPosition(chatsList.size - 1)
-                        }else{
-                            binding!!.btnDown.visibility=View.VISIBLE
+                        } else {
+                            binding!!.btnDown.visibility = View.VISIBLE
                         }
                     } catch (e: java.lang.Exception) {
                     }
@@ -1060,9 +1102,10 @@ var percentageProgress:ProgressCircula?=null
                 }
 
 //                Handler().postDelayed({
-                    isFetch=false
-                    MyUtils.stopProgress(this@ChatLiveActivity
-                    )
+                isFetch = false
+                MyUtils.stopProgress(
+                    this@ChatLiveActivity
+                )
 //                },3000)
             }
 
@@ -1071,7 +1114,10 @@ var percentageProgress:ProgressCircula?=null
 
             }
         }
-        firebaseChats.child(roomId!!).limitToLast(limit).addValueEventListener(
+//        firebaseChats.child(roomId!!).limitToLast(limit).addValueEventListener(
+//            stateValueEventListner as ValueEventListener
+//        );
+        firebaseChats.child(roomId!!).addValueEventListener(
             stateValueEventListner as ValueEventListener
         );
 
@@ -1188,7 +1234,7 @@ var percentageProgress:ProgressCircula?=null
 
     override fun onDestroy() {
         super.onDestroy()
-        com.rohit.chatever.MyUtils.currentChatId =""
+        com.rohit.chatever.MyUtils.currentChatId = ""
         onLiveChatScreen = false
 //        firebaseChats.removeEventListener(stateValueEventListner!!);
     }
@@ -1278,7 +1324,6 @@ var percentageProgress:ProgressCircula?=null
         }
         return null
     }
-
 
 
 }
